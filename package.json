@@ -1,16 +1,21 @@
 {
   "name": "azure-pipelines-library",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "license": "MIT",
-  "author": "dzhukovsky",
+  "author": "Dmitry Zhukovsky",
   "type": "module",
   "packageManager": "yarn@4.10.3",
+  "engines": {
+    "node": ">=21.1.0"
+  },
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --port 3000",
     "build": "tsc -b && vite build",
     "lint": "biome lint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "package": "run build && tfx extension create --manifests vss-extension.json",
+    "package:dev": "run package -- --overrides-file vss-extension.dev.json"
   },
   "dependencies": {
     "react": "^19.1.1",

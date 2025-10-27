@@ -1,0 +1,19 @@
+{
+  "id": "pipelines-library-dev",
+  "name": "Pipelines Library (Dev)",
+  "public": false,
+  "contributions": [
+    {
+      "id": "hub.dev",
+      "type": "ms.vss-web.hub",
+      "targets": [
+        "ms.vss-build-web.build-release-hub-group"
+      ],
+      "properties": {
+        "name": "Library (Dev)",
+        "uri": "http://localhost:3000/index.html",
+        "iconName": "Library"
+      }
+    }
+  ]
+}

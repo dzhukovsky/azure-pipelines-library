@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json.schemastore.org/vss-extension",
+  "id": "pipelines-library",
+  "name": "Pipelines Library",
+  "manifestVersion": 1,
+  "version": "1.0.2",
+  "publisher": "dzhukovsky",
+  "public": false,
+  "author": "Dmitry Zhukovsky",
+  "description": "Azure DevOps Extension",
+  "targets": [
+    {
+      "id": "Microsoft.VisualStudio.Services"
+    }
+  ],
+  "demands": [
+    "api-version/7.2"
+  ],
+  "icons": {
+    "default": "icon.png"
+  },
+  "scopes": [
+    "vso.variablegroups_manage",
+    "vso.securefiles_manage"
+  ],
+  "categories": [
+    "Azure Pipelines"
+  ],
+  "tags": [
+    "Preview"
+  ],
+  "content": {
+    "details": {
+      "path": "README.md"
+    },
+    "license": {
+      "path": "LICENSE"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "uri": "https://github.com/dzhukovsky/azure-pipelines-library"
+  },
+  "contributions": [
+    {
+      "id": "hub",
+      "type": "ms.vss-web.hub",
+      "targets": [
+        "ms.vss-build-web.build-release-hub-group"
+      ],
+      "properties": {
+        "name": "Library (New)",
+        "uri": "index.html",
+        "iconName": "Library"
+      }
+    }
+  ],
+  "files": [
+    {
+      "path": "dist",
+      "packagePath": "/",
+      "addressable": true
+    }
+  ]
+}

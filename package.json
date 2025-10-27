@@ -1,0 +1,41 @@
+{
+  "name": "azure-pipelines-library",
+  "private": true,
+  "version": "1.0.0",
+  "license": "MIT",
+  "author": "Dmitry Zhukovsky",
+  "type": "module",
+  "packageManager": "yarn@4.10.3",
+  "engines": {
+    "node": ">=21.1.0"
+  },
+  "scripts": {
+    "dev": "vite --port 3000",
+    "build": "tsc -b && vite build",
+    "lint": "biome lint",
+    "preview": "vite preview",
+    "package": "run build && tfx extension create --manifests vss-extension.json",
+    "package:dev": "run package -- --overrides-file vss-extension.dev.json"
+  },
+  "dependencies": {
+    "@fluentui/react-icons": "^2.0.309",
+    "@tanstack/react-query": "^4.41.0",
+    "azure-devops-extension-api": "https://github.com/dzhukovsky/azure-devops-extension-api.git#add-esm-support",
+    "azure-devops-extension-sdk": "^4.0.2",
+    "azure-devops-ui": "^2.263.0",
+    "react": "^16.8.1",
+    "react-dom": "^16.8.1",
+    "yaml": "^2.8.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.2.4",
+    "@types/node": "^24.5.2",
+    "@types/react": "^16.8.1",
+    "@types/react-dom": "^16.8.1",
+    "@vitejs/plugin-react-swc": "^3.10.2",
+    "sass-embedded": "^1.89.2",
+    "tfx-cli": "^0.21.1",
+    "typescript": "^5.8.3",
+    "vite": "^7.0.0"
+  }
+}

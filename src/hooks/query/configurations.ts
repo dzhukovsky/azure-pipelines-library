@@ -5,7 +5,9 @@ import {
 import { CoreRestClient } from 'azure-devops-extension-api/Core';
 import * as SDK from 'azure-devops-extension-sdk';
 
+let isLoaded = false;
 let organizationUrl: string | undefined;
+let projectName: string | undefined;
 
 export const loadConfigurations = async () => {
   await SDK.ready();
@@ -16,22 +18,14 @@ export const loadConfigurations = async () => {
   organizationUrl = await service.getResourceAreaLocation(
     CoreRestClient.RESOURCE_AREA_ID,
   );
-};
-
-export const getOrganizationUrl = () => {
-  if (!organizationUrl) {
-    throw new Error(
-      'Organization URL is not loaded yet. Make sure to call loadConfigurations() before using this function.',
-    );
-  }
-  return organizationUrl;
+  projectName = SDK.getWebContext().project.name;
+  isLoaded = true;
 };
 
 export const getProjectUrl = () => {
-  if (!organizationUrl) {
-    throw new Error(
-      'Organization URL is not loaded yet. Make sure to call loadConfigurations() before using this function.',
-    );
+  if (!isLoaded) {
+    throw new Error('Configurations are not loaded yet');
   }
-  return `${organizationUrl}${SDK.getWebContext().project.name}`;
+
+  return `${organizationUrl}${projectName}`;
 };

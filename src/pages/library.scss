@@ -71,3 +71,21 @@
 .padding-right-0 {
   padding-right: 0 !important;
 }
+
+.text-deleted {
+  text-decoration: line-through;
+}
+
+input[type="password"] {
+  &::-ms-reveal,
+  &::-ms-clear,
+  &::-webkit-credentials-auto-fill-button,
+  &::-webkit-clear-button,
+  &::-webkit-reveal-button {
+    display: none;
+  }
+
+  &::-webkit-textfield-decoration-container {
+    display: none;
+  }
+}

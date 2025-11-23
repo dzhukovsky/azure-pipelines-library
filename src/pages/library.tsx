@@ -11,7 +11,7 @@ import { Tab, TabBar } from 'azure-devops-ui/Tabs';
 import { InlineKeywordFilterBarItem } from 'azure-devops-ui/TextFilterBarItem';
 import { Filter, type IFilter } from 'azure-devops-ui/Utilities/Filter';
 import { useCallback, useMemo } from 'react';
-import { HomeTab } from '@/components/tabs/HomeTab';
+import { HomeTab } from '@/components/tabs/home/HomeTab';
 import { MatrixTab } from '@/components/tabs/MatrixTab';
 import { useFilterSubscription } from '@/hooks/filtering';
 import { getProjectUrl } from '@/hooks/query/configurations';

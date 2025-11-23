@@ -13,11 +13,8 @@ import type { IFilter } from 'azure-devops-ui/Utilities/Filter';
 import { useCallback, useMemo } from 'react';
 import { useFiltering } from '../hooks/filtering';
 import { type SortFunc, useSorting } from '../hooks/sorting';
-import {
-  renderTextFieldCell,
-  type Status,
-  StatusTypes,
-} from './TextFieldTableCell';
+import { type State, States } from './shared/State';
+import { TextFieldCell } from './TextFieldCell';
 
 interface IVariablesMatrixProps {
   variableGroups: VariableGroup[];
@@ -26,7 +23,7 @@ interface IVariablesMatrixProps {
 interface IVariableItem {
   name: IObservableValue<string>;
   originalName?: string;
-  status: IObservableValue<Status | undefined>;
+  state: State;
   readonly: boolean;
   values: ValuesObject;
 }
@@ -36,7 +33,7 @@ type ValuesObject = Record<string, ValuesItem>;
 type ValuesItem = {
   value: IObservableValue<string>;
   originalValue?: string;
-  status: IObservableValue<Status | undefined>;
+  state: State;
   isSecret: boolean;
 };
 
@@ -73,10 +70,10 @@ const useColumns = (
           columnIndex={columnIndex}
           tableColumn={tableColumn}
         >
-          {renderTextFieldCell(
-            tableItem.name,
-            tableItem.status,
-            {
+          <TextFieldCell
+            value={tableItem.name}
+            state={tableItem.state}
+            iconProps={{
               render: isSecret
                 ? (className) => (
                     <KeyRegular
@@ -86,19 +83,19 @@ const useColumns = (
                   )
                 : undefined,
               iconName: isSecret ? undefined : 'Variable',
-            },
-            {
+            }}
+            textFieldProps={{
               readOnly: isSecret,
               placeholder: 'Name (required)',
               required: true,
-            },
-            (newName) => {
-              tableItem.status.value =
-                validateRequiredName(newName) ??
-                validateNameUniqueness(newName, variables.value) ??
-                getStatus(newName, tableItem.originalName);
-            },
-          )}
+              onChange: (_, newName) => {
+                tableItem.state =
+                  validateRequiredName(newName) ??
+                  validateNameUniqueness(newName, variables.value) ??
+                  getStatus(newName, tableItem.originalName);
+              },
+            }}
+          />
         </TableCell>
       );
     };
@@ -118,18 +115,16 @@ const useColumns = (
           columnIndex={columnIndex}
           tableColumn={tableColumn}
         >
-          {renderTextFieldCell(
-            variable.value,
-            variable.status,
-            undefined,
-            { inputType: variable.isSecret ? 'password' : 'text' },
-            (newValue) => {
-              variable.status.value = getStatus(
-                newValue,
-                variable.originalValue,
-              );
-            },
-          )}
+          <TextFieldCell
+            value={variable.value}
+            state={variable.state}
+            textFieldProps={{
+              inputType: variable.isSecret ? 'password' : 'text',
+              onChange: (_, newValue) => {
+                variable.state = getStatus(newValue, variable.originalValue);
+              },
+            }}
+          />
         </TableCell>
       );
     };
@@ -184,17 +179,17 @@ const useColumns = (
 
 const getStatus = (newValue: string, originalValue?: string) => {
   if (originalValue === undefined) {
-    return StatusTypes.Untracked;
+    return States.New;
   }
 
   if (newValue !== originalValue) {
-    return StatusTypes.Modified;
+    return States.Modified;
   }
 
-  return undefined;
+  return States.Unchanged;
 };
 
-const validateRequiredName = (variableName: string): Status | undefined => {
+const validateRequiredName = (variableName: string): State | undefined => {
   if (!variableName?.trim()) {
     return { type: 'Error', message: 'Name is required' };
   }
@@ -205,7 +200,7 @@ const validateRequiredName = (variableName: string): Status | undefined => {
 const validateNameUniqueness = (
   variableName: string,
   variables: IVariableItem[],
-): Status | undefined => {
+): State | undefined => {
   variableName = variableName?.trim().toLocaleLowerCase();
   const count = variables.filter(
     (v) => v.name.value?.trim().toLocaleLowerCase() === variableName,
@@ -246,11 +241,11 @@ const useVariables = (variableGroups: VariableGroup[]) => {
         values[name][vg.id] = (variable && {
           value: new ObservableValue(variable.value ?? ''),
           originalValue: variable.value ?? '',
-          status: new ObservableValue(undefined),
+          state: States.New,
           isSecret,
         }) || {
           value: new ObservableValue(''),
-          status: new ObservableValue(StatusTypes.Untracked),
+          state: States.New,
           isSecret,
         };
       });
@@ -259,7 +254,7 @@ const useVariables = (variableGroups: VariableGroup[]) => {
     const variables: IVariableItem[] = variableNames.map((name) => ({
       name: new ObservableValue(name),
       originalName: name,
-      status: new ObservableValue(undefined),
+      state: States.Unchanged,
       readonly: Object.values(values[name]).some((v) => v.isSecret),
       values: values[name],
     }));
@@ -272,14 +267,14 @@ const useVariables = (variableGroups: VariableGroup[]) => {
     variableGroups.forEach((vg) => {
       values[vg.id] = {
         value: new ObservableValue(''),
-        status: new ObservableValue(StatusTypes.Untracked),
+        state: States.New,
         isSecret: false,
       };
     });
 
     const newVariable: IVariableItem = {
       name: new ObservableValue(''),
-      status: new ObservableValue(StatusTypes.Untracked),
+      state: States.New,
       readonly: false,
       values,
     };

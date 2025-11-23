@@ -1,20 +1,25 @@
 import { ObservableLike } from 'azure-devops-ui/Core/Observable';
-import { ExpandableTreeCell, type ITreeColumn } from 'azure-devops-ui/TreeEx';
+import { TableCell } from 'azure-devops-ui/Table';
+import type { ITreeColumn } from 'azure-devops-ui/TreeEx';
 import type { ITreeItemEx } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import { memo } from 'react';
-import type { RenderHandler, RenderOptions } from './createActionColumn';
+
+export type RenderHandler<T> = (options: RenderOptions<T>) => React.ReactNode;
 
 export type ActionColumnOptions<T> = Omit<ITreeColumn<T>, 'renderCell'> & {
-  id: string;
   renderCell: RenderHandler<T>;
   renderActions: RenderHandler<T>;
-  contentClassName?: string;
 };
 
-export function createExpandableActionColumn<T>({
+export type RenderOptions<T> = {
+  rowIndex: number;
+  treeItem: ITreeItemEx<T>;
+  data: T;
+};
+
+export function createActionColumn<T>({
   renderCell,
   renderActions,
-  contentClassName,
   ...options
 }: ActionColumnOptions<T>): ITreeColumn<T> {
   return {
@@ -24,7 +29,7 @@ export function createExpandableActionColumn<T>({
       columnIndex,
       tableColumn,
       tableItem,
-      _ariaRowIndex,
+      ariaRowIndex,
       role,
     ) => {
       return (
@@ -34,8 +39,9 @@ export function createExpandableActionColumn<T>({
           columnIndex={columnIndex}
           item={tableItem}
           column={tableColumn}
+          ariaLabel={options.ariaLabel}
+          ariaRowIndex={ariaRowIndex}
           role={role}
-          contentClassName={contentClassName}
           renderCell={renderCell}
           renderActions={renderActions}
         />
@@ -45,36 +51,47 @@ export function createExpandableActionColumn<T>({
 }
 
 const ActionCell = memo(
-  <T,>(props: {
+  <T,>({
+    rowIndex,
+    columnIndex,
+    item,
+    column,
+    renderCell,
+    renderActions,
+    ariaLabel,
+    ariaRowIndex,
+    role,
+  }: {
     rowIndex: number;
     columnIndex: number;
     item: ITreeItemEx<T>;
     column: ITreeColumn<T>;
-    contentClassName?: string;
+    ariaLabel?: string;
+    ariaRowIndex?: number;
     role?: string;
     renderCell: (options: RenderOptions<T>) => React.ReactNode;
     renderActions: (options: RenderOptions<T>) => React.ReactNode;
   }) => {
-    const data = ObservableLike.getValue(props.item.underlyingItem.data);
+    const data = ObservableLike.getValue(item.underlyingItem.data);
     const options: RenderOptions<T> = {
-      rowIndex: props.rowIndex,
-      treeItem: props.item,
+      rowIndex: rowIndex,
+      treeItem: item,
       data,
     };
 
     return (
-      <ExpandableTreeCell
-        contentClassName={props.contentClassName}
-        columnIndex={props.columnIndex}
-        treeItem={props.item}
-        treeColumn={props.column}
-        role={props.role}
+      <TableCell
+        columnIndex={columnIndex}
+        tableColumn={column}
+        ariaLabel={ariaLabel}
+        ariaRowIndex={ariaRowIndex}
+        role={role}
       >
         <div className="flex-row flex-grow">
-          {props.renderCell(options)}
-          {props.renderActions(options)}
+          {renderCell(options)}
+          {renderActions(options)}
         </div>
-      </ExpandableTreeCell>
+      </TableCell>
     );
   },
 );

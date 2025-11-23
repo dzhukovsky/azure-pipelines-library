@@ -1,3 +1,4 @@
+import { ObservableLike } from 'azure-devops-ui/Core/Observable';
 import { type ITableColumn, TableCell } from 'azure-devops-ui/Table';
 import { memo } from 'react';
 import { useTableRow } from './useTableRow';
@@ -8,7 +9,7 @@ export type ActionColumnOptions<T> = Omit<ITableColumn<T>, 'renderCell'> & {
 };
 
 export type RenderOptions<T> = {
-  item: T;
+  data: T;
   rowIndex: number;
   hasFocus: boolean;
   hasMouse: boolean;
@@ -58,10 +59,11 @@ const ActionCell = memo(
     renderActions: (options: RenderOptions<T>) => React.ReactNode;
   }) => {
     const { hasFocus, hasMouse } = useTableRow();
+    const data = ObservableLike.getValue(props.item);
 
     const options: RenderOptions<T> = {
       rowIndex: props.rowIndex,
-      item: props.item,
+      data,
       hasFocus,
       hasMouse,
     };

@@ -1,3 +1,4 @@
+import { CircleFilled } from '@fluentui/react-icons';
 import { Icon } from 'azure-devops-ui/Icon';
 import { Tooltip } from 'azure-devops-ui/TooltipEx';
 import { memo } from 'react';
@@ -31,7 +32,7 @@ const textColors: Record<State['type'], string> = {
 };
 
 export const StateIcon = memo(
-  ({ state }: { state: State }) =>
+  ({ state, circle }: { state: State; circle?: boolean }) =>
     (state.type === 'Unchanged' && <span />) ||
     (state.type === 'Error' && (
       <Icon
@@ -45,8 +46,7 @@ export const StateIcon = memo(
           className="text-field-status padding-vertical-8 padding-horizontal-8 margin-horizontal-4"
           style={{ color: textColors[state.type] }}
         >
-          {state.type.charAt(0)}
-          {/* <CircleFilled fontSize={9} /> */}
+          {(circle && <CircleFilled fontSize={9} />) || state.type.charAt(0)}
         </span>
       </Tooltip>
     ),

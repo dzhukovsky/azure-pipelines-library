@@ -5,10 +5,7 @@ import type {
 } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import { States } from '@/components/shared/State';
 import { useTreeRow } from '@/components/shared/Tree/useTreeRow';
-import {
-  type ObservableVariable,
-  ObservableVariableGroup,
-} from '@/models/VariableGroup';
+import type { ObservableVariable } from '@/models/VariableGroup';
 import type { LibraryItem } from '../VariablesTree';
 
 export const VariableNameActionsCell = ({
@@ -38,6 +35,13 @@ export const VariableNameActionsCell = ({
           text: `Restore variable '${data.name.value}'`,
         }}
         onClick={() => {
+          const group = treeItem.parentItem?.underlyingItem.data.group;
+          if (!group) {
+            return;
+          }
+
+          group.variables.push(data);
+
           data.state.value = data.modified ? States.Modified : States.Unchanged;
           onBlur?.();
         }}
@@ -50,23 +54,22 @@ export const VariableNameActionsCell = ({
           text: `Delete variable '${data.name.value}'`,
         }}
         onClick={() => {
-          if (data.state.initialValue !== States.New) {
-            data.state.value = States.Deleted;
-            onBlur?.();
-            return;
-          }
-
           const group = treeItem.parentItem?.underlyingItem.data.group;
           if (!group) {
             return;
           }
 
+          if (data.state.initialValue === States.New) {
+            itemProvider.remove(
+              treeItem.underlyingItem,
+              treeItem.parentItem?.underlyingItem,
+            );
+          }
+
           group.variables.removeAll((x) => x === data);
 
-          itemProvider.remove(
-            treeItem.underlyingItem,
-            treeItem.parentItem?.underlyingItem,
-          );
+          data.state.value = States.Deleted;
+          onBlur?.();
         }}
       />
     )

@@ -1,6 +1,8 @@
 import { type IContextualMenuProps, MenuButton } from 'azure-devops-ui/Menu';
+import { Observer } from 'azure-devops-ui/Observer';
 import { useMemo } from 'react';
 import { stringify as yamlStringify } from 'yaml';
+import { StateIcon } from '@/components/shared/State';
 import { useTreeRow } from '@/components/shared/Tree/useTreeRow';
 import { downloadFile, expandObject } from '@/helpers/exportHelper';
 import { getVariableGroupById } from '@/hooks/query/variableGroups';
@@ -69,7 +71,11 @@ export const GroupValueActionsCell = ({
   }, [data.id]);
 
   if (!hasMouseOrFocus) {
-    return <span />;
+    return (
+      <Observer state={data.state}>
+        {({ state }) => <StateIcon state={state} circle />}
+      </Observer>
+    );
   }
 
   return (

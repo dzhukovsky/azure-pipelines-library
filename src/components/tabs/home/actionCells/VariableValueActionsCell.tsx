@@ -1,6 +1,6 @@
 import { Button } from 'azure-devops-ui/Button';
 import { Observer } from 'azure-devops-ui/Observer';
-import { StateIcon, States } from '@/components/shared/State';
+import { StateIcon } from '@/components/shared/State';
 import { useTreeRow } from '@/components/shared/Tree/useTreeRow';
 import type { ObservableVariable } from '@/models/VariableGroup';
 
@@ -29,7 +29,6 @@ export const VariableValueActionsCell = ({
           }}
           onClick={() => {
             data.isSecret.value = !isSecret;
-            data.state.value = States.Modified;
           }}
         />
       )}

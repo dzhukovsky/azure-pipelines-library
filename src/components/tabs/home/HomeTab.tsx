@@ -93,7 +93,7 @@ const mapObservableVariableGroups = (variableGroups: VariableGroup[]) => {
       return new ObservableVariable(
         name,
         variable.value,
-        variable.isSecret,
+        variable.isSecret ?? false,
         false,
       );
     });
@@ -115,6 +115,13 @@ const mapObservableSecureFiles = (secureFiles: SecureFile[]) => {
         return new ObservableSecureFileProperty(name, value, false);
       },
     );
-    return new ObservableSecureFile(file.id, file.name, properties, false);
+    return new ObservableSecureFile(
+      file.id,
+      file.name,
+      properties,
+      false,
+      file.modifiedBy ?? file.createdBy,
+      file.modifiedOn ?? file.createdOn,
+    );
   });
 };

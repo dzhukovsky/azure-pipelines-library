@@ -44,37 +44,35 @@ export function createExpandableActionColumn<T>({
   };
 }
 
-const ActionCell = memo(
-  <T,>(props: {
-    rowIndex: number;
-    columnIndex: number;
-    item: ITreeItemEx<T>;
-    column: ITreeColumn<T>;
-    contentClassName?: string;
-    role?: string;
-    renderCell: (options: RenderOptions<T>) => React.ReactNode;
-    renderActions: (options: RenderOptions<T>) => React.ReactNode;
-  }) => {
-    const data = ObservableLike.getValue(props.item.underlyingItem.data);
-    const options: RenderOptions<T> = {
-      rowIndex: props.rowIndex,
-      treeItem: props.item,
-      data,
-    };
+const ActionCell = <T,>(props: {
+  rowIndex: number;
+  columnIndex: number;
+  item: ITreeItemEx<T>;
+  column: ITreeColumn<T>;
+  contentClassName?: string;
+  role?: string;
+  renderCell: (options: RenderOptions<T>) => React.ReactNode;
+  renderActions: (options: RenderOptions<T>) => React.ReactNode;
+}) => {
+  const data = ObservableLike.getValue(props.item.underlyingItem.data);
+  const options: RenderOptions<T> = {
+    rowIndex: props.rowIndex,
+    treeItem: props.item,
+    data,
+  };
 
-    return (
-      <ExpandableTreeCell
-        contentClassName={props.contentClassName}
-        columnIndex={props.columnIndex}
-        treeItem={props.item}
-        treeColumn={props.column}
-        role={props.role}
-      >
-        <div className="flex-row flex-grow">
-          {props.renderCell(options)}
-          {props.renderActions(options)}
-        </div>
-      </ExpandableTreeCell>
-    );
-  },
-);
+  return (
+    <ExpandableTreeCell
+      contentClassName={props.contentClassName}
+      columnIndex={props.columnIndex}
+      treeItem={props.item}
+      treeColumn={props.column}
+      role={props.role}
+    >
+      <div className="flex-row flex-grow">
+        {props.renderCell(options)}
+        {props.renderActions(options)}
+      </div>
+    </ExpandableTreeCell>
+  );
+};

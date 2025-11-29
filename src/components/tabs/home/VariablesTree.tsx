@@ -171,11 +171,6 @@ const useColumns = (itemProvider: ITreeItemProvider<LibraryItem>) => {
             return renderListCell({
               text: fileProperty.name.value,
               textClassName: 'padding-vertical-8',
-              iconProps: {
-                render: (className) => (
-                  <DocumentKeyRegular className={className} />
-                ),
-              },
             });
           }
 

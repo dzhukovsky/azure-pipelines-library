@@ -7,6 +7,7 @@ import type { ITreeItem } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import { useEffect, useState } from 'react';
 import { useSecureFiles } from '@/hooks/query/secureFiles';
 import { useVariableGroups } from '@/hooks/query/variableGroups';
+import { useSubscribtion } from '@/models/Observable/ObservableObject';
 import {
   ObservableSecureFile,
   ObservableSecureFileProperty,
@@ -18,11 +19,24 @@ import {
 } from '@/models/VariableGroup';
 import { type LibraryItem, VariablesTree } from './VariablesTree';
 
-export const HomeTab = ({ filter }: { filter: IFilter }) => {
-  const [treeItems, setTreeItems] = useState<ITreeItem<LibraryItem>[]>(() => [
-    // biome-ignore lint/style/noNonNullAssertion: loading placeholder
-    { data: undefined! },
-  ]);
+type TabContext = {
+  items: ITreeItem<LibraryItem>[];
+  model: HomeTabModel;
+};
+export const HomeTab = ({
+  filter,
+  onTabContextChange,
+}: {
+  filter: IFilter;
+  onTabContextChange: (model: HomeTabModel) => void;
+}) => {
+  const [context, setContext] = useState<TabContext>(() => ({
+    items: [
+      // biome-ignore lint/style/noNonNullAssertion: loading placeholder
+      { data: undefined! },
+    ],
+    model: new HomeTabModel([], []),
+  }));
 
   const groups = useVariableGroups();
   const files = useSecureFiles();
@@ -34,15 +48,20 @@ export const HomeTab = ({ filter }: { filter: IFilter }) => {
     if (!isLoading) {
       const model = createHomeTabModel(groups.data ?? [], files.data ?? []);
       const items = mapTreeItems(model);
-      setTreeItems(items);
+      setContext({
+        items,
+        model,
+      });
     }
   }, [isLoading, groups.data, files.data]);
+
+  useSubscribtion(context.model, onTabContextChange);
 
   if (error) {
     return <div>Error: {(error as Error).message}</div>;
   }
 
-  return <VariablesTree items={treeItems} filter={filter} />;
+  return <VariablesTree items={context.items} filter={filter} />;
 };
 
 const mapTreeItems = (model: HomeTabModel) => {

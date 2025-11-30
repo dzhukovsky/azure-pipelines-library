@@ -1,4 +1,5 @@
-import { Observable } from 'azure-devops-ui/Core/Observable';
+import { type IObservable, Observable } from 'azure-devops-ui/Core/Observable';
+import { useEffect, useMemo } from 'react';
 import { ObservableObjectArray } from './ObservableObjectArray';
 import {
   defaultEqualityComparer,
@@ -55,4 +56,16 @@ export abstract class ObservableObject<TSelf> extends Observable<
       this._valueProps.some((x) => x.modified) ||
       this._arrayProps.some((x) => x.modified);
   }
+}
+
+export type ChangeHandler<T> = (value: T) => void;
+
+export function useSubscribtion<T>(
+  observable: IObservable<T>,
+  onChange: ChangeHandler<T>,
+) {
+  useEffect(() => {
+    observable.subscribe(onChange);
+    return () => observable.unsubscribe(onChange);
+  }, [observable, onChange]);
 }

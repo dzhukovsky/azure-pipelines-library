@@ -6,15 +6,15 @@ export class ObservableObjectArray<
 > extends ObservableArray<TItem> {
   private _modified = false;
 
-  private readonly _initialItems: readonly TItem[];
+  readonly initialItems: readonly TItem[];
   private readonly _currentItems = new Set<TItem>();
 
   constructor(items?: TItem[]) {
     super(items);
 
-    this._initialItems = items ? [...items] : [];
+    this.initialItems = items ? [...items] : [];
 
-    this._initialItems.forEach((item) => {
+    this.initialItems.forEach((item) => {
       this._currentItems.add(item);
       item.subscribe(this.onItemModified);
     });
@@ -49,8 +49,8 @@ export class ObservableObjectArray<
 
   private recomputeModified() {
     this.modified =
-      this._currentItems.size !== this._initialItems.length ||
-      this._initialItems.some(
+      this._currentItems.size !== this.initialItems.length ||
+      this.initialItems.some(
         (item) => !this._currentItems.has(item) || item.modified,
       );
   }

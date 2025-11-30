@@ -41,10 +41,10 @@ import type {
   ObservableVariable,
   ObservableVariableGroup,
 } from '@/models/VariableGroup';
-import { GroupNameActionsCell } from './actionCells/GroupNameActionsCell';
-import { GroupValueActionsCell } from './actionCells/GroupValueActionsCell';
-import { VariableNameActionsCell } from './actionCells/VariableNameActionsCell';
-import { VariableValueActionsCell } from './actionCells/VariableValueActionsCell';
+import { GroupNameActionsCell } from './ActionCells/GroupNameActionsCell';
+import { GroupValueActionsCell } from './ActionCells/GroupValueActionsCell';
+import { VariableNameActionsCell } from './ActionCells/VariableNameActionsCell';
+import { VariableValueActionsCell } from './ActionCells/VariableValueActionsCell';
 
 export type VariablesTreeProps = {
   items: ITreeItem<LibraryItem>[];

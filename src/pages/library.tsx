@@ -10,8 +10,11 @@ import { Surface, SurfaceBackground } from 'azure-devops-ui/Surface';
 import { Tab, TabBar } from 'azure-devops-ui/Tabs';
 import { InlineKeywordFilterBarItem } from 'azure-devops-ui/TextFilterBarItem';
 import { Filter, type IFilter } from 'azure-devops-ui/Utilities/Filter';
-import { useCallback, useMemo, useState } from 'react';
-import { PreviewChangesDialog } from '@/components/Dialogs/PreviewChangesDialog';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  PreviewChangesDialog,
+  type PreviewChangesDialogOptions,
+} from '@/components/Dialogs/PreviewChangesDialog';
 import { States } from '@/components/shared/State';
 import { HomeTab } from '@/components/Tabs/HomeTab';
 import { MatrixTab } from '@/components/Tabs/MatrixTab';
@@ -22,7 +25,10 @@ import {
   type QueryParamsSetter,
   useNavigationService,
 } from '@/hooks/query/navigation';
+import { ObservableObjectArray } from '@/models/Observable/ObservableObjectArray';
+import { ObservableSecureFile } from '@/models/SecureFile';
 import type { HomeTabModel } from '@/models/tabs/HomeTabModel';
+import { ObservableVariableGroup } from '@/models/VariableGroup';
 
 export const LibraryPage = () => {
   const { queryParams, isLoading, setQueryParams } = useNavigationService({
@@ -30,14 +36,15 @@ export const LibraryPage = () => {
     filter: '',
   });
 
-  const isPreviewDialogOpen = useMemo(
-    () => new ObservableValue<boolean>(false),
+  const previewDialogOptions = useMemo(
+    () =>
+      new ObservableValue<PreviewChangesDialogOptions | undefined>(undefined),
     [],
   );
 
   const filter = useFilter(queryParams.filter, setQueryParams);
   const { headerCommands, renderTabBarCommands, onTabContextChange } =
-    useHeader(filter, isPreviewDialogOpen);
+    useHeader(filter, previewDialogOptions);
   const { currentTab, tabs } = useTabs(
     queryParams.tab,
     setQueryParams,
@@ -73,7 +80,7 @@ export const LibraryPage = () => {
           </div>
         </Page>
       </Surface>
-      <PreviewChangesDialog isOpen={isPreviewDialogOpen} />
+      <PreviewChangesDialog options={previewDialogOptions} />
     </>
   );
 };
@@ -87,16 +94,20 @@ const useFilter = (
     [defaultValue],
   );
 
-  if (filter.getFilterItemValue('keyword') !== defaultValue) {
-    filter.setFilterItemState('keyword', { value: defaultValue });
-  }
+  useEffect(() => {
+    if (filter.getFilterItemValue('keyword') !== defaultValue) {
+      filter.setFilterItemState('keyword', { value: defaultValue });
+    }
+  }, [defaultValue, filter]);
 
-  useFilterSubscription(filter, () => {
+  const onFilterChange = useCallback(() => {
     setQueryParams(
       { filter: filter.getFilterItemValue('keyword') ?? '' },
       false,
     );
-  });
+  }, [filter, setQueryParams]);
+
+  useFilterSubscription(filter, onFilterChange);
 
   return filter;
 };
@@ -140,7 +151,9 @@ const useTabs = (
 
 const useHeader = (
   filter: IFilter,
-  isPreviewDialogOpen: ObservableValue<boolean>,
+  previewDialogOptions: ObservableValue<
+    PreviewChangesDialogOptions | undefined
+  >,
 ) => {
   const getHasChangesCommands = useCallback(
     (model: HomeTabModel): IHeaderCommandBarItem[] => [
@@ -153,57 +166,10 @@ const useHeader = (
             primary={true}
             text="Preview changes"
             onClick={() => {
-              isPreviewDialogOpen.value = true;
-              model.variableGroups.initialItems
-                .filter((vg) => vg.state.value === States.Deleted)
-                .forEach((vg) => {
-                  console.log('Deleted variable group:', vg.name.value);
-                });
-              model.secureFiles.initialItems
-                .filter((sf) => sf.state.value === States.Deleted)
-                .forEach((sf) => {
-                  console.log('Deleted secure file:', sf.name.value);
-                });
-
-              model.variableGroups.value
-                .filter((vg) => vg.modified)
-                .forEach((vg) => {
-                  console.log('Modified variable group:', vg.name.value);
-                  vg.variables.initialItems
-                    .filter((v) => v.state.value === States.Deleted)
-                    .forEach((v) => {
-                      console.log(
-                        `  Deleted variable: ${v.name.value} from variable group: ${vg.name.value}`,
-                      );
-                    });
-                  vg.variables.value
-                    .filter((v) => v.modified)
-                    .forEach((v) => {
-                      console.log(
-                        `  Modified variable: ${v.name.value} from variable group: ${vg.name.value}`,
-                      );
-                    });
-                });
-
-              model.secureFiles.value
-                .filter((sf) => sf.modified)
-                .forEach((sf) => {
-                  console.log('Modified secure file:', sf.name.value);
-                  sf.properties.initialItems
-                    .filter((p) => p.state.value === States.Deleted)
-                    .forEach((p) => {
-                      console.log(
-                        `  Deleted property: ${p.name.value} from secure file: ${sf.name.value}`,
-                      );
-                    });
-                  sf.properties.value
-                    .filter((p) => p.modified)
-                    .forEach((p) => {
-                      console.log(
-                        `  Modified property: ${p.name.value} from secure file: ${sf.name.value}`,
-                      );
-                    });
-                });
+              previewDialogOptions.value = {
+                variableGroups: model.variableGroups,
+                secureFiles: model.secureFiles,
+              };
             }}
           />
         ),
@@ -217,7 +183,7 @@ const useHeader = (
         important: false,
       },
     ],
-    [isPreviewDialogOpen],
+    [previewDialogOptions],
   );
 
   const noChangesCommands: IHeaderCommandBarItem[] = useMemo(

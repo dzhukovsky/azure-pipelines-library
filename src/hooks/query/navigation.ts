@@ -4,6 +4,7 @@ import {
   type IHostNavigationService,
 } from 'azure-devops-extension-api';
 import * as SDK from 'azure-devops-extension-sdk';
+import { useCallback } from 'react';
 
 const getNavigationService = async () => {
   await SDK.ready();
@@ -40,16 +41,16 @@ export function useNavigationService<TParams extends Record<string, string>>(
     },
   });
 
-  const setQueryParams = async (
-    newParams: Partial<TParams>,
-    refetch = true,
-  ) => {
-    const service = await getNavigationService();
-    const currentParams = (await service.getQueryParams()) as TParams;
-    const updatedParams = { ...currentParams, ...newParams } as TParams;
-    service.setQueryParams(updatedParams);
-    refetch && (await refetchQuery());
-  };
+  const setQueryParams = useCallback(
+    async (newParams: Partial<TParams>, refetch = true) => {
+      const service = await getNavigationService();
+      const currentParams = (await service.getQueryParams()) as TParams;
+      const updatedParams = { ...currentParams, ...newParams } as TParams;
+      service.setQueryParams(updatedParams);
+      refetch && (await refetchQuery());
+    },
+    [refetchQuery],
+  );
 
   return {
     queryParams: queryParams ?? defaultParams,

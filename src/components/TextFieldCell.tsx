@@ -1,4 +1,7 @@
-import type { IReadonlyObservableValue } from 'azure-devops-ui/Core/Observable';
+import {
+  type IObservableLikeValue,
+  ObservableLike,
+} from 'azure-devops-ui/Core/Observable';
 import type { IIconProps } from 'azure-devops-ui/Icon';
 import {
   type ITextFieldProps,
@@ -10,7 +13,7 @@ import { css } from 'azure-devops-ui/Util';
 import type { State } from './shared/State';
 
 export type TextFieldCellProps = {
-  value: IReadonlyObservableValue<string>;
+  value: IObservableLikeValue<string>;
   state: State;
   iconProps?: IIconProps;
   textFieldProps?: Pick<
@@ -38,7 +41,7 @@ export function TextFieldCell({
       tooltipProps={{
         disabled: textFieldProps?.inputType === 'password',
         overflowOnly: true,
-        renderContent: () => value.value,
+        renderContent: () => ObservableLike.getValue(value),
       }}
       prefixIconProps={iconProps}
       className="text-field"

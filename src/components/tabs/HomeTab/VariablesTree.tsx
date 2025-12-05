@@ -28,6 +28,7 @@ import { memo, useCallback, useMemo } from 'react';
 import type { State } from '@/components/shared/State';
 import { createActionColumn } from '@/components/shared/Tree/createActionColumn';
 import { createExpandableActionColumn } from '@/components/shared/Tree/createExpandableActionColumn';
+import { getLoadingProvider } from '@/components/shared/Tree/loadingProvider';
 import { useRowRenderer } from '@/components/shared/Tree/useRowRenderer';
 import { TextFieldCell } from '@/components/TextFieldCell';
 import type { FilterFunc } from '@/hooks/filtering';
@@ -49,6 +50,7 @@ import { VariableValueActionsCell } from './ActionCells/VariableValueActionsCell
 export type VariablesTreeProps = {
   items: ITreeItem<LibraryItem>[];
   filter: IFilter;
+  loading?: boolean;
 };
 
 export type GroupItem = {
@@ -285,14 +287,18 @@ const filterFunc: FilterFunc<LibraryItem> = (item, filterText) => {
   return false;
 };
 
-export const VariablesTree = ({ items, filter }: VariablesTreeProps) => {
+export const VariablesTree = ({
+  items,
+  filter,
+  loading,
+}: VariablesTreeProps) => {
   const { filteredItems, isEmpty } = useFiltering(items, filter, filterFunc);
   const { columns } = useColumns(filteredItems);
 
   const renderRow = useRowRenderer(columns);
-
+  console.log('VariablesTree render, isEmpty:', isEmpty);
   return (
-    (isEmpty && <span>No items found</span>) || (
+    (!loading && isEmpty && <span>No items found</span>) || (
       <Card
         className="flex-grow bolt-card-no-vertical-padding"
         contentProps={{ contentPadding: false }}
@@ -301,7 +307,7 @@ export const VariablesTree = ({ items, filter }: VariablesTreeProps) => {
           id={'variables-tree'}
           className="text-field-table-wrap"
           columns={columns}
-          itemProvider={filteredItems}
+          itemProvider={loading ? getLoadingProvider() : filteredItems}
           showLines={false}
           virtualize={false}
           renderRow={renderRow}

@@ -31,10 +31,7 @@ export const HomeTab = ({
   onTabContextChange: (model: HomeTabModel) => void;
 }) => {
   const [context, setContext] = useState<TabContext>(() => ({
-    items: [
-      // biome-ignore lint/style/noNonNullAssertion: loading placeholder
-      { data: undefined! },
-    ],
+    items: [],
     model: new HomeTabModel([], []),
   }));
 
@@ -61,7 +58,9 @@ export const HomeTab = ({
     return <div>Error: {(error as Error).message}</div>;
   }
 
-  return <VariablesTree items={context.items} filter={filter} />;
+  return (
+    <VariablesTree items={context.items} filter={filter} loading={isLoading} />
+  );
 };
 
 const mapTreeItems = (model: HomeTabModel) => {

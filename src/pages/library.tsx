@@ -42,9 +42,11 @@ export const LibraryPage = () => {
     [],
   );
 
+  const [tabContainerKey, setTabContainerKey] = useState<number>(0);
+
   const filter = useFilter(queryParams.filter, setQueryParams);
   const { headerCommands, renderTabBarCommands, onTabContextChange } =
-    useHeader(filter, previewDialogOptions);
+    useHeader(filter, setTabContainerKey, previewDialogOptions);
   const { currentTab, tabs } = useTabs(
     queryParams.tab,
     setQueryParams,
@@ -75,7 +77,7 @@ export const LibraryPage = () => {
               <Tab key={tab.id} id={tab.id} name={tab.name} />
             ))}
           </TabBar>
-          <div className="page-content page-content-top">
+          <div key={tabContainerKey} className="page-content page-content-top">
             {currentTab?.render()}
           </div>
         </Page>
@@ -151,41 +153,11 @@ const useTabs = (
 
 const useHeader = (
   filter: IFilter,
+  setTabContainerKey: (updater: (prevId: number) => number) => void,
   previewDialogOptions: ObservableValue<
     PreviewChangesDialogOptions | undefined
   >,
 ) => {
-  const getHasChangesCommands = useCallback(
-    (model: HomeTabModel): IHeaderCommandBarItem[] => [
-      {
-        id: 'preview-changes',
-        important: true,
-        renderButton: ({ id }) => (
-          <Button
-            key={id}
-            primary={true}
-            text="Preview changes"
-            onClick={() => {
-              previewDialogOptions.value = {
-                variableGroups: model.variableGroups,
-                secureFiles: model.secureFiles,
-              };
-            }}
-          />
-        ),
-      },
-      {
-        id: 'discard-changes',
-        text: 'Discard changes',
-        onActivate: () => {
-          alert('Discard changes');
-        },
-        important: false,
-      },
-    ],
-    [previewDialogOptions],
-  );
-
   const noChangesCommands: IHeaderCommandBarItem[] = useMemo(
     () => [
       {
@@ -247,6 +219,42 @@ const useHeader = (
 
   const [headerCommands, setHeaderCommands] =
     useState<IHeaderCommandBarItem[]>(noChangesCommands);
+
+  const discardChanges = useCallback(() => {
+    setTabContainerKey((prevId) => prevId + 1);
+    previewDialogOptions.value = undefined;
+    setHeaderCommands(noChangesCommands);
+  }, [previewDialogOptions, setTabContainerKey, noChangesCommands]);
+
+  const getHasChangesCommands = useCallback(
+    (model: HomeTabModel): IHeaderCommandBarItem[] => [
+      {
+        id: 'preview-changes',
+        important: true,
+        renderButton: ({ id }) => (
+          <Button
+            key={id}
+            primary={true}
+            text="Preview changes"
+            onClick={() => {
+              console.log('Preview changes clicked');
+              previewDialogOptions.value = {
+                variableGroups: model.variableGroups,
+                secureFiles: model.secureFiles,
+              };
+            }}
+          />
+        ),
+      },
+      {
+        id: 'discard-changes',
+        text: 'Discard changes',
+        onActivate: discardChanges,
+        important: false,
+      },
+    ],
+    [previewDialogOptions, discardChanges],
+  );
 
   const onTabContextChange = useCallback(
     (model: HomeTabModel) =>

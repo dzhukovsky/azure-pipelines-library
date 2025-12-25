@@ -1,4 +1,3 @@
-import { CircleFilled } from '@fluentui/react-icons';
 import { Icon } from 'azure-devops-ui/Icon';
 import { Tooltip } from 'azure-devops-ui/TooltipEx';
 import { memo } from 'react';
@@ -46,7 +45,10 @@ export const StateIcon = memo(
           className="text-field-status padding-vertical-8 padding-horizontal-8 margin-horizontal-4"
           style={{ color: textColors[state.type] }}
         >
-          {(circle && <CircleFilled fontSize={9} />) || state.type.charAt(0)}
+          {(circle && (
+            <Icon iconName="fluent-CircleFilled" style={{ fontSize: 9 }} />
+          )) ||
+            state.type.charAt(0)}
         </span>
       </Tooltip>
     ),

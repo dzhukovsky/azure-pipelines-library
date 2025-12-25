@@ -18,7 +18,6 @@
     "package:dev": "run package -- --overrides-file vss-extension.dev.json"
   },
   "dependencies": {
-    "@fluentui/react-icons": "^2.0.309",
     "@tanstack/react-query": "^4.41.0",
     "azure-devops-extension-api": "https://github.com/dzhukovsky/azure-devops-extension-api.git#add-esm-support",
     "azure-devops-extension-sdk": "^4.0.2",

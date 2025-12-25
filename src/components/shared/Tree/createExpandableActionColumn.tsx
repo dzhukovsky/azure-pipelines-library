@@ -1,7 +1,6 @@
 import { ObservableLike } from 'azure-devops-ui/Core/Observable';
 import { ExpandableTreeCell, type ITreeColumn } from 'azure-devops-ui/TreeEx';
 import type { ITreeItemEx } from 'azure-devops-ui/Utilities/TreeItemProvider';
-import { memo } from 'react';
 import type { RenderHandler, RenderOptions } from './createActionColumn';
 
 export type ActionColumnOptions<T> = Omit<ITreeColumn<T>, 'renderCell'> & {

@@ -1,0 +1,46 @@
+// https: //storybooks.fluentui.dev/react/?path=/docs/icons-catalog--docs
+// https://github.com/microsoft/fluentui-system-icons/blob/main/fonts/FluentSystemIcons-Regular.css
+// https://github.com/microsoft/fluentui-system-icons/blob/main/fonts/FluentSystemIcons-Filled.css
+
+@use "sass:list";
+
+$fluent-icons: (
+  KeyRegular: (regular, "\e740"),
+  DocumentKeyRegular: (regular, "\f011d"),
+  MathFormulaRegular: (regular, "\e7e1"),
+  CircleFilled: (filled, "\f2ba"),
+  LibraryColor: (filled, "\e76f", var(--icon-folder-color, #dcb67a)),
+);
+
+@function fluent-font($style) {
+  @if $style ==regular {
+    @return "FluentRegular";
+  }
+
+  @if $style ==filled {
+    @return "FluentFilled";
+  }
+
+  @error "Unknown style: #{$style}";
+}
+
+@mixin fluent-icon($style, $code, $color: null) {
+  font-family: fluent-font($style);
+  content: $code;
+
+  @if $color !=null {
+    color: $color;
+  }
+}
+
+.fluent-icons-enabled {
+  @each $name, $def in $fluent-icons {
+    $style: list.nth($def, 1);
+    $code: list.nth($def, 2);
+    $color: if(list.length($def) >=3, list.nth($def, 3), null);
+
+    .ms-Icon--fluent-#{$name}:before {
+      @include fluent-icon($style, $code, $color);
+    }
+  }
+}

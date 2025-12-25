@@ -1,6 +1,6 @@
 {
-  "id": "pipelines-library-dev",
-  "name": "Pipelines Library (Dev)",
+  "id": "advanced-library-dev",
+  "name": "Advanced Library (Dev)",
   "public": false,
   "contributions": [
     {
@@ -10,7 +10,7 @@
         "ms.vss-build-web.build-release-hub-group"
       ],
       "properties": {
-        "name": "Library (Dev)",
+        "name": "Advanced Library (Dev)",
         "uri": "http://localhost:3000/index.html",
         "iconName": "Library"
       }

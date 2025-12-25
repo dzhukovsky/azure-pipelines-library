@@ -5,13 +5,6 @@ __metadata:
   version: 8
   cacheKey: 10c0
 
-"@babel/runtime@npm:^7.1.2":
-  version: 7.28.3
-  resolution: "@babel/runtime@npm:7.28.3"
-  checksum: 10c0/b360f82c2c5114f2a062d4d143d7b4ec690094764853937110585a9497977aed66c102166d0e404766c274e02a50ffb8f6d77fef7251ecf3f607f0e03e6397bc
-  languageName: node
-  linkType: hard
-
 "@biomejs/biome@npm:^2.2.4":
   version: 2.2.4
   resolution: "@biomejs/biome@npm:2.2.4"
@@ -114,13 +107,6 @@ __metadata:
   version: 1.5.0
   resolution: "@colors/colors@npm:1.5.0"
   checksum: 10c0/eb42729851adca56d19a08e48d5a1e95efd2a32c55ae0323de8119052be0510d4b7a1611f2abcbf28c044a6c11e6b7d38f99fccdad7429300c37a8ea5fb95b44
-  languageName: node
-  linkType: hard
-
-"@emotion/hash@npm:^0.9.0":
-  version: 0.9.2
-  resolution: "@emotion/hash@npm:0.9.2"
-  checksum: 10c0/0dc254561a3cc0a06a10bbce7f6a997883fd240c8c1928b93713f803a2e9153a257a488537012efe89dbe1246f2abfe2add62cdb3471a13d67137fcb808e81c2
   languageName: node
   linkType: hard
 
@@ -303,53 +289,6 @@ __metadata:
   version: 0.25.9
   resolution: "@esbuild/win32-x64@npm:0.25.9"
   conditions: os=win32 & cpu=x64
-  languageName: node
-  linkType: hard
-
-"@fluentui/react-icons@npm:^2.0.309":
-  version: 2.0.309
-  resolution: "@fluentui/react-icons@npm:2.0.309"
-  dependencies:
-    "@griffel/react": "npm:^1.0.0"
-    tslib: "npm:^2.1.0"
-  peerDependencies:
-    react: ">=16.8.0 <19.0.0"
-  checksum: 10c0/4fbd6b4c1e5f5a3c771b71288028b1724083c3eecd95f2adc0474b64236a505024ba86fc4c75299ea3bab269ec61f5957e3770daf0cdbd04e16887b60791421e
-  languageName: node
-  linkType: hard
-
-"@griffel/core@npm:^1.19.2":
-  version: 1.19.2
-  resolution: "@griffel/core@npm:1.19.2"
-  dependencies:
-    "@emotion/hash": "npm:^0.9.0"
-    "@griffel/style-types": "npm:^1.3.0"
-    csstype: "npm:^3.1.3"
-    rtl-css-js: "npm:^1.16.1"
-    stylis: "npm:^4.2.0"
-    tslib: "npm:^2.1.0"
-  checksum: 10c0/6e086ba2132e130360e14d1ab0493f6b7e34e3dba82c928a0a438ac7f48628555845ba5366a8dfaaf163ee67b3bca1776906347d02dc0ab32c03ef85bd113ba2
-  languageName: node
-  linkType: hard
-
-"@griffel/react@npm:^1.0.0":
-  version: 1.5.30
-  resolution: "@griffel/react@npm:1.5.30"
-  dependencies:
-    "@griffel/core": "npm:^1.19.2"
-    tslib: "npm:^2.1.0"
-  peerDependencies:
-    react: ">=16.8.0 <20.0.0"
-  checksum: 10c0/c09ddb46e755fc183c807d4c51d93bc4dc21b6a62302597a5cde66c44d0868f91af32d020599de1fd9ae8d4095eb3fea365dcd2d4fb6b0e2bc6734f4fbcf080b
-  languageName: node
-  linkType: hard
-
-"@griffel/style-types@npm:^1.3.0":
-  version: 1.3.0
-  resolution: "@griffel/style-types@npm:1.3.0"
-  dependencies:
-    csstype: "npm:^3.1.3"
-  checksum: 10c0/94c63ed89398e154f5ced769b25ff7e14471c991672f32f69ac27daa463f880650cb2d7d5ef7e00811e3cd3a6cd2694b9ef861d9bc294cf72838e31761d72ef8
   languageName: node
   linkType: hard
 
@@ -1132,7 +1071,6 @@ __metadata:
   resolution: "azure-pipelines-library@workspace:."
   dependencies:
     "@biomejs/biome": "npm:^2.2.4"
-    "@fluentui/react-icons": "npm:^2.0.309"
     "@tanstack/react-query": "npm:^4.41.0"
     "@types/node": "npm:^24.5.2"
     "@types/react": "npm:^16.8.1"
@@ -1423,7 +1361,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"csstype@npm:^3.0.2, csstype@npm:^3.1.3":
+"csstype@npm:^3.0.2":
   version: 3.1.3
   resolution: "csstype@npm:3.1.3"
   checksum: 10c0/80c089d6f7e0c5b2bd83cf0539ab41474198579584fa10d86d0cafe0642202343cbc119e076a0b1aece191989477081415d66c9fefbf3c957fc2fc4b7009f248
@@ -3437,15 +3375,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rtl-css-js@npm:^1.16.1":
-  version: 1.16.1
-  resolution: "rtl-css-js@npm:1.16.1"
-  dependencies:
-    "@babel/runtime": "npm:^7.1.2"
-  checksum: 10c0/4b81ef50e50c97455d61c9bb576e2892651c79bac5d0c52b4123ebb9d6a2c5144590a79c9db0a3212a81b4eb83bf317e03637220f20b387a37b96cbac324d3d2
-  languageName: node
-  linkType: hard
-
 "rxjs@npm:^7.4.0":
   version: 7.8.2
   resolution: "rxjs@npm:7.8.2"
@@ -4078,13 +4007,6 @@ __metadata:
   version: 3.0.0
   resolution: "strip-final-newline@npm:3.0.0"
   checksum: 10c0/a771a17901427bac6293fd416db7577e2bc1c34a19d38351e9d5478c3c415f523f391003b42ed475f27e33a78233035df183525395f731d3bfb8cdcbd4da08ce
-  languageName: node
-  linkType: hard
-
-"stylis@npm:^4.2.0":
-  version: 4.3.6
-  resolution: "stylis@npm:4.3.6"
-  checksum: 10c0/e736d484983a34f7c65d362c67dc79b7bce388054b261c2b7b23d02eaaf280617033f65d44b1ea341854f4331a5074b885668ac8741f98c13a6cfd6443ae85d0
   languageName: node
   linkType: hard
 

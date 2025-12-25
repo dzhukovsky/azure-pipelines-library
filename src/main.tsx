@@ -1,4 +1,5 @@
 import 'azure-devops-ui/Core/override.css';
+import './styles/icons.scss';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import * as SDK from 'azure-devops-extension-sdk';
@@ -16,8 +17,10 @@ const queryClient = new QueryClient({
   },
 });
 
-SDK.init();
+SDK.init({ loaded: false });
 await loadConfigurations();
+await document.fonts.ready;
+SDK.notifyLoadSucceeded();
 
 ReactDOM.render(
   <SurfaceContext.Provider value={{ background: SurfaceBackground.neutral }}>

@@ -1,4 +1,3 @@
-import { KeyRegular } from '@fluentui/react-icons/fonts';
 import type { VariableGroup } from 'azure-devops-extension-api/TaskAgent';
 import { Button } from 'azure-devops-ui/Button';
 import { Card } from 'azure-devops-ui/Card';
@@ -8,6 +7,7 @@ import {
   ObservableArray,
   ObservableValue,
 } from 'azure-devops-ui/Core/Observable';
+import { IconSize } from 'azure-devops-ui/Icon';
 import { type ITableColumn, Table, TableCell } from 'azure-devops-ui/Table';
 import type { IFilter } from 'azure-devops-ui/Utilities/Filter';
 import { useCallback, useMemo } from 'react';
@@ -74,15 +74,14 @@ const useColumns = (
             value={tableItem.name}
             state={tableItem.state}
             iconProps={{
-              render: isSecret
-                ? (className) => (
-                    <KeyRegular
-                      className={className}
-                      style={{ paddingLeft: '6px' }}
-                    />
-                  )
-                : undefined,
-              iconName: isSecret ? undefined : 'Variable',
+              iconName: isSecret
+                ? 'fluent-LibraryColor'
+                : 'fluent-MathFormulaRegular',
+              style: {
+                paddingLeft: 0,
+                marginLeft: 0,
+              },
+              size: IconSize.medium,
             }}
             textFieldProps={{
               readOnly: isSecret,

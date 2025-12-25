@@ -1,5 +1,5 @@
 import { type IObservable, Observable } from 'azure-devops-ui/Core/Observable';
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { ObservableObjectArray } from './ObservableObjectArray';
 import {
   defaultEqualityComparer,

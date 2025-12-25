@@ -10,7 +10,7 @@ import {
   TextFieldWidth,
 } from 'azure-devops-ui/TextField';
 import { css } from 'azure-devops-ui/Util';
-import { type State, StateIcon } from './shared/State';
+import type { State } from './shared/State';
 
 export type TextFieldCellProps = {
   value: IObservableLikeValue<string>;
@@ -50,9 +50,6 @@ export function TextFieldCell({
         state.type === 'Deleted' && 'status-deleted',
         state.type === 'Error' && 'input-validation-error',
       )}
-      suffixIconProps={{
-        render: () => <StateIcon state={state} />,
-      }}
       disabled={state.type === 'Deleted'}
       containerClassName="text-field-container"
       width={TextFieldWidth.auto}

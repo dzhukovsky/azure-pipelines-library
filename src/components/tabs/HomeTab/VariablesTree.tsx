@@ -1,14 +1,10 @@
-import {
-  DocumentKeyRegular,
-  KeyRegular,
-  LibraryFilled,
-} from '@fluentui/react-icons/fonts';
 import type { IdentityRef } from 'azure-devops-extension-api/WebApi';
 import { Card } from 'azure-devops-ui/Card';
 import {
   type IObservableValue,
   ObservableValue,
 } from 'azure-devops-ui/Core/Observable';
+import { IconSize } from 'azure-devops-ui/Icon';
 import { renderListCell } from 'azure-devops-ui/List';
 import { Observer } from 'azure-devops-ui/Observer';
 import {
@@ -109,14 +105,8 @@ const useColumns = (itemProvider: ITreeItemProvider<LibraryItem>) => {
               text: group.name.value,
               textClassName: 'padding-vertical-8',
               iconProps: {
-                render: (className) => (
-                  <LibraryFilled
-                    className={className}
-                    style={{
-                      color: 'var(--icon-folder-color, #dcb67a)',
-                    }}
-                  />
-                ),
+                iconName: 'fluent-LibraryColor',
+                size: IconSize.medium,
               },
             });
           }
@@ -133,16 +123,14 @@ const useColumns = (itemProvider: ITreeItemProvider<LibraryItem>) => {
                     value={groupVariable.name}
                     state={state}
                     iconProps={{
-                      render: isSecret
-                        ? (className) => (
-                            <KeyRegular
-                              className={className}
-                              style={{ paddingLeft: '2px', marginLeft: '0' }}
-                            />
-                          )
-                        : undefined,
-                      iconName: isSecret ? undefined : 'Variable',
-                      style: { paddingLeft: '0', marginLeft: '0' },
+                      iconName: isSecret
+                        ? 'fluent-KeyRegular'
+                        : 'fluent-MathFormulaRegular',
+                      style: {
+                        paddingLeft: 0,
+                        marginLeft: 0,
+                      },
+                      size: IconSize.medium,
                     }}
                     textFieldProps={{
                       onChange: (_, newValue) => {
@@ -161,9 +149,8 @@ const useColumns = (itemProvider: ITreeItemProvider<LibraryItem>) => {
               text: file.name.value,
               textClassName: 'padding-vertical-8',
               iconProps: {
-                render: (className) => (
-                  <DocumentKeyRegular className={className} />
-                ),
+                iconName: 'fluent-DocumentKeyRegular',
+                size: IconSize.medium,
               },
             });
           }

@@ -1,5 +1,5 @@
 import type { ITreeItem } from 'azure-devops-ui/Utilities/TreeItemProvider';
-import { type State, States } from '@/components/shared/State';
+import type { State } from '@/components/shared/State';
 import type { ObservableObjectArray } from '@/models/Observable/ObservableObjectArray';
 import type { ObservableSecureFile } from '@/models/SecureFile';
 import { getArrayChanges } from '@/models/StateObject';

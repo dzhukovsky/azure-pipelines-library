@@ -15,7 +15,6 @@ import {
   PreviewChangesDialog,
   type PreviewChangesDialogOptions,
 } from '@/components/Dialogs/PreviewChangesDialog';
-import { States } from '@/components/shared/State';
 import { HomeTab } from '@/components/Tabs/HomeTab';
 import { MatrixTab } from '@/components/Tabs/MatrixTab';
 import { useFilterSubscription } from '@/hooks/filtering';
@@ -25,10 +24,7 @@ import {
   type QueryParamsSetter,
   useNavigationService,
 } from '@/hooks/query/navigation';
-import { ObservableObjectArray } from '@/models/Observable/ObservableObjectArray';
-import { ObservableSecureFile } from '@/models/SecureFile';
 import type { HomeTabModel } from '@/models/tabs/HomeTabModel';
-import { ObservableVariableGroup } from '@/models/VariableGroup';
 
 export const LibraryPage = () => {
   const { queryParams, isLoading, setQueryParams } = useNavigationService({

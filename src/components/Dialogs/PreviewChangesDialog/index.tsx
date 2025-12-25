@@ -1,24 +1,17 @@
 import './index.scss';
 
 import {
-  DocumentKeyRegular,
-  KeyRegular,
-  LibraryFilled,
-} from '@fluentui/react-icons/fonts';
-import {
   type IObservableValue,
   ObservableValue,
 } from 'azure-devops-ui/Core/Observable';
-import { CustomDialog, Dialog } from 'azure-devops-ui/Dialog';
+import { CustomDialog } from 'azure-devops-ui/Dialog';
 import { TitleSize } from 'azure-devops-ui/Header';
+import { IconSize } from 'azure-devops-ui/Icon';
 import { renderListCell } from 'azure-devops-ui/List';
 import { Observer } from 'azure-devops-ui/Observer';
-import { PanelContent, PanelFooter, PanelHeader } from 'azure-devops-ui/Panel';
+import { PanelFooter, PanelHeader } from 'azure-devops-ui/Panel';
 import { type ITreeColumn, Tree } from 'azure-devops-ui/TreeEx';
-import type { IItemProvider } from 'azure-devops-ui/Utilities/Provider';
 import {
-  ITreeItem,
-  type ITreeItemEx,
   type ITreeItemProvider,
   TreeItemProvider,
 } from 'azure-devops-ui/Utilities/TreeItemProvider';
@@ -117,14 +110,8 @@ const useColumns = () => {
               text: group.name,
               textClassName: 'padding-vertical-8',
               iconProps: {
-                render: (className) => (
-                  <LibraryFilled
-                    className={className}
-                    style={{
-                      color: 'var(--icon-folder-color, #dcb67a)',
-                    }}
-                  />
-                ),
+                iconName: 'fluent-LibraryColor',
+                size: IconSize.medium,
               },
             });
           }
@@ -136,16 +123,14 @@ const useColumns = () => {
                 value={groupVariable.name}
                 state={groupVariable.state}
                 iconProps={{
-                  render: groupVariable.isSecret
-                    ? (className) => (
-                        <KeyRegular
-                          className={className}
-                          style={{ paddingLeft: '2px', marginLeft: '0' }}
-                        />
-                      )
-                    : undefined,
-                  iconName: groupVariable.isSecret ? undefined : 'Variable',
-                  style: { paddingLeft: '0', marginLeft: '0' },
+                  iconName: groupVariable.isSecret
+                    ? 'fluent-KeyRegular'
+                    : 'fluent-MathFormulaRegular',
+                  style: {
+                    paddingLeft: 0,
+                    marginLeft: 0,
+                  },
+                  size: IconSize.medium,
                 }}
                 textFieldProps={{ readOnly: true }}
               />
@@ -158,9 +143,8 @@ const useColumns = () => {
               text: file.name,
               textClassName: 'padding-vertical-8',
               iconProps: {
-                render: (className) => (
-                  <DocumentKeyRegular className={className} />
-                ),
+                iconName: 'fluent-DocumentKeyRegular',
+                size: IconSize.medium,
               },
             });
           }

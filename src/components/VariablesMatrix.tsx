@@ -241,7 +241,7 @@ const useVariables = (variableGroups: VariableGroup[]) => {
         values[name][vg.id] = (variable && {
           value: new ObservableValue(variable.value ?? ''),
           originalValue: variable.value ?? '',
-          state: States.New,
+          state: States.Unchanged,
           isSecret,
         }) || {
           value: new ObservableValue(''),
@@ -318,6 +318,7 @@ export const VariablesMatrix = ({
             selectRowOnClick={false}
             itemProvider={filteredItems}
             showLines={false}
+            virtualize={false}
           />
         </Card>
         <div className="flex-row margin-vertical-16">

@@ -1,0 +1,29 @@
+.text-field-container {
+  width: 100%;
+  min-width: 0;
+
+  input {
+    background-color: transparent;
+    border: none;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    min-width: 0;
+
+    &.bolt-textfield.focused.focus-treatment {
+      box-shadow: none;
+      border-color: transparent;
+    }
+
+    &:hover:not(.disabled):not(.focused) {
+      background-color: transparent;
+    }
+
+    &.state-deleted {
+      text-decoration: line-through;
+    }
+
+    &.state-error {
+      color: var(--status-error-foreground);
+    }
+  }
+}

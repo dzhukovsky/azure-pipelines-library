@@ -1,5 +1,3 @@
-import './index.scss';
-
 import { Button } from 'azure-devops-ui/Button';
 import { ObservableValue } from 'azure-devops-ui/Core/Observable';
 import { Header, TitleSize } from 'azure-devops-ui/Header';
@@ -57,7 +55,7 @@ export const LibraryPage = () => {
   return (
     <>
       <Surface background={SurfaceBackground.neutral}>
-        <Page className="hub-page flex-grow">
+        <Page className="height-100vh flex-grow">
           <Header
             title="Advanced Library"
             titleSize={TitleSize.Large}

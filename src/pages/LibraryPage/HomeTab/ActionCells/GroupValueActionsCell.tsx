@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { stringify as yamlStringify } from 'yaml';
 import { getVariableGroupById } from '@/features/variable-groups/hooks/useVariableGroups';
 import type { ObservableVariableGroup } from '@/features/variable-groups/models';
-import { StateIcon } from '@/shared/components/State';
+import { StateIcon } from '@/shared/components/StateIcon';
 import { useTreeRow } from '@/shared/components/Tree/useTreeRow';
 import { expandObject } from '@/shared/lib/exportHelper';
 

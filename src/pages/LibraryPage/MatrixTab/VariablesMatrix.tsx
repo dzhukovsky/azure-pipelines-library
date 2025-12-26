@@ -11,7 +11,7 @@ import { IconSize } from 'azure-devops-ui/Icon';
 import { type ITableColumn, Table, TableCell } from 'azure-devops-ui/Table';
 import type { IFilter } from 'azure-devops-ui/Utilities/Filter';
 import { useCallback, useMemo } from 'react';
-import { type State, States } from '@/shared/components/State';
+import { type State, States } from '@/shared/components/StateIcon';
 import { useFiltering } from '@/shared/components/Table/useFiltering';
 import {
   type SortFunc,

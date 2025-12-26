@@ -42,7 +42,7 @@ export const StateIcon = memo(
     )) || (
       <Tooltip text={state.type}>
         <span
-          className="text-field-status padding-vertical-8 padding-horizontal-8 margin-horizontal-4"
+          className="state-icon padding-vertical-8 padding-horizontal-8 margin-horizontal-4"
           style={{ color: textColors[state.type] }}
         >
           {(circle && (

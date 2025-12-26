@@ -30,7 +30,7 @@ import type {
   ObservableVariableGroup,
 } from '@/features/variable-groups/models';
 import { getIdentityDetailsProvider } from '@/shared/api/identityImage';
-import type { State } from '@/shared/components/State';
+import type { State } from '@/shared/components/StateIcon';
 import type { FilterFunc } from '@/shared/components/Table/useFiltering';
 import { TextFieldCell } from '@/shared/components/TextFieldCell';
 import { createActionColumn } from '@/shared/components/Tree/createActionColumn';

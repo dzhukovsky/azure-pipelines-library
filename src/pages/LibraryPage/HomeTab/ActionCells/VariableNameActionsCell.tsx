@@ -4,7 +4,7 @@ import type {
   ITreeItemProvider,
 } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import type { ObservableVariable } from '@/features/variable-groups/models';
-import { States } from '@/shared/components/State';
+import { States } from '@/shared/components/StateIcon';
 import { useTreeRow } from '@/shared/components/Tree/useTreeRow';
 import type { LibraryItem } from '../VariablesTree';
 

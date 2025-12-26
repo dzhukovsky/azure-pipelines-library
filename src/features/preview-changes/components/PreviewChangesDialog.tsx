@@ -18,7 +18,7 @@ import {
 import { useMemo } from 'react';
 import type { ObservableSecureFile } from '@/features/secure-files/models';
 import type { ObservableVariableGroup } from '@/features/variable-groups/models';
-import { StateIcon } from '@/shared/components/State';
+import { StateIcon } from '@/shared/components/StateIcon';
 import { TextFieldCell } from '@/shared/components/TextFieldCell';
 import { createActionColumn } from '@/shared/components/Tree/createActionColumn';
 import { createExpandableActionColumn } from '@/shared/components/Tree/createExpandableActionColumn';

@@ -1,4 +1,5 @@
 import 'azure-devops-ui/Core/override.css';
+import '@/shared/styles/common.scss';
 import '@/shared/styles/icons.scss';
 
 import * as SDK from 'azure-devops-extension-sdk';

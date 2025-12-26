@@ -1,0 +1,41 @@
+#root {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
+.height-100vh {
+    height: 100vh;
+}
+
+.padding-right-0 {
+    padding-right: 0 !important;
+}
+
+input[type="password"] {
+
+    &::-ms-reveal,
+    &::-ms-clear,
+    &::-webkit-credentials-auto-fill-button,
+    &::-webkit-clear-button,
+    &::-webkit-reveal-button {
+        display: none;
+    }
+
+    &::-webkit-textfield-decoration-container {
+        display: none;
+    }
+}
+
+.text-field-table-wrap {
+    .bolt-list-cell {
+        border: none;
+    }
+
+    .bolt-tree-row.text-field-row.focused,
+    .bolt-table-row:not(.bolt-tree-row).focused {
+        background-color: rgba(var(--palette-neutral-2), 1);
+    }
+}

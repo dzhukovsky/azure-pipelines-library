@@ -1,9 +1,11 @@
+import './index.scss';
+
 import type { IObservableLikeValue } from 'azure-devops-ui/Core/Observable';
 import { Icon, type IIconProps } from 'azure-devops-ui/Icon';
 import { Observer } from 'azure-devops-ui/Observer';
 import { Tooltip } from 'azure-devops-ui/TooltipEx';
 import { css } from 'azure-devops-ui/Util';
-import type { State } from '@/shared/components/State';
+import type { State } from '@/shared/components/StateIcon';
 
 export type TextFieldCellProps = {
   value: IObservableLikeValue<string>;
@@ -41,8 +43,8 @@ export function TextFieldCell({
                 className={css(
                   'bolt-textfield-input text-ellipsis flex-grow',
                   iconProps && 'bolt-textfield-input-with-prefix',
-                  state.type === 'Deleted' && 'status-deleted',
-                  state.type === 'Error' && 'input-validation-error',
+                  state.type === 'Deleted' && 'state-deleted',
+                  state.type === 'Error' && 'state-error',
                 )}
                 value={value}
                 spellCheck={false}

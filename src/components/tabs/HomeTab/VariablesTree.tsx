@@ -132,10 +132,8 @@ const useColumns = (itemProvider: ITreeItemProvider<LibraryItem>) => {
                       },
                       size: IconSize.medium,
                     }}
-                    textFieldProps={{
-                      onChange: (_, newValue) => {
-                        groupVariable.name.value = newValue;
-                      },
+                    onChange={(e) => {
+                      groupVariable.name.value = e.target.value;
                     }}
                   />
                 )}
@@ -208,11 +206,9 @@ const useColumns = (itemProvider: ITreeItemProvider<LibraryItem>) => {
                   <TextFieldCell
                     value={groupVariable.value}
                     state={state}
-                    textFieldProps={{
-                      inputType: isSecret ? 'password' : 'text',
-                      onChange: (_, newValue) => {
-                        groupVariable.value.value = newValue;
-                      },
+                    type={isSecret ? 'password' : 'text'}
+                    onChange={(e) => {
+                      groupVariable.value.value = e.target.value;
                     }}
                   />
                 )}
@@ -283,7 +279,6 @@ export const VariablesTree = ({
   const { columns } = useColumns(filteredItems);
 
   const renderRow = useRowRenderer(columns);
-  console.log('VariablesTree render, isEmpty:', isEmpty);
   return (
     (!loading && isEmpty && <span>No items found</span>) || (
       <Card

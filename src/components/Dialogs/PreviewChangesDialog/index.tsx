@@ -132,7 +132,7 @@ const useColumns = () => {
                   },
                   size: IconSize.medium,
                 }}
-                textFieldProps={{ readOnly: true }}
+                readOnly
               />
             );
           }
@@ -173,10 +173,8 @@ const useColumns = () => {
               <TextFieldCell
                 value={groupVariable.value ?? ''}
                 state={groupVariable.state}
-                textFieldProps={{
-                  inputType: groupVariable.isSecret ? 'password' : 'text',
-                  readOnly: true,
-                }}
+                type={groupVariable.isSecret ? 'password' : 'text'}
+                readOnly
               />
             );
           }
@@ -187,9 +185,7 @@ const useColumns = () => {
               <TextFieldCell
                 value={fileProperty.value ?? ''}
                 state={fileProperty.state}
-                textFieldProps={{
-                  readOnly: true,
-                }}
+                readOnly
               />
             );
           }

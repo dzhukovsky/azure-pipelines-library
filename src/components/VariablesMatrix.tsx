@@ -83,16 +83,14 @@ const useColumns = (
               },
               size: IconSize.medium,
             }}
-            textFieldProps={{
-              readOnly: isSecret,
-              placeholder: 'Name (required)',
-              required: true,
-              onChange: (_, newName) => {
-                tableItem.state =
-                  validateRequiredName(newName) ??
-                  validateNameUniqueness(newName, variables.value) ??
-                  getStatus(newName, tableItem.originalName);
-              },
+            readOnly={isSecret}
+            required
+            placeholder="Name (required)"
+            onChange={(e) => {
+              tableItem.state =
+                validateRequiredName(e.target.value) ??
+                validateNameUniqueness(e.target.value, variables.value) ??
+                getStatus(e.target.value, tableItem.originalName);
             }}
           />
         </TableCell>
@@ -117,11 +115,12 @@ const useColumns = (
           <TextFieldCell
             value={variable.value}
             state={variable.state}
-            textFieldProps={{
-              inputType: variable.isSecret ? 'password' : 'text',
-              onChange: (_, newValue) => {
-                variable.state = getStatus(newValue, variable.originalValue);
-              },
+            type={variable.isSecret ? 'password' : 'text'}
+            onChange={(e) => {
+              variable.state = getStatus(
+                e.target.value,
+                variable.originalValue,
+              );
             }}
           />
         </TableCell>

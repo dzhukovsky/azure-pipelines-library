@@ -22,10 +22,14 @@
 
   .text-field-container {
     width: 100%;
+    min-width: 0;
 
-    .text-field {
+    input {
       background-color: transparent;
       border: none;
+      padding-top: 8px;
+      padding-bottom: 8px;
+      min-width: 0;
 
       &.bolt-textfield.focused.focus-treatment {
         box-shadow: none;
@@ -36,19 +40,11 @@
         background-color: transparent;
       }
 
-      input {
-        min-width: 0;
-      }
-    }
-
-    .text-field-input {
-      padding-top: 8px;
-      padding-bottom: 8px;
-
       &.status-deleted {
         text-decoration: line-through;
       }
     }
+
 
     .text-field-status {
       width: 16px;

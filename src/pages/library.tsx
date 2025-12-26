@@ -59,7 +59,7 @@ export const LibraryPage = () => {
       <Surface background={SurfaceBackground.neutral}>
         <Page className="hub-page flex-grow">
           <Header
-            title="Library"
+            title="Advanced Library"
             titleSize={TitleSize.Large}
             commandBarItems={headerCommands}
           />
@@ -233,7 +233,6 @@ const useHeader = (
             primary={true}
             text="Preview changes"
             onClick={() => {
-              console.log('Preview changes clicked');
               previewDialogOptions.value = {
                 variableGroups: model.variableGroups,
                 secureFiles: model.secureFiles,

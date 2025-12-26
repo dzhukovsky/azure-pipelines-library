@@ -20,7 +20,6 @@ const queryClient = new QueryClient({
 SDK.init({ loaded: false });
 await loadConfigurations();
 await document.fonts.ready;
-SDK.notifyLoadSucceeded();
 
 ReactDOM.render(
   <SurfaceContext.Provider value={{ background: SurfaceBackground.neutral }}>
@@ -30,3 +29,5 @@ ReactDOM.render(
   </SurfaceContext.Provider>,
   document.getElementById('root'),
 );
+
+SDK.notifyLoadSucceeded();

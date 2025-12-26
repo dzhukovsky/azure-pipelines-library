@@ -1,14 +1,7 @@
-import {
-  type IObservableLikeValue,
-  ObservableLike,
-} from 'azure-devops-ui/Core/Observable';
-import type { IIconProps } from 'azure-devops-ui/Icon';
-import {
-  type ITextFieldProps,
-  TextField,
-  TextFieldStyle,
-  TextFieldWidth,
-} from 'azure-devops-ui/TextField';
+import type { IObservableLikeValue } from 'azure-devops-ui/Core/Observable';
+import { Icon, type IIconProps } from 'azure-devops-ui/Icon';
+import { Observer } from 'azure-devops-ui/Observer';
+import { Tooltip } from 'azure-devops-ui/TooltipEx';
 import { css } from 'azure-devops-ui/Util';
 import type { State } from './shared/State';
 
@@ -16,45 +9,51 @@ export type TextFieldCellProps = {
   value: IObservableLikeValue<string>;
   state: State;
   iconProps?: IIconProps;
-  textFieldProps?: Pick<
-    ITextFieldProps,
-    'placeholder' | 'inputType' | 'readOnly' | 'required' | 'onChange'
-  >;
-};
+} & Pick<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  'type' | 'readOnly' | 'required' | 'placeholder' | 'onChange'
+>;
 
 export function TextFieldCell({
   value,
   state,
   iconProps,
-  textFieldProps,
+  ...inputProps
 }: TextFieldCellProps) {
-  const placeholder =
-    textFieldProps?.placeholder ||
-    (textFieldProps?.inputType === 'password' && '******') ||
-    undefined;
+  const isPasswordField = inputProps.type === 'password';
+
+  inputProps.placeholder ??= (isPasswordField && '******') || undefined;
 
   return (
-    <TextField
-      {...textFieldProps}
-      spellCheck={false}
-      placeholder={placeholder}
-      tooltipProps={{
-        disabled: textFieldProps?.inputType === 'password',
-        overflowOnly: true,
-        renderContent: () => ObservableLike.getValue(value),
+    <Observer value={value}>
+      {({ value }) => {
+        value ??= '';
+
+        return (
+          <span className="flex-row text-field-container">
+            {iconProps && <Icon {...iconProps} />}
+            <Tooltip
+              text={value}
+              disabled={isPasswordField}
+              overflowOnly={true}
+            >
+              <input
+                className={css(
+                  'bolt-textfield-input text-ellipsis flex-grow',
+                  iconProps && 'bolt-textfield-input-with-prefix',
+                  state.type === 'Deleted' && 'status-deleted',
+                  state.type === 'Error' && 'input-validation-error',
+                )}
+                value={value}
+                spellCheck={false}
+                disabled={state.type === 'Deleted'}
+                data-form-type="other"
+                {...inputProps}
+              />
+            </Tooltip>
+          </span>
+        );
       }}
-      prefixIconProps={iconProps}
-      className="text-field"
-      inputClassName={css(
-        'text-ellipsis text-field-input',
-        state.type === 'Deleted' && 'status-deleted',
-        state.type === 'Error' && 'input-validation-error',
-      )}
-      disabled={state.type === 'Deleted'}
-      containerClassName="text-field-container"
-      width={TextFieldWidth.auto}
-      style={TextFieldStyle.inline}
-      value={value}
-    ></TextField>
+    </Observer>
   );
 }

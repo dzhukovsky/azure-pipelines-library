@@ -3,8 +3,8 @@ import '@/shared/styles/icons.scss';
 
 import * as SDK from 'azure-devops-extension-sdk';
 import { useEffect, useState } from 'react';
-import { loadConfigurations } from '@/hooks/query/configurations';
-import { LibraryPage } from '@/pages/library';
+import { LibraryPage } from '@/pages/LibraryPage';
+import { initConfigurations } from '@/shared/api/configurations';
 import { Providers } from './providers';
 
 export const App = () => {
@@ -13,7 +13,7 @@ export const App = () => {
   useEffect(() => {
     const init = async () => {
       SDK.init({ loaded: false });
-      await loadConfigurations();
+      await initConfigurations();
       await document.fonts.ready;
       SDK.notifyLoadSucceeded();
       setReady(true);

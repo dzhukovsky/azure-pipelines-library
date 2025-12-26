@@ -3,77 +3,78 @@
 ## Project Structure
 ```
 src/
-├── app/                          # Application entry point
-│   ├── App.tsx                   # Root component (formerly LibraryPage)
-│   ├── providers.tsx             # QueryClient, SurfaceContext
-│   └── main.tsx                  # SDK initialization, render bootstrap
+├── app/                                    # 🚀 Application entry point
+│   ├── App.tsx
+│   ├── main.tsx
+│   └── providers.tsx
 │
-├── features/                     # Feature-based structure
-│   ├── variable-groups/          # Feature: Variable Groups
-│   │   ├── api/                  # API requests
-│   │   │   └── variableGroupsApi.ts
-│   │   ├── components/           # Feature UI components
-│   │   │   ├── VariableGroupTree.tsx
-│   │   │   └── ActionCells/
-│   │   ├── hooks/                # Feature hooks
-│   │   │   └── useVariableGroups.ts
-│   │   ├── models/               # Feature models
-│   │   │   ├── ObservableVariableGroup.ts
-│   │   │   └── ObservableVariable.ts
-│   │   └── index.ts              # Feature public API
-│   │
-│   ├── secure-files/             # Feature: Secure Files
-│   │   ├── api/
+├── features/                               # 🧩 Isolated features
+│   ├── preview-changes/
 │   │   ├── components/
-│   │   ├── hooks/
-│   │   ├── models/
-│   │   └── index.ts
+│   │   │   ├── PreviewChangesDialog.scss
+│   │   │   └── PreviewChangesDialog.tsx
+│   │   └── mappings.ts
 │   │
-│   ├── preview-changes/          # Feature: Preview Changes dialog
-│   │   ├── components/
+│   ├── secure-files/
 │   │   ├── hooks/
-│   │   └── index.ts
+│   │   │   └── useSecureFiles.ts
+│   │   └── models/
+│   │       ├── index.ts
+│   │       ├── ObservableSecureFile.ts
+│   │       └── ObservableSecureFileProperty.ts
 │   │
-│   └── matrix/                   # Feature: Matrix tab
-│       ├── components/
-│       └── index.ts
+│   └── variable-groups/
+│       ├── hooks/
+│       │   └── useVariableGroups.ts
+│       └── models/
+│           ├── index.ts
+│           ├── ObservableVariable.ts
+│           └── ObservableVariableGroup.ts
 │
-├── shared/                       # Reusable/shared code
-│   ├── api/                      # Base API clients
+├── pages/                                  # 📄 Pages
+│   ├── HistoryPage/
+│   ├── LibraryPage/
+│   │   ├── HomeTab/
+│   │   │   ├── ActionCells/
+│   │   │   ├── HomeTabModel.ts
+│   │   │   ├── index.tsx
+│   │   │   └── VariablesTree.tsx
+│   │   ├── MatrixTab/
+│   │   │   ├── MatrixTab.tsx
+│   │   │   └── VariablesMatrix.tsx
+│   │   ├── index.scss
+│   │   └── index.tsx
+│   └── SettingsPage/
+│
+├── shared/                                 # 🔧 Shared code
+│   ├── api/
 │   │   ├── clients/
-│   │   │   └── SettingsRestClient.ts
-│   │   └── configurations.ts
+│   │   ├── configurations.ts
+│   │   ├── identityImage.ts
+│   │   └── settingsService.ts
 │   │
-│   ├── components/               # Shared UI components
+│   ├── components/
+│   │   ├── State/
 │   │   ├── Table/
-│   │   ├── Tree/
-│   │   ├── TextFieldCell.tsx
-│   │   └── State.tsx
+│   │   ├── TextFieldCell/
+│   │   └── Tree/
 │   │
-│   ├── hooks/                    # Shared hooks
-│   │   ├── useFilter.ts
-│   │   ├── useSorting.ts
-│   │   └── useNavigation.ts
+│   ├── hooks/
+│   │   ├── useNavigation.ts
+│   │   ├── useObservable.ts
+│   │   └── useTabModel.ts
 │   │
-│   ├── lib/                      # Utilities and observable system
-│   │   ├── observable/
-│   │   │   ├── ObservableObject.ts
-│   │   │   ├── ObservableObjectArray.ts
-│   │   │   ├── ObservableObjectValue.ts
-│   │   │   └── StateObject.ts
-│   │   └── export.ts
+│   ├── lib/
+│   │   ├── exportHelper.ts
+│   │   └── observable/
+│   │       ├── index.ts
+│   │       ├── ObservableObject.ts
+│   │       ├── ObservableObjectArray.ts
+│   │       ├── ObservableObjectValue.ts
+│   │       └── StateObject.ts
 │   │
 │   └── styles/
-│       └── icons.scss
 │
-├── pages/                        # Pages / tabs (thin components)
-│   ├── HomePage/
-│   │   ├── HomePage.tsx
-│   │   ├── useHomePageModel.ts
-│   │   └── index.ts
-│   └── MatrixPage/
-│       └── ...
-│
-└── types/                        # Shared types
-    └── index.ts
+└── vite-env.d.ts
+
 ```

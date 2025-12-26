@@ -1,4 +1,4 @@
-import { type State, States, statesEqual } from '@/components/shared/State';
+import { type State, States, statesEqual } from '@/shared/components/State';
 import { ObservableObject } from './ObservableObject';
 import type { ObservableObjectArray } from './ObservableObjectArray';
 import { ObservableObjectValue } from './ObservableObjectValue';

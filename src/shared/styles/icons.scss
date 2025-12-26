@@ -17,7 +17,7 @@ $fluent-icons: (
     @return "FluentRegular";
   }
 
-  @if $style ==filled {
+  @else if $style ==filled {
     @return "FluentFilled";
   }
 
@@ -37,9 +37,13 @@ $fluent-icons: (
   @each $name, $def in $fluent-icons {
     $style: list.nth($def, 1);
     $code: list.nth($def, 2);
-    $color: if(list.length($def) >=3, list.nth($def, 3), null);
+    $color: null;
 
-    .ms-Icon--fluent-#{$name}:before {
+    @if list.length($def)>=3 {
+      $color: list.nth($def, 3);
+    }
+
+    .ms-Icon--fluent-#{$name}::before {
       @include fluent-icon($style, $code, $color);
     }
   }

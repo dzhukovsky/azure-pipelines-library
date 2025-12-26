@@ -1,7 +1,9 @@
-import { ObservableObject } from '../Observable/ObservableObject';
-import type { ObservableObjectArray } from '../Observable/ObservableObjectArray';
-import type { ObservableSecureFile } from '../SecureFile';
-import type { ObservableVariableGroup } from '../VariableGroup';
+import type { ObservableSecureFile } from '@/features/secure-files/models';
+import type { ObservableVariableGroup } from '@/features/variable-groups/models';
+import {
+  ObservableObject,
+  type ObservableObjectArray,
+} from '@/shared/lib/observable';
 
 export class HomeTabModel extends ObservableObject<HomeTabModel> {
   readonly variableGroups: ObservableObjectArray<ObservableVariableGroup>;

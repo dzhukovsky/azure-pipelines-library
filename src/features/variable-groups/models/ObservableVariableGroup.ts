@@ -1,7 +1,10 @@
 import type { IdentityRef } from 'azure-devops-extension-api/WebApi';
-import type { ObservableObjectArray } from './Observable/ObservableObjectArray';
-import type { ObservableObjectValue } from './Observable/ObservableObjectValue';
-import { StateObject } from './StateObject';
+import {
+  type ObservableObjectArray,
+  type ObservableObjectValue,
+  StateObject,
+} from '@/shared/lib/observable';
+import type { ObservableVariable } from './ObservableVariable';
 
 export class ObservableVariableGroup extends StateObject<ObservableVariableGroup> {
   readonly id: number;
@@ -26,18 +29,5 @@ export class ObservableVariableGroup extends StateObject<ObservableVariableGroup
 
     this.name = this.addValueProperty(name);
     this.variables = this.addArrayProperty(variables);
-  }
-}
-
-export class ObservableVariable extends StateObject<ObservableVariable> {
-  readonly name: ObservableObjectValue<string>;
-  readonly value: ObservableObjectValue<string>;
-  readonly isSecret: ObservableObjectValue<boolean>;
-
-  constructor(name: string, value: string, isSecret: boolean, isNew: boolean) {
-    super(isNew);
-    this.name = this.addValueProperty(name);
-    this.value = this.addValueProperty(value);
-    this.isSecret = this.addValueProperty(isSecret);
   }
 }

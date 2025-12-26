@@ -27,17 +27,17 @@ import { createExpandableActionColumn } from '@/components/shared/Tree/createExp
 import { getLoadingProvider } from '@/components/shared/Tree/loadingProvider';
 import { useRowRenderer } from '@/components/shared/Tree/useRowRenderer';
 import { TextFieldCell } from '@/components/TextFieldCell';
-import type { FilterFunc } from '@/hooks/filtering';
-import { getIdentityDetailsProvider } from '@/hooks/query/identityImage';
-import { useFiltering } from '@/hooks/treeFiltering';
 import type {
   ObservableSecureFile,
   ObservableSecureFileProperty,
-} from '@/models/SecureFile';
+} from '@/features/secure-files/models';
 import type {
   ObservableVariable,
   ObservableVariableGroup,
-} from '@/models/VariableGroup';
+} from '@/features/variable-groups/models';
+import type { FilterFunc } from '@/hooks/filtering';
+import { getIdentityDetailsProvider } from '@/hooks/query/identityImage';
+import { useFiltering } from '@/hooks/treeFiltering';
 import { GroupNameActionsCell } from './ActionCells/GroupNameActionsCell';
 import { GroupValueActionsCell } from './ActionCells/GroupValueActionsCell';
 import { VariableNameActionsCell } from './ActionCells/VariableNameActionsCell';

@@ -1,7 +1,7 @@
 import { type State, States, statesEqual } from '@/components/shared/State';
-import { ObservableObject } from './Observable/ObservableObject';
-import type { ObservableObjectArray } from './Observable/ObservableObjectArray';
-import { ObservableObjectValue } from './Observable/ObservableObjectValue';
+import { ObservableObject } from './ObservableObject';
+import type { ObservableObjectArray } from './ObservableObjectArray';
+import { ObservableObjectValue } from './ObservableObjectValue';
 
 export abstract class StateObject<T> extends ObservableObject<T> {
   readonly state: ObservableObjectValue<State>;

@@ -4,9 +4,9 @@ import { useMemo } from 'react';
 import { stringify as yamlStringify } from 'yaml';
 import { StateIcon } from '@/components/shared/State';
 import { useTreeRow } from '@/components/shared/Tree/useTreeRow';
+import type { ObservableVariableGroup } from '@/features/variable-groups/models';
 import { downloadFile, expandObject } from '@/helpers/exportHelper';
 import { getVariableGroupById } from '@/hooks/query/variableGroups';
-import type { ObservableVariableGroup } from '@/models/VariableGroup';
 
 export const GroupValueActionsCell = ({
   data,

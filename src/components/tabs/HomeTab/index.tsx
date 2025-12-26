@@ -5,18 +5,18 @@ import type {
 import type { IFilter } from 'azure-devops-ui/Utilities/Filter';
 import type { ITreeItem } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import { useEffect, useState } from 'react';
-import { useSecureFiles } from '@/hooks/query/secureFiles';
-import { useVariableGroups } from '@/hooks/query/variableGroups';
-import { useSubscribtion } from '@/models/Observable/ObservableObject';
 import {
   ObservableSecureFile,
   ObservableSecureFileProperty,
-} from '@/models/SecureFile';
-import { HomeTabModel } from '@/models/tabs/HomeTabModel';
+} from '@/features/secure-files/models';
 import {
   ObservableVariable,
   ObservableVariableGroup,
-} from '@/models/VariableGroup';
+} from '@/features/variable-groups/models';
+import { useSecureFiles } from '@/hooks/query/secureFiles';
+import { useVariableGroups } from '@/hooks/query/variableGroups';
+import { HomeTabModel } from '@/models/tabs/HomeTabModel';
+import { useSubscribtion } from '@/shared/lib/observable';
 import { type LibraryItem, VariablesTree } from './VariablesTree';
 
 type TabContext = {

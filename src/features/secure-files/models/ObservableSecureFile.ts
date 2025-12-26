@@ -1,7 +1,10 @@
 import type { IdentityRef } from 'azure-devops-extension-api/WebApi';
-import type { ObservableObjectArray } from './Observable/ObservableObjectArray';
-import type { ObservableObjectValue } from './Observable/ObservableObjectValue';
-import { StateObject } from './StateObject';
+import {
+  type ObservableObjectArray,
+  type ObservableObjectValue,
+  StateObject,
+} from '@/shared/lib/observable';
+import type { ObservableSecureFileProperty } from './ObservableSecureFileProperty';
 
 export class ObservableSecureFile extends StateObject<ObservableSecureFile> {
   readonly id: string;
@@ -26,16 +29,5 @@ export class ObservableSecureFile extends StateObject<ObservableSecureFile> {
 
     this.name = this.addValueProperty(name);
     this.properties = this.addArrayProperty(properties);
-  }
-}
-
-export class ObservableSecureFileProperty extends StateObject<ObservableSecureFileProperty> {
-  readonly name: ObservableObjectValue<string>;
-  readonly value: ObservableObjectValue<string>;
-
-  constructor(name: string, value: string, isNew: boolean) {
-    super(isNew);
-    this.name = this.addValueProperty(name);
-    this.value = this.addValueProperty(value);
   }
 }

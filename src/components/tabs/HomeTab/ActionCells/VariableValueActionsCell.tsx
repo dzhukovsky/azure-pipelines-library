@@ -2,7 +2,7 @@ import { Button } from 'azure-devops-ui/Button';
 import { Observer } from 'azure-devops-ui/Observer';
 import { StateIcon } from '@/components/shared/State';
 import { useTreeRow } from '@/components/shared/Tree/useTreeRow';
-import type { ObservableVariable } from '@/models/VariableGroup';
+import type { ObservableVariable } from '@/features/variable-groups/models';
 
 export const VariableValueActionsCell = ({
   data,

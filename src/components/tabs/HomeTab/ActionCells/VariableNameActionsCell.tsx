@@ -5,7 +5,7 @@ import type {
 } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import { States } from '@/components/shared/State';
 import { useTreeRow } from '@/components/shared/Tree/useTreeRow';
-import type { ObservableVariable } from '@/models/VariableGroup';
+import type { ObservableVariable } from '@/features/variable-groups/models';
 import type { LibraryItem } from '../VariablesTree';
 
 export const VariableNameActionsCell = ({

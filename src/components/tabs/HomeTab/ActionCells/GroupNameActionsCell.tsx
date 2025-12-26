@@ -4,7 +4,7 @@ import type {
   ITreeItemProvider,
 } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import { useTreeRow } from '@/components/shared/Tree/useTreeRow';
-import { ObservableVariable } from '@/models/VariableGroup';
+import { ObservableVariable } from '@/features/variable-groups/models';
 import type { LibraryItem } from '../VariablesTree';
 
 export const GroupNameActionsCell = ({

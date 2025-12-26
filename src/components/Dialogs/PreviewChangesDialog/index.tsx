@@ -20,9 +20,9 @@ import { StateIcon } from '@/components/shared/State';
 import { createActionColumn } from '@/components/shared/Tree/createActionColumn';
 import { createExpandableActionColumn } from '@/components/shared/Tree/createExpandableActionColumn';
 import { TextFieldCell } from '@/components/TextFieldCell';
-import type { ObservableObjectArray } from '@/models/Observable/ObservableObjectArray';
-import type { ObservableSecureFile } from '@/models/SecureFile';
-import type { ObservableVariableGroup } from '@/models/VariableGroup';
+import type { ObservableSecureFile } from '@/features/secure-files/models';
+import type { ObservableVariableGroup } from '@/features/variable-groups/models';
+import type { ObservableObjectArray } from '@/shared/lib/observable';
 import {
   type LibraryItem,
   mapSecureFileChanges,

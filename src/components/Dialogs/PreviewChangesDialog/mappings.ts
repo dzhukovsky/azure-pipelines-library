@@ -1,9 +1,11 @@
 import type { ITreeItem } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import type { State } from '@/components/shared/State';
-import type { ObservableObjectArray } from '@/models/Observable/ObservableObjectArray';
-import type { ObservableSecureFile } from '@/models/SecureFile';
-import { getArrayChanges } from '@/models/StateObject';
-import type { ObservableVariableGroup } from '@/models/VariableGroup';
+import type { ObservableSecureFile } from '@/features/secure-files/models';
+import type { ObservableVariableGroup } from '@/features/variable-groups/models';
+import {
+  getArrayChanges,
+  type ObservableObjectArray,
+} from '@/shared/lib/observable';
 
 export type LibraryItem = {
   group?: VariableGroup;

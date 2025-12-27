@@ -6,15 +6,9 @@ import type { IFilter } from 'azure-devops-ui/Utilities/Filter';
 import type { ITreeItem } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import { useEffect, useState } from 'react';
 import { useSecureFiles } from '@/features/secure-files/hooks/useSecureFiles';
-import {
-  ObservableSecureFile,
-  ObservableSecureFileProperty,
-} from '@/features/secure-files/models';
+import { mapSecureFiles } from '@/features/secure-files/mapSecureFiles';
 import { useVariableGroups } from '@/features/variable-groups/hooks/useVariableGroups';
-import {
-  ObservableVariable,
-  ObservableVariableGroup,
-} from '@/features/variable-groups/models';
+import { mapVariableGroups } from '@/features/variable-groups/mapVariableGroups';
 import { useSubscribtion } from '@/shared/lib/observable';
 import { HomeTabModel } from './HomeTabModel';
 import { type LibraryItem, VariablesTree } from './VariablesTree';
@@ -23,6 +17,7 @@ type TabContext = {
   items: ITreeItem<LibraryItem>[];
   model: HomeTabModel;
 };
+
 export const HomeTab = ({
   filter,
   onTabContextChange,
@@ -99,47 +94,8 @@ const createHomeTabModel = (
   variableGroups: VariableGroup[],
   secureFiles: SecureFile[],
 ) => {
-  const groups = mapObservableVariableGroups(variableGroups);
-  const files = mapObservableSecureFiles(secureFiles);
+  const groups = mapVariableGroups(variableGroups);
+  const files = mapSecureFiles(secureFiles);
 
   return new HomeTabModel(groups, files);
-};
-
-const mapObservableVariableGroups = (variableGroups: VariableGroup[]) => {
-  return variableGroups.map((vg) => {
-    const variables = Object.entries(vg.variables).map(([name, variable]) => {
-      return new ObservableVariable(
-        name,
-        variable.value,
-        variable.isSecret ?? false,
-        false,
-      );
-    });
-    return new ObservableVariableGroup(
-      vg.id,
-      vg.name,
-      variables,
-      false,
-      vg.modifiedBy ?? vg.createdBy,
-      vg.modifiedOn ?? vg.createdOn,
-    );
-  });
-};
-
-const mapObservableSecureFiles = (secureFiles: SecureFile[]) => {
-  return secureFiles.map((file) => {
-    const properties = Object.entries(file.properties ?? {}).map(
-      ([name, value]) => {
-        return new ObservableSecureFileProperty(name, value, false);
-      },
-    );
-    return new ObservableSecureFile(
-      file.id,
-      file.name,
-      properties,
-      false,
-      file.modifiedBy ?? file.createdBy,
-      file.modifiedOn ?? file.createdOn,
-    );
-  });
 };

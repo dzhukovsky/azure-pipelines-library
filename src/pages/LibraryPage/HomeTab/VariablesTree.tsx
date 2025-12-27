@@ -33,7 +33,10 @@ import { getIdentityDetailsProvider } from '@/shared/api/identityImage';
 import type { State } from '@/shared/components/StateIcon';
 import type { FilterFunc } from '@/shared/components/Table/useFiltering';
 import { TextFieldCell } from '@/shared/components/TextFieldCell';
-import { createActionColumn } from '@/shared/components/Tree/createActionColumn';
+import {
+  createActionColumn,
+  type RenderHandler,
+} from '@/shared/components/Tree/createActionColumn';
 import { createExpandableActionColumn } from '@/shared/components/Tree/createExpandableActionColumn';
 import { getLoadingProvider } from '@/shared/components/Tree/loadingProvider';
 import { useFiltering } from '@/shared/components/Tree/useFiltering';
@@ -325,3 +328,17 @@ const LastModifiedByCell = memo(
     );
   },
 );
+
+interface IRenderer<T> {
+  renderCell: RenderHandler<T>;
+  renderActions: RenderHandler<T>;
+}
+
+interface IHomeTreeRenderer<T> {
+  name: IRenderer<T>;
+  value: IRenderer<T>;
+}
+
+type LibraryItemRenderers<LibraryItem> = {
+  [K in keyof LibraryItem]: IHomeTreeRenderer<LibraryItem[K]>;
+};

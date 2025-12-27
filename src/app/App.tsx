@@ -4,8 +4,8 @@ import '@/shared/styles/icons.scss';
 
 import * as SDK from 'azure-devops-extension-sdk';
 import { useEffect, useState } from 'react';
-import { LibraryPage } from '@/pages/LibraryPage';
 import { initConfigurations } from '@/shared/api/configurations';
+import { PageRouter } from './PageRouter';
 import { Providers } from './providers';
 
 export const App = () => {
@@ -26,7 +26,7 @@ export const App = () => {
 
   return (
     <Providers>
-      <LibraryPage />
+      <PageRouter />
     </Providers>
   );
 };

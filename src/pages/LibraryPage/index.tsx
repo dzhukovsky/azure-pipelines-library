@@ -18,14 +18,14 @@ import { useFilterSubscription } from '@/shared/components/Table/useFiltering';
 import {
   navigateTo,
   type QueryParamsSetter,
-  useNavigationService,
+  useNavigation,
 } from '@/shared/hooks/useNavigation';
 import { HomeTab } from './HomeTab';
 import type { HomeTabModel } from './HomeTab/HomeTabModel';
 import { MatrixTab } from './MatrixTab/MatrixTab';
 
 export const LibraryPage = () => {
-  const { queryParams, isLoading, setQueryParams } = useNavigationService({
+  const { queryParams, isLoading, setQueryParams } = useNavigation({
     tab: 'home',
     filter: '',
   });

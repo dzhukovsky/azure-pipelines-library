@@ -21,15 +21,16 @@ export type QueryParamsSetter<TParams> = (
 
 export type Navigation<TParams extends Record<string, string>> = {
   queryParams: TParams;
+  route?: string;
   isLoading: boolean;
   setQueryParams: QueryParamsSetter<TParams>;
 };
 
-export function useNavigationService<TParams extends Record<string, string>>(
+export function useNavigation<TParams extends Record<string, string>>(
   defaultParams: TParams,
 ): Navigation<TParams> {
   const {
-    data: queryParams,
+    data,
     isLoading,
     refetch: refetchQuery,
   } = useQuery({
@@ -37,7 +38,12 @@ export function useNavigationService<TParams extends Record<string, string>>(
     queryFn: async () => {
       const service = await getNavigationService();
       const params = await service.getQueryParams();
-      return { ...defaultParams, ...params };
+      const route = await service.getPageRoute();
+
+      return {
+        queryParams: { ...defaultParams, ...params },
+        route: normalizePath(route.routeValues.parameters ?? ''),
+      };
     },
   });
 
@@ -53,17 +59,20 @@ export function useNavigationService<TParams extends Record<string, string>>(
   );
 
   return {
-    queryParams: queryParams ?? defaultParams,
+    queryParams: data?.queryParams ?? defaultParams,
+    route: data?.route,
     isLoading,
     setQueryParams,
   };
 }
 
 export const navigateTo = async (url: string) => {
-  await SDK.ready();
-  const service = await SDK.getService<IHostNavigationService>(
-    CommonServiceIds.HostNavigationService,
-  );
-
+  const service = await getNavigationService();
   service.navigate(url);
 };
+
+function normalizePath(value: string) {
+  const idx = value.indexOf('/');
+  value = idx === -1 ? '' : value.slice(idx + 1).trim();
+  return value.toLowerCase();
+}

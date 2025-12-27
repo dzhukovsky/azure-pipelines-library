@@ -24,7 +24,11 @@ import type { FilterFunc } from '@/shared/components/Table/useFiltering';
 import { createActionColumn } from '@/shared/components/Tree/createActionColumn';
 import { createExpandableActionColumn } from '@/shared/components/Tree/createExpandableActionColumn';
 import { getLoadingProvider } from '@/shared/components/Tree/loadingProvider';
-import type { TreeRenderer, TypedData } from '@/shared/components/Tree/types';
+import {
+  getRenderer,
+  type TreeRenderer,
+  type TypedData,
+} from '@/shared/components/Tree/types';
 import { useFiltering } from '@/shared/components/Tree/useFiltering';
 import { useRowRenderer } from '@/shared/components/Tree/useRowRenderer';
 import { filePropertyRenderer } from './renderers/filePropertyRenderer';
@@ -68,7 +72,7 @@ const useColumns = (itemProvider: ITreeItemProvider<HomeTreeItem>) => {
         contentClassName: 'padding-vertical-0 padding-right-0',
         onSize,
         renderCell: (options) => {
-          const renderer = renderers[options.data.type];
+          const renderer = getRenderer(renderers, options.data.type);
           return renderer.name.renderCell({
             rowIndex: options.rowIndex,
             treeItem: options.treeItem,
@@ -77,7 +81,7 @@ const useColumns = (itemProvider: ITreeItemProvider<HomeTreeItem>) => {
           });
         },
         renderActions: (options) => {
-          const renderer = renderers[options.data.type];
+          const renderer = getRenderer(renderers, options.data.type);
           return renderer.name.renderActions({
             rowIndex: options.rowIndex,
             treeItem: options.treeItem,
@@ -92,7 +96,7 @@ const useColumns = (itemProvider: ITreeItemProvider<HomeTreeItem>) => {
         name: 'Value / Last modified by',
         width: new ObservableValue(-75),
         renderCell: (options) => {
-          const renderer = renderers[options.data.type];
+          const renderer = getRenderer(renderers, options.data.type);
           return renderer.value.renderCell({
             rowIndex: options.rowIndex,
             treeItem: options.treeItem,
@@ -101,7 +105,7 @@ const useColumns = (itemProvider: ITreeItemProvider<HomeTreeItem>) => {
           });
         },
         renderActions: (options) => {
-          const renderer = renderers[options.data.type];
+          const renderer = getRenderer(renderers, options.data.type);
           return renderer.value.renderActions({
             rowIndex: options.rowIndex,
             treeItem: options.treeItem,

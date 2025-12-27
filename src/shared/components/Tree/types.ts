@@ -22,9 +22,21 @@ export type TreeRenderer<TColumns extends string, TData extends TypedData> = {
   [K in TData['type']]: RowRenderer<TColumns, Extract<TData, { type: K }>>;
 };
 
-export type RenderHandler<TData extends TypedData> = (options: {
+export type RenderHandlerOptions<TData extends TypedData> = {
   rowIndex: number;
   treeItem: ITreeItemEx<TData>;
   data: TData['data'];
   provider: ITreeItemProvider<TData>;
-}) => React.ReactNode;
+};
+
+export type RenderHandler<TData extends TypedData> = (
+  options: RenderHandlerOptions<TData>,
+) => React.ReactNode;
+
+export function getRenderer<
+  TData extends TypedData,
+  TColumns extends string,
+  TTreeRenderer extends TreeRenderer<TColumns, TData>,
+>(renderers: TTreeRenderer, type: TData['type']): RowRenderer<TColumns, TData> {
+  return renderers[type];
+}

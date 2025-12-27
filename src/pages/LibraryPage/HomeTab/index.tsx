@@ -11,10 +11,10 @@ import { useVariableGroups } from '@/features/variable-groups/hooks/useVariableG
 import { mapVariableGroups } from '@/features/variable-groups/mapVariableGroups';
 import { useSubscribtion } from '@/shared/lib/observable';
 import { HomeTabModel } from './HomeTabModel';
-import { type LibraryItem, VariablesTree } from './VariablesTree';
+import { type HomeTreeItem, VariablesTree } from './VariablesTree';
 
 type TabContext = {
-  items: ITreeItem<LibraryItem>[];
+  items: ITreeItem<HomeTreeItem>[];
   model: HomeTabModel;
 };
 
@@ -60,27 +60,31 @@ export const HomeTab = ({
 
 const mapTreeItems = (model: HomeTabModel) => {
   const rootItems = [
-    ...model.variableGroups.value.map<ITreeItem<LibraryItem>>((group) => ({
+    ...model.variableGroups.value.map<ITreeItem<HomeTreeItem>>((group) => ({
       data: {
-        group: group,
+        type: 'group',
+        data: group,
       },
-      childItems: group.variables.value.map<ITreeItem<LibraryItem>>(
+      childItems: group.variables.value.map<ITreeItem<HomeTreeItem>>(
         (variable) => ({
           data: {
-            groupVariable: variable,
+            type: 'groupVariable',
+            data: variable,
           },
         }),
       ),
       expanded: false,
     })),
-    ...model.secureFiles.value.map<ITreeItem<LibraryItem>>((file) => ({
+    ...model.secureFiles.value.map<ITreeItem<HomeTreeItem>>((file) => ({
       data: {
-        file: file,
+        type: 'file',
+        data: file,
       },
-      childItems: file.properties.value.map<ITreeItem<LibraryItem>>(
+      childItems: file.properties.value.map<ITreeItem<HomeTreeItem>>(
         (property) => ({
           data: {
-            fileProperty: property,
+            type: 'fileProperty',
+            data: property,
           },
         }),
       ),

@@ -50,8 +50,8 @@ const ActionCell = <T,>(props: {
   column: ITreeColumn<T>;
   contentClassName?: string;
   role?: string;
-  renderCell: (options: RenderOptions<T>) => React.ReactNode;
-  renderActions: (options: RenderOptions<T>) => React.ReactNode;
+  renderCell: RenderHandler<T>;
+  renderActions: RenderHandler<T>;
 }) => {
   const data = ObservableLike.getValue(props.item.underlyingItem.data);
   const options: RenderOptions<T> = {

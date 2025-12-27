@@ -6,7 +6,7 @@ import type {
 import type { ObservableVariable } from '@/features/variable-groups/models';
 import { States } from '@/shared/components/StateIcon';
 import { useTreeRow } from '@/shared/components/Tree/useTreeRow';
-import type { LibraryItem } from '../VariablesTree';
+import type { HomeTreeItem } from '../VariablesTree';
 
 export const VariableNameActionsCell = ({
   data,
@@ -14,8 +14,8 @@ export const VariableNameActionsCell = ({
   itemProvider,
 }: {
   data: ObservableVariable;
-  treeItem: ITreeItemEx<LibraryItem>;
-  itemProvider: ITreeItemProvider<LibraryItem>;
+  treeItem: ITreeItemEx<HomeTreeItem>;
+  itemProvider: ITreeItemProvider<HomeTreeItem>;
 }) => {
   const { hasMouse, hasFocus, onBlur } = useTreeRow();
   const hasMouseOrFocus = hasMouse || hasFocus;
@@ -35,12 +35,12 @@ export const VariableNameActionsCell = ({
           text: `Restore variable '${data.name.value}'`,
         }}
         onClick={() => {
-          const group = treeItem.parentItem?.underlyingItem.data.group;
-          if (!group) {
+          const group = treeItem.parentItem?.underlyingItem.data;
+          if (group?.type !== 'group') {
             return;
           }
 
-          group.variables.push(data);
+          group.data.variables.push(data);
 
           data.state.value = data.modified ? States.Modified : States.Unchanged;
           onBlur?.();
@@ -54,8 +54,8 @@ export const VariableNameActionsCell = ({
           text: `Delete variable '${data.name.value}'`,
         }}
         onClick={() => {
-          const group = treeItem.parentItem?.underlyingItem.data.group;
-          if (!group) {
+          const group = treeItem.parentItem?.underlyingItem.data;
+          if (group?.type !== 'group') {
             return;
           }
 
@@ -66,7 +66,7 @@ export const VariableNameActionsCell = ({
             );
           }
 
-          group.variables.removeAll((x) => x === data);
+          group.data.variables.removeAll((x) => x === data);
 
           data.state.value = States.Deleted;
           onBlur?.();

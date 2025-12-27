@@ -3,18 +3,23 @@ import type {
   ITreeItemEx,
   ITreeItemProvider,
 } from 'azure-devops-ui/Utilities/TreeItemProvider';
-import { ObservableVariable } from '@/features/variable-groups/models';
+import {
+  ObservableVariable,
+  type ObservableVariableGroup,
+} from '@/features/variable-groups/models';
 import { useTreeRow } from '@/shared/components/Tree/useTreeRow';
-import type { LibraryItem } from '../VariablesTree';
+import type { HomeTreeItem } from '../VariablesTree';
 
 export const GroupNameActionsCell = ({
-  rowIndex,
+  data,
   treeItem,
+  rowIndex,
   itemProvider,
 }: {
+  data: ObservableVariableGroup;
+  treeItem: ITreeItemEx<HomeTreeItem>;
   rowIndex: number;
-  treeItem: ITreeItemEx<LibraryItem>;
-  itemProvider: ITreeItemProvider<LibraryItem>;
+  itemProvider: ITreeItemProvider<HomeTreeItem>;
 }) => {
   const { hasMouse, hasFocus } = useTreeRow();
   const hasMouseOrFocus = hasMouse || hasFocus;
@@ -29,17 +34,15 @@ export const GroupNameActionsCell = ({
       iconProps={{ iconName: 'Add' }}
       tooltipProps={{ text: 'Add new variable' }}
       onClick={(e) => {
-        const group = treeItem.underlyingItem.data.group;
-        if (!group) {
-          return;
-        }
-
         const variable = new ObservableVariable('', '', false, true);
-        group.variables.push(variable);
+        data.variables.push(variable);
 
         itemProvider.add(
           {
-            data: { groupVariable: variable },
+            data: {
+              type: 'groupVariable',
+              data: variable,
+            },
             highlighted: true,
           },
           treeItem.underlyingItem,

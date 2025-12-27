@@ -1,26 +1,17 @@
-import type { IdentityRef } from 'azure-devops-extension-api/WebApi';
 import { Card } from 'azure-devops-ui/Card';
-import {
-  type IObservableValue,
-  ObservableValue,
-} from 'azure-devops-ui/Core/Observable';
-import { IconSize } from 'azure-devops-ui/Icon';
-import { renderListCell } from 'azure-devops-ui/List';
-import { Observer } from 'azure-devops-ui/Observer';
+import { ObservableValue } from 'azure-devops-ui/Core/Observable';
 import {
   type ITreeColumn,
   renderTreeRow,
   Tree,
   type TreeRowRenderer,
 } from 'azure-devops-ui/TreeEx';
-import { ago } from 'azure-devops-ui/Utilities/Date';
 import type { IFilter } from 'azure-devops-ui/Utilities/Filter';
 import type {
   ITreeItem,
   ITreeItemProvider,
 } from 'azure-devops-ui/Utilities/TreeItemProvider';
-import { VssPersona } from 'azure-devops-ui/VssPersona';
-import { memo, useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import type {
   ObservableSecureFile,
   ObservableSecureFileProperty,
@@ -29,211 +20,106 @@ import type {
   ObservableVariable,
   ObservableVariableGroup,
 } from '@/features/variable-groups/models';
-import { getIdentityDetailsProvider } from '@/shared/api/identityImage';
-import type { State } from '@/shared/components/StateIcon';
 import type { FilterFunc } from '@/shared/components/Table/useFiltering';
-import { TextFieldCell } from '@/shared/components/TextFieldCell';
-import {
-  createActionColumn,
-  type RenderHandler,
-} from '@/shared/components/Tree/createActionColumn';
+import { createActionColumn } from '@/shared/components/Tree/createActionColumn';
 import { createExpandableActionColumn } from '@/shared/components/Tree/createExpandableActionColumn';
 import { getLoadingProvider } from '@/shared/components/Tree/loadingProvider';
+import type { TreeRenderer, TypedData } from '@/shared/components/Tree/types';
 import { useFiltering } from '@/shared/components/Tree/useFiltering';
 import { useRowRenderer } from '@/shared/components/Tree/useRowRenderer';
-import { GroupNameActionsCell } from './ActionCells/GroupNameActionsCell';
-import { GroupValueActionsCell } from './ActionCells/GroupValueActionsCell';
-import { VariableNameActionsCell } from './ActionCells/VariableNameActionsCell';
-import { VariableValueActionsCell } from './ActionCells/VariableValueActionsCell';
+import { filePropertyRenderer } from './renderers/filePropertyRenderer';
+import { fileRenderer } from './renderers/fileRenderer';
+import { groupRenderer } from './renderers/groupRenderer';
+import { variableRenderer } from './renderers/variableRenderer';
 
 export type VariablesTreeProps = {
-  items: ITreeItem<LibraryItem>[];
+  items: ITreeItem<HomeTreeItem>[];
   filter: IFilter;
   loading?: boolean;
 };
 
-export type GroupItem = {
-  id: number;
-  name: string;
-  state: State;
-  modifiedBy: IdentityRef;
-  modifiedOn: Date;
-  type: 'group';
+export type HomeTreeItem =
+  | TypedData<'group', ObservableVariableGroup>
+  | TypedData<'groupVariable', ObservableVariable>
+  | TypedData<'file', ObservableSecureFile>
+  | TypedData<'fileProperty', ObservableSecureFileProperty>;
+
+export type HomeTreeColumns = 'name' | 'value';
+
+export type HomeTreeRenderer = TreeRenderer<HomeTreeColumns, HomeTreeItem>;
+
+const renderers: HomeTreeRenderer = {
+  group: groupRenderer,
+  groupVariable: variableRenderer,
+  file: fileRenderer,
+  fileProperty: filePropertyRenderer,
 };
 
-export type GroupVariableItem = {
-  name: IObservableValue<string>;
-  value: IObservableValue<string>;
-  isSecret: IObservableValue<boolean>;
-  state: IObservableValue<State>;
-  type: 'groupVariable';
-};
-
-export type SecureFileItem = {
-  name: string;
-  modifiedBy: IdentityRef;
-  modifiedOn: Date;
-  type: 'file';
-};
-
-export type SecureFilePropertyItem = {
-  name: string;
-  value: string;
-  type: 'fileProperty';
-};
-
-export type LibraryItem = {
-  group?: ObservableVariableGroup;
-  groupVariable?: ObservableVariable;
-  file?: ObservableSecureFile;
-  fileProperty?: ObservableSecureFileProperty;
-};
-
-const useColumns = (itemProvider: ITreeItemProvider<LibraryItem>) => {
+const useColumns = (itemProvider: ITreeItemProvider<HomeTreeItem>) => {
   const columns = useMemo(() => {
     const onSize = (_event: MouseEvent, index: number, width: number) => {
       (columns[index].width as ObservableValue<number>).value = width;
     };
 
-    const columns: ITreeColumn<LibraryItem>[] = [
-      createExpandableActionColumn<LibraryItem>({
+    const columns: ITreeColumn<HomeTreeItem>[] = [
+      createExpandableActionColumn<HomeTreeItem>({
         id: 'name',
         name: 'Name',
         contentClassName: 'padding-vertical-0 padding-right-0',
         onSize,
-        renderCell: ({ data }) => {
-          const group = data.group;
-          if (group) {
-            return renderListCell({
-              text: group.name.value,
-              textClassName: 'padding-vertical-8',
-              iconProps: {
-                iconName: 'fluent-LibraryColor',
-                size: IconSize.medium,
-              },
-            });
-          }
-
-          const groupVariable = data.groupVariable;
-          if (groupVariable) {
-            return (
-              <Observer
-                state={groupVariable.state}
-                isSecret={groupVariable.isSecret}
-              >
-                {({ state, isSecret }) => (
-                  <TextFieldCell
-                    value={groupVariable.name}
-                    state={state}
-                    iconProps={{
-                      iconName: isSecret
-                        ? 'fluent-KeyRegular'
-                        : 'fluent-MathFormulaRegular',
-                      style: {
-                        paddingLeft: 0,
-                        marginLeft: 0,
-                      },
-                      size: IconSize.medium,
-                    }}
-                    onChange={(e) => {
-                      groupVariable.name.value = e.target.value;
-                    }}
-                  />
-                )}
-              </Observer>
-            );
-          }
-
-          const file = data.file;
-          if (file) {
-            return renderListCell({
-              text: file.name.value,
-              textClassName: 'padding-vertical-8',
-              iconProps: {
-                iconName: 'fluent-DocumentKeyRegular',
-                size: IconSize.medium,
-              },
-            });
-          }
-
-          const fileProperty = data.fileProperty;
-          if (fileProperty) {
-            return renderListCell({
-              text: fileProperty.name.value,
-              textClassName: 'padding-vertical-8',
-            });
-          }
-
-          return undefined;
+        renderCell: (options) => {
+          const renderer = renderers[options.data.type];
+          return renderer.name.renderCell({
+            rowIndex: options.rowIndex,
+            treeItem: options.treeItem,
+            data: options.data.data,
+            provider: itemProvider,
+          });
         },
-        renderActions: ({ rowIndex, data, treeItem }) =>
-          (data.group && (
-            <GroupNameActionsCell
-              rowIndex={rowIndex}
-              treeItem={treeItem}
-              itemProvider={itemProvider}
-            />
-          )) ||
-          (data.groupVariable && (
-            <VariableNameActionsCell
-              data={data.groupVariable}
-              treeItem={treeItem}
-              itemProvider={itemProvider}
-            />
-          )),
+        renderActions: (options) => {
+          const renderer = renderers[options.data.type];
+          return renderer.name.renderActions({
+            rowIndex: options.rowIndex,
+            treeItem: options.treeItem,
+            data: options.data.data,
+            provider: itemProvider,
+          });
+        },
         width: new ObservableValue(-25),
       }),
-      createActionColumn<LibraryItem>({
+      createActionColumn<HomeTreeItem>({
         id: 'value',
         name: 'Value / Last modified by',
         width: new ObservableValue(-75),
-        renderCell: ({ data }) => {
-          const groupOrFile = data.group ?? data.file;
-          if (groupOrFile?.modifiedBy && groupOrFile.modifiedOn) {
-            return (
-              <LastModifiedByCell
-                modifiedBy={groupOrFile.modifiedBy}
-                modifiedOn={groupOrFile.modifiedOn}
-              />
-            );
-          }
-
-          const groupVariable = data.groupVariable;
-          if (groupVariable) {
-            return (
-              <Observer
-                state={groupVariable.state}
-                isSecret={groupVariable.isSecret}
-              >
-                {({ state, isSecret }) => (
-                  <TextFieldCell
-                    value={groupVariable.value}
-                    state={state}
-                    type={isSecret ? 'password' : 'text'}
-                    onChange={(e) => {
-                      groupVariable.value.value = e.target.value;
-                    }}
-                  />
-                )}
-              </Observer>
-            );
-          }
+        renderCell: (options) => {
+          const renderer = renderers[options.data.type];
+          return renderer.value.renderCell({
+            rowIndex: options.rowIndex,
+            treeItem: options.treeItem,
+            data: options.data.data,
+            provider: itemProvider,
+          });
         },
-        renderActions: ({ data }) =>
-          (data.group && <GroupValueActionsCell data={data.group} />) ||
-          (data.groupVariable && (
-            <VariableValueActionsCell data={data.groupVariable} />
-          )),
+        renderActions: (options) => {
+          const renderer = renderers[options.data.type];
+          return renderer.value.renderActions({
+            rowIndex: options.rowIndex,
+            treeItem: options.treeItem,
+            data: options.data.data,
+            provider: itemProvider,
+          });
+        },
       }),
     ];
 
     return columns;
   }, [itemProvider]);
 
-  const renderRow = useCallback<TreeRowRenderer<LibraryItem>>(
+  const renderRow = useCallback<TreeRowRenderer<HomeTreeItem>>(
     (rowIndex, item, details) => {
       const data = item.underlyingItem.data;
-      const className = data.groupVariable ? 'text-field-row' : undefined;
+      const className =
+        data.type === 'groupVariable' ? 'text-field-row' : undefined;
 
       return renderTreeRow(rowIndex, item, details, columns, data, className);
     },
@@ -243,34 +129,22 @@ const useColumns = (itemProvider: ITreeItemProvider<LibraryItem>) => {
   return { columns, renderRow };
 };
 
-const filterFunc: FilterFunc<LibraryItem> = (item, filterText) => {
+const filterFunc: FilterFunc<HomeTreeItem> = (item, filterText) => {
   if (!filterText || !item) {
     return true;
   }
 
-  if (item.group) {
-    return item.group.name.value?.toLocaleLowerCase().includes(filterText);
+  switch (item.type) {
+    case 'group':
+    case 'file':
+      return item.data.name.value?.toLocaleLowerCase().includes(filterText);
+    case 'groupVariable':
+    case 'fileProperty':
+      return (
+        item.data.name.value?.toLocaleLowerCase().includes(filterText) ||
+        item.data.value.value?.toLocaleLowerCase().includes(filterText)
+      );
   }
-
-  if (item.groupVariable) {
-    return (
-      item.groupVariable.name.value?.toLocaleLowerCase().includes(filterText) ||
-      item.groupVariable.value.value?.toLocaleLowerCase().includes(filterText)
-    );
-  }
-
-  if (item.file) {
-    return item.file.name.value?.toLocaleLowerCase().includes(filterText);
-  }
-
-  if (item.fileProperty) {
-    return (
-      item.fileProperty.name.value?.toLocaleLowerCase().includes(filterText) ||
-      item.fileProperty.value.value?.toLocaleLowerCase().includes(filterText)
-    );
-  }
-
-  return false;
 };
 
 export const VariablesTree = ({
@@ -288,7 +162,7 @@ export const VariablesTree = ({
         className="flex-grow bolt-card-no-vertical-padding"
         contentProps={{ contentPadding: false }}
       >
-        <Tree<LibraryItem>
+        <Tree<HomeTreeItem>
           id={'variables-tree'}
           className="text-field-table-wrap"
           columns={columns}
@@ -305,40 +179,4 @@ export const VariablesTree = ({
       </Card>
     )
   );
-};
-
-const LastModifiedByCell = memo(
-  (props: { modifiedBy: IdentityRef; modifiedOn: Date }) => {
-    return (
-      <span
-        className="flex-row flex-grow margin-left-4 padding-vertical-8"
-        style={{ paddingLeft: '7px' }}
-      >
-        <span style={{ marginTop: '1px' }}>
-          <VssPersona
-            identityDetailsProvider={getIdentityDetailsProvider(
-              props.modifiedBy,
-            )}
-            className="margin-right-4"
-            size="extra-small"
-          />
-        </span>
-        <span>{`${props.modifiedBy.displayName} updated ${ago(props.modifiedOn)}`}</span>
-      </span>
-    );
-  },
-);
-
-interface IRenderer<T> {
-  renderCell: RenderHandler<T>;
-  renderActions: RenderHandler<T>;
-}
-
-interface IHomeTreeRenderer<T> {
-  name: IRenderer<T>;
-  value: IRenderer<T>;
-}
-
-type LibraryItemRenderers<LibraryItem> = {
-  [K in keyof LibraryItem]: IHomeTreeRenderer<LibraryItem[K]>;
 };

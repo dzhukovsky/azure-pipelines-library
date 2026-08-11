@@ -4,27 +4,66 @@ import type { ObservableObjectArray } from './ObservableObjectArray';
 import { ObservableObjectValue } from './ObservableObjectValue';
 
 export abstract class StateObject<T> extends ObservableObject<T> {
-  readonly state: ObservableObjectValue<State>;
   readonly isNew: boolean;
+  readonly present: ObservableObjectValue<boolean>;
+  readonly error: ObservableObjectValue<string | undefined>;
 
-  constructor(isNew: boolean, initialState?: State) {
+  private readonly _state: ObservableObjectValue<State>;
+
+  get state(): ObservableObjectValue<State> {
+    return this._state;
+  }
+
+  constructor(isNew: boolean, initiallyPresent = true) {
     super();
     this.isNew = isNew;
 
-    const state = isNew ? States.New : States.Unchanged;
-    this.state = new ObservableObjectValue(initialState ?? state, statesEqual);
+    this.present = this.addValueProperty(initiallyPresent);
+    this.error = new ObservableObjectValue<string | undefined>(undefined);
+    this._state = new ObservableObjectValue<State>(
+      this.computeState(),
+      statesEqual,
+    );
 
-    this.subscribe(() => {
-      this.state.value = this.modified && !isNew ? States.Modified : state;
-    });
+    const update = () => {
+      this._state.value = this.computeState();
+    };
+
+    // `modified` flips notify `this`; `present` and `error` can change state
+    // without flipping `modified`, so subscribe to them directly.
+    this.subscribe(update);
+    this.present.subscribe(update);
+    this.error.subscribe(update);
+  }
+
+  delete() {
+    this.present.value = false;
+  }
+
+  restore() {
+    this.present.value = true;
+  }
+
+  private computeState(): State {
+    if (this.error.value) {
+      return States.error(this.error.value);
+    }
+    if (!this.present.value) {
+      return this.isNew ? States.Unchanged : States.Deleted;
+    }
+    if (this.isNew) {
+      return States.New;
+    }
+    return this.modified ? States.Modified : States.Unchanged;
   }
 }
 
 export function getArrayChanges<T extends StateObject<T>>(
   items: ObservableObjectArray<T>,
 ) {
-  return [
-    ...items.initialItems.filter((item) => item.state.value === States.Deleted),
-    ...items.value.filter((item) => item.state.value !== States.Unchanged),
-  ];
+  // Deleted items now stay in the array (present=false), so a single scan
+  // over the current items covers additions, edits and deletions.
+  return items.value.filter(
+    (item) => item.state.value.type !== 'Unchanged',
+  );
 }

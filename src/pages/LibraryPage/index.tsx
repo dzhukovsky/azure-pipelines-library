@@ -17,6 +17,7 @@ import {
   PreviewChangesDialog,
   type PreviewChangesDialogOptions,
 } from '@/features/preview-changes/components/PreviewChangesDialog';
+import { saveLibraryChanges } from '@/features/save-changes/saveLibraryChanges';
 import { getProjectUrl } from '@/shared/api/configurations';
 import { useFilterSubscription } from '@/shared/components/Table/useFiltering';
 import {
@@ -350,8 +351,23 @@ const useHeader = (
               // Paints Error states; the preview still opens so the user sees
               // them in context.
               activeModel.validate();
+              const changes = activeModel.getChanges();
               previewDialogOptions.value = {
-                changes: activeModel.getChanges(),
+                changes,
+                onSave: () => saveLibraryChanges(changes),
+                onSaved: (outcome) => {
+                  // Task 12: record history here
+                  if (outcome.ok) {
+                    // Full success: reload immediately, closing the dialog.
+                    discardChanges();
+                  }
+                  // Partial or total failure: leave the dialog open so the
+                  // SaveFooter can show per-group errors. For a partial
+                  // save, SaveFooter defers the reload to onClosed (below)
+                  // so the user gets a chance to read them first; a total
+                  // failure needs no reload since nothing changed.
+                },
+                onClosed: discardChanges,
               };
             }}
           />

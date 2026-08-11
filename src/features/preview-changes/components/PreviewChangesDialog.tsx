@@ -16,8 +16,12 @@ import {
   type ITreeItemProvider,
   TreeItemProvider,
 } from 'azure-devops-ui/Utilities/TreeItemProvider';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { hasErrors, type LibraryChanges } from '@/features/library-changes';
+import type {
+  GroupSaveResult,
+  SaveOutcome,
+} from '@/features/save-changes/saveLibraryChanges';
 import { StateIcon } from '@/shared/components/StateIcon';
 import { TextFieldCell } from '@/shared/components/TextFieldCell';
 import { createActionColumn } from '@/shared/components/Tree/createActionColumn';
@@ -26,6 +30,13 @@ import { type LibraryItem, mapTreeItems } from '../mappings';
 
 export type PreviewChangesDialogOptions = {
   changes: LibraryChanges;
+  onSave: () => Promise<SaveOutcome>;
+  onSaved: (outcome: SaveOutcome) => void; // page-level: invalidate + remount + record history
+  // Invoked when the dialog is dismissed after a partial save (some groups
+  // saved, some failed). Lets the page defer its reload until the user has
+  // had a chance to read the per-group errors, instead of yanking the
+  // dialog away the instant the save call returns.
+  onClosed?: () => void;
 };
 
 export interface IPreviewChangesDialogProps {
@@ -69,24 +80,86 @@ export const PreviewChangesDialog = (props: IPreviewChangesDialogProps) => {
               </MessageCard>
             )}
             <PreviewChangesTree itemProvider={itemProvider} />
-            <PanelFooter
-              buttonProps={[
-                {
-                  text: 'Cancel',
-                  onClick: close,
-                },
-                {
-                  text: 'Save changes',
-                  onClick: close,
-                  primary: true,
-                  disabled: invalid,
-                },
-              ]}
-            />
+            <SaveFooter options={options} invalid={invalid} close={close} />
           </CustomDialog>
         );
       }}
     </Observer>
+  );
+};
+
+// A separate component (rather than inline in the Observer render prop)
+// because it needs hooks: the render prop body above runs on every
+// Observable notification and cannot hold its own state.
+const SaveFooter = ({
+  options,
+  invalid,
+  close,
+}: {
+  options: PreviewChangesDialogOptions;
+  invalid: boolean;
+  close: () => void;
+}) => {
+  const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState<GroupSaveResult[]>();
+  // Set when the failed save still saved some groups: the data is now
+  // stale, but the dialog stays open so the errors remain visible. The
+  // reload (via options.onClosed) is deferred until the user dismisses it.
+  const [reloadOnClose, setReloadOnClose] = useState(false);
+
+  const onSaveClick = async () => {
+    setSaving(true);
+    setErrors(undefined);
+    const outcome = await options.onSave();
+    setSaving(false);
+    if (outcome.ok) {
+      close();
+    } else {
+      setErrors(outcome.results.filter((r) => !r.ok));
+      setReloadOnClose(outcome.results.some((r) => r.ok));
+    }
+    options.onSaved(outcome); // page invalidates/remounts on full success
+  };
+
+  const onCancelClick = () => {
+    close();
+    if (reloadOnClose) {
+      options.onClosed?.();
+    }
+  };
+
+  return (
+    <>
+      {errors && (
+        <>
+          <MessageCard
+            severity={MessageCardSeverity.Error}
+            className="margin-16"
+          >
+            {errors.map((r) => `${r.groupName}: ${r.ok ? '' : r.error}`).join('\n')}
+          </MessageCard>
+          {reloadOnClose && (
+            <MessageCard
+              severity={MessageCardSeverity.Info}
+              className="margin-16"
+            >
+              Successfully saved groups were applied; press Cancel to reload.
+            </MessageCard>
+          )}
+        </>
+      )}
+      <PanelFooter
+        buttonProps={[
+          { text: 'Cancel', onClick: onCancelClick, disabled: saving },
+          {
+            text: saving ? 'Saving…' : 'Save changes',
+            onClick: onSaveClick,
+            primary: true,
+            disabled: invalid || saving,
+          },
+        ]}
+      />
+    </>
   );
 };
 

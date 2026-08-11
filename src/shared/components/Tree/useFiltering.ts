@@ -20,7 +20,10 @@ function filterItems<T>(
   return items
     .map((item) => ({
       ...item,
-      expanded: !!filterText,
+      // Force-expand while filtering so matches stay visible; otherwise
+      // respect the source item's own expansion state (auto-expand on add,
+      // manual user toggles) instead of always collapsing it.
+      expanded: filterText ? true : !!item.expanded,
       childItems: filterItems(item.childItems ?? [], filter, filterFunc),
     }))
     .filter(

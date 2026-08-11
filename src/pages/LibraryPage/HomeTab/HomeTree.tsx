@@ -39,7 +39,10 @@ export type HomeTreeProps = {
   items: IReadonlyObservableArray<ITreeItem<HomeTreeItem>>;
   filter: IFilter;
   loading?: boolean;
-  onToggleGroup?: (group: ObservableVariableGroup, expanded: boolean) => void;
+  onToggleItem?: (
+    data: ObservableVariableGroup | ObservableSecureFile,
+    expanded: boolean,
+  ) => void;
 };
 
 export type HomeTreeItem =
@@ -118,7 +121,7 @@ export const HomeTree = ({
   items,
   filter,
   loading,
-  onToggleGroup,
+  onToggleItem,
 }: HomeTreeProps) => {
   const { filteredItems, isEmpty } = useObservableFiltering(
     items,
@@ -146,8 +149,8 @@ export const HomeTree = ({
             const data = item.underlyingItem.data;
             if (item.underlyingItem.childItems?.length) {
               filteredItems.toggle(item.underlyingItem);
-              if (data.type === 'group') {
-                onToggleGroup?.(data.data, !!item.underlyingItem.expanded);
+              if (data.type === 'group' || data.type === 'file') {
+                onToggleItem?.(data.data, !!item.underlyingItem.expanded);
               }
             }
           }}

@@ -8,6 +8,7 @@ import type { ITreeItem } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import { useEffect, useState } from 'react';
 import { useSecureFiles } from '@/features/secure-files/hooks/useSecureFiles';
 import { mapSecureFiles } from '@/features/secure-files/mapSecureFiles';
+import type { ObservableSecureFile } from '@/features/secure-files/models';
 import { useVariableGroups } from '@/features/variable-groups/hooks/useVariableGroups';
 import { mapVariableGroups } from '@/features/variable-groups/mapVariableGroups';
 import type { ObservableVariableGroup } from '@/features/variable-groups/models';
@@ -15,11 +16,13 @@ import { useSubscribtion } from '@/shared/lib/observable';
 import { HomeTabModel } from './HomeTabModel';
 import { HomeTree, type HomeTreeItem } from './HomeTree';
 
+type ExpandableItem = ObservableVariableGroup | ObservableSecureFile;
+
 type TabContext = {
   groupsData?: VariableGroup[];
   filesData?: SecureFile[];
   items: ObservableArray<ITreeItem<HomeTreeItem>>;
-  expandedGroups: Set<ObservableVariableGroup>;
+  expandedItems: Set<ExpandableItem>;
   model: HomeTabModel;
 };
 
@@ -30,14 +33,14 @@ const createTabContext = (
   filesData: SecureFile[] | undefined,
 ): TabContext => {
   const model = createHomeTabModel(groupsData ?? [], filesData ?? []);
-  const expandedGroups = new Set<ObservableVariableGroup>();
+  const expandedItems = new Set<ExpandableItem>();
 
   const items = new ObservableArray<ITreeItem<HomeTreeItem>>(
-    mapTreeItems(model, expandedGroups),
+    mapTreeItems(model, expandedItems),
   );
 
   const rebuild = () => {
-    items.splice(0, items.length, ...mapTreeItems(model, expandedGroups));
+    items.splice(0, items.length, ...mapTreeItems(model, expandedItems));
   };
 
   // Rebuild only when rows are added/removed; value edits flow through the
@@ -55,13 +58,13 @@ const createTabContext = (
     group.variables.subscribe((e) => {
       if (e?.addedItems?.length) {
         // Auto-expand a group when a variable is added to it.
-        expandedGroups.add(group);
+        expandedItems.add(group);
       }
       onMembershipChange(e);
     });
   });
 
-  return { groupsData, filesData, items, expandedGroups, model };
+  return { groupsData, filesData, items, expandedItems, model };
 };
 
 export const HomeTab = ({
@@ -109,11 +112,20 @@ export const HomeTab = ({
       items={context.items}
       filter={filter}
       loading={isLoading}
-      onToggleGroup={(group, expanded) => {
+      onToggleItem={(data, expanded) => {
         if (expanded) {
-          context.expandedGroups.add(group);
+          context.expandedItems.add(data);
         } else {
-          context.expandedGroups.delete(group);
+          context.expandedItems.delete(data);
+        }
+
+        // The provider's items are copies of `context.items`'s entries, so a
+        // user toggle never reaches the source array on its own. Patch the
+        // matching root in place — it's only read on the next rebuild/re-seed,
+        // no notify needed.
+        const root = context.items.value.find((it) => it.data.data === data);
+        if (root) {
+          root.expanded = expanded;
         }
       }}
     />
@@ -122,20 +134,21 @@ export const HomeTab = ({
 
 const mapTreeItems = (
   model: HomeTabModel,
-  expandedGroups: Set<ObservableVariableGroup>,
+  expandedItems: Set<ExpandableItem>,
 ) => [
   ...model.variableGroups.value.map<ITreeItem<HomeTreeItem>>((group) => ({
     data: { type: 'group', data: group },
     childItems: group.variables.value.map<ITreeItem<HomeTreeItem>>(
       (variable) => ({ data: { type: 'groupVariable', data: variable } }),
     ),
-    expanded: expandedGroups.has(group),
+    expanded: expandedItems.has(group),
   })),
   ...model.secureFiles.value.map<ITreeItem<HomeTreeItem>>((file) => ({
     data: { type: 'file', data: file },
     childItems: file.properties.value.map<ITreeItem<HomeTreeItem>>(
       (property) => ({ data: { type: 'fileProperty', data: property } }),
     ),
+    expanded: expandedItems.has(file),
   })),
 ];
 

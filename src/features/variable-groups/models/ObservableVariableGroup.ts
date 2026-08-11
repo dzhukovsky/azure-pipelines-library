@@ -4,7 +4,7 @@ import {
   type ObservableObjectValue,
   StateObject,
 } from '@/shared/lib/observable';
-import type { ObservableVariable } from './ObservableVariable';
+import { ObservableVariable } from './ObservableVariable';
 
 export class ObservableVariableGroup extends StateObject<ObservableVariableGroup> {
   readonly id: number;
@@ -29,5 +29,18 @@ export class ObservableVariableGroup extends StateObject<ObservableVariableGroup
 
     this.name = this.addValueProperty(name);
     this.variables = this.addArrayProperty(variables);
+  }
+
+  addVariable(): ObservableVariable {
+    const variable = new ObservableVariable('', '', false, true);
+    this.variables.push(variable);
+    return variable;
+  }
+
+  removeNewVariable(variable: ObservableVariable) {
+    if (!variable.isNew) {
+      return;
+    }
+    this.variables.removeAll((x) => x === variable);
   }
 }

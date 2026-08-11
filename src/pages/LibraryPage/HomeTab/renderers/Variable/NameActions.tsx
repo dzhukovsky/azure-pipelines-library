@@ -7,27 +7,31 @@ export const NameActions = ({ data }: { data: ObservableVariable }) => {
   const { hasMouse, hasFocus } = useTreeRow();
   const hasMouseOrFocus = hasMouse || hasFocus;
 
-  if (!hasMouseOrFocus || data.state.value.type === 'Deleted') {
+  if (!hasMouseOrFocus) {
     return <span />;
   }
 
   return (
-    <Observer isSecret={data.isSecret}>
-      {({ isSecret }) => (
-        <Button
-          subtle
-          iconProps={{ iconName: isSecret ? 'Lock' : 'Unlock' }}
-          tooltipProps={{
-            text: isSecret
-              ? 'Change variable type to plain text'
-              : 'Change variable type to secret',
-          }}
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={() => {
-            data.isSecret.value = !isSecret;
-          }}
-        />
-      )}
+    <Observer isSecret={data.isSecret} state={data.state}>
+      {({ isSecret, state }) =>
+        state.type === 'Deleted' ? (
+          <span />
+        ) : (
+          <Button
+            subtle
+            iconProps={{ iconName: isSecret ? 'Lock' : 'Unlock' }}
+            tooltipProps={{
+              text: isSecret
+                ? 'Change variable type to plain text'
+                : 'Change variable type to secret',
+            }}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => {
+              data.isSecret.value = !isSecret;
+            }}
+          />
+        )
+      }
     </Observer>
   );
 };

@@ -1,4 +1,5 @@
 import { Button } from 'azure-devops-ui/Button';
+import { Observer } from 'azure-devops-ui/Observer';
 import type {
   ITreeItemEx,
   ITreeItemProvider,
@@ -11,7 +12,6 @@ import type { HomeTreeItem } from '../../HomeTree';
 export const ValueActions = ({
   data,
   treeItem,
-  itemProvider,
 }: {
   data: ObservableVariable;
   treeItem: ITreeItemEx<HomeTreeItem>;
@@ -20,60 +20,50 @@ export const ValueActions = ({
   const { hasMouse, hasFocus, onBlur } = useTreeRow();
   const hasMouseOrFocus = hasMouse || hasFocus;
 
-  const deleted = data.state.value.type === 'Deleted';
-
-  if (!hasMouseOrFocus) {
-    return <StateIcon state={data.state.value} />;
-  }
-
   return (
-    (deleted && (
-      <Button
-        subtle
-        iconProps={{ iconName: 'Undo' }}
-        tooltipProps={{
-          text: `Restore variable '${data.name.value}'`,
-        }}
-        onMouseDown={(e) => e.preventDefault()}
-        onClick={() => {
-          const group = treeItem.parentItem?.underlyingItem.data;
-          if (group?.type !== 'group') {
-            return;
-          }
+    <Observer state={data.state}>
+      {({ state }) => {
+        if (!hasMouseOrFocus) {
+          return <StateIcon state={state} />;
+        }
 
-          group.data.variables.push(data);
+        if (state === States.Deleted) {
+          return (
+            <Button
+              subtle
+              iconProps={{ iconName: 'Undo' }}
+              tooltipProps={{ text: `Restore variable '${data.name.value}'` }}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => {
+                data.restore();
+                onBlur?.();
+              }}
+            />
+          );
+        }
 
-          data.state.value = data.modified ? States.Modified : States.Unchanged;
-          onBlur?.();
-        }}
-      />
-    )) || (
-      <Button
-        subtle
-        iconProps={{ iconName: 'Delete' }}
-        tooltipProps={{
-          text: `Delete variable '${data.name.value}'`,
-        }}
-        onMouseDown={(e) => e.preventDefault()}
-        onClick={() => {
-          const group = treeItem.parentItem?.underlyingItem.data;
-          if (group?.type !== 'group') {
-            return;
-          }
+        return (
+          <Button
+            subtle
+            iconProps={{ iconName: 'Delete' }}
+            tooltipProps={{ text: `Delete variable '${data.name.value}'` }}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => {
+              const group = treeItem.parentItem?.underlyingItem.data;
+              if (group?.type !== 'group') {
+                return;
+              }
 
-          if (data.state.initialValue === States.New) {
-            itemProvider.remove(
-              treeItem.underlyingItem,
-              treeItem.parentItem?.underlyingItem,
-            );
-          }
-
-          group.data.variables.removeAll((x) => x === data);
-
-          data.state.value = States.Deleted;
-          onBlur?.();
-        }}
-      />
-    )
+              if (data.isNew) {
+                group.data.removeNewVariable(data); // row disappears via reactive items (Task 4)
+              } else {
+                data.delete();
+              }
+              onBlur?.();
+            }}
+          />
+        );
+      }}
+    </Observer>
   );
 };

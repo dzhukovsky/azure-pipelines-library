@@ -1,0 +1,48 @@
+import type {
+  ObservableVariable,
+  ObservableVariableGroup,
+} from '@/features/variable-groups/models';
+import type { HomeTabModel } from '@/pages/LibraryPage/HomeTab/HomeTabModel';
+import { getArrayChanges } from '@/shared/lib/observable';
+import type { GroupChange, LibraryChanges, VariableChange } from './types';
+
+const mapVariable = (v: ObservableVariable): VariableChange => ({
+  key: v.name.value,
+  previousKey: !v.isNew && v.name.modified ? v.name.initialValue : undefined,
+  value: v.value.modified || v.isNew ? v.value.value : undefined,
+  valueChanged: v.value.modified || v.isNew,
+  isSecret: v.isSecret.value,
+  isSecretChanged: v.isSecret.modified,
+  state: v.state.value,
+});
+
+const mapGroup = (g: ObservableVariableGroup): GroupChange => ({
+  groupId: g.id,
+  name: g.name.value,
+  nameChanged: g.name.modified,
+  modifiedOnSnapshot: g.modifiedOn,
+  state: g.state.value,
+  variables: getArrayChanges(g.variables)
+    .map(mapVariable)
+    .sort((a, b) => a.key.localeCompare(b.key)),
+});
+
+export const mapHomeChanges = (model: HomeTabModel): LibraryChanges => ({
+  groups: getArrayChanges(model.variableGroups)
+    .map(mapGroup)
+    .sort((a, b) => a.name.localeCompare(b.name)),
+  files: getArrayChanges(model.secureFiles)
+    .map((sf) => ({
+      fileId: sf.id,
+      name: sf.name.value,
+      state: sf.state.value,
+      properties: getArrayChanges(sf.properties)
+        .map((p) => ({
+          name: p.name.value,
+          value: p.value.value,
+          state: p.state.value,
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name)),
+});

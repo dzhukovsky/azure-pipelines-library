@@ -9,6 +9,7 @@ import { Tab, TabBar } from 'azure-devops-ui/Tabs';
 import { InlineKeywordFilterBarItem } from 'azure-devops-ui/TextFilterBarItem';
 import { Filter, type IFilter } from 'azure-devops-ui/Utilities/Filter';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { mapHomeChanges } from '@/features/library-changes';
 import { ManageViewsDialog } from '@/features/matrix-views/components/ManageViewsDialog';
 import { useMatrixViews } from '@/features/matrix-views/hooks/useMatrixViews';
 import {
@@ -253,10 +254,7 @@ const useHeader = (
             primary={true}
             text="Preview changes"
             onClick={() => {
-              previewDialogOptions.value = {
-                variableGroups: model.variableGroups,
-                secureFiles: model.secureFiles,
-              };
+              previewDialogOptions.value = { changes: mapHomeChanges(model) };
             }}
           />
         ),

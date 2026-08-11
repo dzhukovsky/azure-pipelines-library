@@ -16,23 +16,15 @@ import {
   TreeItemProvider,
 } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import { useMemo } from 'react';
-import type { ObservableSecureFile } from '@/features/secure-files/models';
-import type { ObservableVariableGroup } from '@/features/variable-groups/models';
+import type { LibraryChanges } from '@/features/library-changes';
 import { StateIcon } from '@/shared/components/StateIcon';
 import { TextFieldCell } from '@/shared/components/TextFieldCell';
 import { createActionColumn } from '@/shared/components/Tree/createActionColumn';
 import { createExpandableActionColumn } from '@/shared/components/Tree/createExpandableActionColumn';
-import type { ObservableObjectArray } from '@/shared/lib/observable';
-import {
-  type LibraryItem,
-  mapSecureFileChanges,
-  mapTreeItems,
-  mapVariableGroupChanges,
-} from '../mappings';
+import { type LibraryItem, mapTreeItems } from '../mappings';
 
 export type PreviewChangesDialogOptions = {
-  variableGroups: ObservableObjectArray<ObservableVariableGroup>;
-  secureFiles: ObservableObjectArray<ObservableSecureFile>;
+  changes: LibraryChanges;
 };
 
 export interface IPreviewChangesDialogProps {
@@ -47,11 +39,9 @@ export const PreviewChangesDialog = (props: IPreviewChangesDialogProps) => {
           return null;
         }
 
-        const variableGroups = mapVariableGroupChanges(options?.variableGroups);
-        const secureFiles = mapSecureFileChanges(options?.secureFiles);
-
-        const treeItems = mapTreeItems(variableGroups, secureFiles);
-        const itemProvider = new TreeItemProvider(treeItems);
+        const itemProvider = new TreeItemProvider(
+          mapTreeItems(options.changes),
+        );
 
         const close = () => {
           props.options.value = undefined;
@@ -120,7 +110,7 @@ const useColumns = () => {
           if (groupVariable) {
             return (
               <TextFieldCell
-                value={groupVariable.name}
+                value={groupVariable.key}
                 state={groupVariable.state}
                 iconProps={{
                   iconName: groupVariable.isSecret

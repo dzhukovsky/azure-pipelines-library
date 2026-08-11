@@ -45,8 +45,12 @@ const createTabState = (
     mapTreeItems(provider.variables.value),
   );
 
-  provider.variables.subscribe(() => {
-    items.splice(0, items.length, ...mapTreeItems(provider.variables.value));
+  // Rebuild only when rows are added/removed; the synthetic `modified`
+  // notify (fired on value edits) must not recreate tree items (focus loss).
+  provider.variables.subscribe((e) => {
+    if (e?.addedItems?.length || e?.removedItems?.length) {
+      items.splice(0, items.length, ...mapTreeItems(provider.variables.value));
+    }
   });
 
   return {

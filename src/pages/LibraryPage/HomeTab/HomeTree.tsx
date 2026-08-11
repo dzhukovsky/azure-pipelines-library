@@ -1,5 +1,8 @@
 import { Card } from 'azure-devops-ui/Card';
-import { ObservableValue } from 'azure-devops-ui/Core/Observable';
+import {
+  type IReadonlyObservableArray,
+  ObservableValue,
+} from 'azure-devops-ui/Core/Observable';
 import {
   renderTreeRow,
   Tree,
@@ -23,7 +26,7 @@ import type { FilterFunc } from '@/shared/components/Table/useFiltering';
 import { createTreeColumns } from '@/shared/components/Tree/createTreeColumns';
 import { getLoadingProvider } from '@/shared/components/Tree/loadingProvider';
 import type { TreeRenderer, TypedData } from '@/shared/components/Tree/types';
-import { useFiltering } from '@/shared/components/Tree/useFiltering';
+import { useObservableFiltering } from '@/shared/components/Tree/useFiltering';
 import { useRowRenderer } from '@/shared/components/Tree/useRowRenderer';
 import {
   filePropertyRenderer,
@@ -33,9 +36,10 @@ import {
 } from './renderers';
 
 export type HomeTreeProps = {
-  items: ITreeItem<HomeTreeItem>[];
+  items: IReadonlyObservableArray<ITreeItem<HomeTreeItem>>;
   filter: IFilter;
   loading?: boolean;
+  onToggleGroup?: (group: ObservableVariableGroup, expanded: boolean) => void;
 };
 
 export type HomeTreeItem =
@@ -110,8 +114,17 @@ const filterFunc: FilterFunc<HomeTreeItem> = (item, filterText) => {
   }
 };
 
-export const HomeTree = ({ items, filter, loading }: HomeTreeProps) => {
-  const { filteredItems, isEmpty } = useFiltering(items, filter, filterFunc);
+export const HomeTree = ({
+  items,
+  filter,
+  loading,
+  onToggleGroup,
+}: HomeTreeProps) => {
+  const { filteredItems, isEmpty } = useObservableFiltering(
+    items,
+    filter,
+    filterFunc,
+  );
   const { columns } = useColumns(filteredItems);
 
   const renderRow = useRowRenderer(columns);
@@ -130,8 +143,12 @@ export const HomeTree = ({ items, filter, loading }: HomeTreeProps) => {
           virtualize={false}
           renderRow={renderRow}
           onToggle={(_, item) => {
+            const data = item.underlyingItem.data;
             if (item.underlyingItem.childItems?.length) {
               filteredItems.toggle(item.underlyingItem);
+              if (data.type === 'group') {
+                onToggleGroup?.(data.data, !!item.underlyingItem.expanded);
+              }
             }
           }}
         />

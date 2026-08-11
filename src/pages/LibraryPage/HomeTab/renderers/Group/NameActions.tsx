@@ -3,24 +3,17 @@ import type {
   ITreeItemEx,
   ITreeItemProvider,
 } from 'azure-devops-ui/Utilities/TreeItemProvider';
-import {
-  ObservableVariable,
-  type ObservableVariableGroup,
-} from '@/features/variable-groups/models';
+import type { ObservableVariableGroup } from '@/features/variable-groups/models';
 import { useTreeRow } from '@/shared/components/Tree/useTreeRow';
 import type { HomeTreeItem } from '../../HomeTree';
 
-export const NameActions = ({
-  data,
-  treeItem,
-  rowIndex,
-  itemProvider,
-}: {
+export const NameActions = (props: {
   data: ObservableVariableGroup;
   treeItem: ITreeItemEx<HomeTreeItem>;
   rowIndex: number;
   itemProvider: ITreeItemProvider<HomeTreeItem>;
 }) => {
+  const { data, rowIndex } = props;
   const { hasMouse, hasFocus } = useTreeRow();
   const hasMouseOrFocus = hasMouse || hasFocus;
 
@@ -35,42 +28,29 @@ export const NameActions = ({
       tooltipProps={{ text: 'Add new variable' }}
       onMouseDown={(e) => e.preventDefault()}
       onClick={(e) => {
-        const variable = new ObservableVariable('', '', false, true);
-        data.variables.push(variable);
-
-        itemProvider.add(
-          {
-            data: {
-              type: 'groupVariable',
-              data: variable,
-            },
-            highlighted: true,
-          },
-          treeItem.underlyingItem,
-        );
-
-        if (!treeItem.underlyingItem.expanded) {
-          itemProvider.toggle(treeItem.underlyingItem);
-        }
-
-        window.requestAnimationFrame(() => selectNextRowInput(rowIndex));
+        data.addVariable();
+        window.requestAnimationFrame(() => selectLastAddedInput(rowIndex));
         e.stopPropagation();
       }}
     />
   );
 };
 
-function selectNextRowInput(rowIndex: number) {
-  const currentRow = document.querySelector(`tr[data-row-index="${rowIndex}"]`);
-  if (!currentRow) return;
+// The new row is appended as the group's last child by the reactive rebuild.
+// Walk forward from the group row through its sibling rows (until the next
+// root row) and focus the last empty name input found — that's the new row.
+function selectLastAddedInput(groupRow: number) {
+  const currentRow = document.querySelector(`tr[data-row-index="${groupRow}"]`);
+  let next = currentRow?.nextElementSibling ?? null;
+  let target: HTMLInputElement | null = null;
 
-  const nextRow = currentRow.nextElementSibling;
-  if (!nextRow || nextRow.tagName.toLowerCase() !== 'tr') {
-    return;
+  while (next && next.tagName.toLowerCase() === 'tr') {
+    const input = next.querySelector('input');
+    if (input && input.value === '') {
+      target = input;
+    }
+    next = next.nextElementSibling;
   }
 
-  const input = nextRow.querySelector('input');
-  if (!input) return;
-
-  input.select?.();
+  target?.select();
 }

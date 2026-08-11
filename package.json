@@ -14,6 +14,7 @@
     "dev": "vite --port 3000",
     "build": "tsc -b && vite build",
     "lint": "biome lint",
+    "test": "bun test src",
     "preview": "vite preview",
     "package": "bun run build && tfx extension create --manifests vss-extension.json",
     "package:dev": "bun run build && tfx extension create --manifests vss-extension.json --overrides-file vss-extension.dev.json"
@@ -29,6 +30,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.8",
+    "@types/bun": "latest",
     "@types/node": "^25.9.5",
     "@types/react": "^16.14.70",
     "@types/react-dom": "^16.9.25",

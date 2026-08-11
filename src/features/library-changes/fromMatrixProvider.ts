@@ -32,6 +32,7 @@ export const mapMatrixChanges = (
         : undefined;
     const renamed = previousKey !== undefined && previousKey !== name;
     const secretFlag = row.name.isSecret;
+    const nameError = row.name.error.value;
 
     for (const groupId of provider.groupIds) {
       const cell = row.values[groupId];
@@ -58,7 +59,11 @@ export const mapMatrixChanges = (
         valueChanged: cell.value.modified || cellState.type === 'New',
         isSecret,
         isSecretChanged,
-        state: cellState.type === 'Unchanged' ? States.Modified : cellState,
+        state: nameError
+          ? States.error(nameError)
+          : cellState.type === 'Unchanged'
+            ? States.Modified
+            : cellState,
       };
       groupChange(groupId).variables.push(change);
     }

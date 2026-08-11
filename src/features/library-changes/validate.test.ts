@@ -6,7 +6,9 @@ import {
 } from '@/features/variable-groups/models';
 import { HomeTabModel } from '@/pages/LibraryPage/HomeTab/HomeTabModel';
 import { MatrixDataProvider } from '@/pages/LibraryPage/MatrixTab/MatrixDataProvider';
-import { validateHomeModel, validateMatrixProvider } from './validate';
+import { mapHomeChanges } from './fromHomeModel';
+import { mapMatrixChanges } from './fromMatrixProvider';
+import { hasErrors, validateHomeModel, validateMatrixProvider } from './validate';
 
 const makeModel = (variables: ObservableVariable[]) =>
   new HomeTabModel(
@@ -37,6 +39,16 @@ describe('validateHomeModel', () => {
     b.name.value = 'other';
     expect(validateHomeModel(model)).toBe(true);
     expect(a.state.value.type).toBe('Unchanged'); // errors cleared on revalidate
+  });
+
+  test('duplicate names surface via hasErrors(mapHomeChanges(...))', () => {
+    const a = new ObservableVariable('dup', '1', false, false);
+    const b = new ObservableVariable('dup', '2', false, false);
+    const model = makeModel([a, b]);
+    a.value.value = '1-edited'; // give it a change so it is emitted at all
+
+    expect(validateHomeModel(model)).toBe(false);
+    expect(hasErrors(mapHomeChanges(model))).toBe(true);
   });
 
   test('secret to plain without re-entered value is an error', () => {
@@ -124,5 +136,92 @@ describe('validateMatrixProvider', () => {
 
     row.values[20].value.value = 'now-visible2';
     expect(validateMatrixProvider(provider)).toBe(true);
+  });
+
+  test('mixed-secret row (initialValue null) flipped to plain errors only the originally-secret cells', () => {
+    const provider = makeProvider([
+      { id: 10, name: 'dev', variables: { mixed: { value: 'a', isSecret: true } } },
+      { id: 20, name: 'prod', variables: { mixed: { value: 'b', isSecret: false } } },
+    ]);
+    const row = provider.variables.value[0];
+    expect(row.name.isSecret.value).toBeNull(); // mixed secret flags -> null
+
+    row.name.isSecret.value = false;
+
+    expect(validateMatrixProvider(provider)).toBe(false);
+    expect(row.values[10].error.value).toBe(
+      'Re-enter the value when converting a secret to plain text',
+    );
+    expect(row.values[20].error.value).toBeUndefined(); // was already plain
+
+    row.values[10].value.value = 'now-visible';
+    expect(validateMatrixProvider(provider)).toBe(true);
+  });
+
+  test('a row deleted from every group does not block re-adding the same name', () => {
+    const provider = makeProvider([
+      { id: 10, name: 'dev', variables: { gone: { value: '1', isSecret: false } } },
+    ]);
+    const row = provider.variables.value[0];
+    row.deleteVariable(10); // only cell deleted -> row.modified true, no present cells
+
+    provider.addNewVariable();
+    const added = provider.variables.value[1];
+    added.name.name.value = 'gone';
+    added.addValue(10);
+    added.values[10].value.value = 'new-value';
+
+    expect(validateMatrixProvider(provider)).toBe(true);
+    expect(row.name.error.value).toBeUndefined();
+    expect(added.name.error.value).toBeUndefined();
+  });
+});
+
+describe('hasErrors integration (mapMatrixChanges)', () => {
+  test('empty name on a new row with a changed cell surfaces via hasErrors', () => {
+    const provider = makeProvider([{ id: 10, name: 'dev', variables: {} }]);
+    provider.addNewVariable();
+    const row = provider.variables.value[0];
+    row.addValue(10);
+    row.values[10].value.value = 'x';
+
+    expect(validateMatrixProvider(provider)).toBe(false);
+    expect(hasErrors(mapMatrixChanges(provider))).toBe(true);
+  });
+
+  test('renaming a row onto an untouched row marks both names errored and surfaces via hasErrors', () => {
+    const provider = makeProvider([
+      {
+        id: 10,
+        name: 'dev',
+        variables: {
+          A: { value: '1', isSecret: false },
+          B: { value: '2', isSecret: false },
+        },
+      },
+    ]);
+    // Row order follows the object literal's key insertion order (A, B).
+    const [rowA, rowB] = provider.variables.value;
+    expect(rowA.name.name.value).toBe('A');
+    expect(rowB.name.name.value).toBe('B');
+    rowB.name.name.value = 'A'; // rename onto A, which itself is otherwise untouched
+
+    expect(validateMatrixProvider(provider)).toBe(false);
+    expect(rowA.name.error.value).toBe('Duplicate variable name');
+    expect(rowB.name.error.value).toBe('Duplicate variable name');
+    // Row A emits no change of its own (nothing edited on it) so its error
+    // never reaches Save's gate — harmless since Save never touches it. Row
+    // B's rename does emit a change, and it carries the duplicate error.
+    expect(hasErrors(mapMatrixChanges(provider))).toBe(true);
+  });
+
+  test('a valid edit does not trip hasErrors', () => {
+    const provider = makeProvider([
+      { id: 10, name: 'dev', variables: { shared: { value: '1', isSecret: false } } },
+    ]);
+    provider.variables.value[0].values[10].value.value = 'new';
+
+    expect(validateMatrixProvider(provider)).toBe(true);
+    expect(hasErrors(mapMatrixChanges(provider))).toBe(false);
   });
 });

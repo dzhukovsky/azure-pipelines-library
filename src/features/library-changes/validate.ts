@@ -54,11 +54,16 @@ export const validateMatrixProvider = (
     });
   });
 
-  const counts = new Map<string, number>();
+  const hasPresentCell = (row: (typeof rows)[number]) =>
+    Object.values(row.values).some((c) => c.present.value);
   const isActive = (row: (typeof rows)[number]) =>
-    row.modified || Object.values(row.values).some((c) => c.present.value);
+    row.modified || hasPresentCell(row);
 
-  for (const row of rows.filter(isActive)) {
+  // Duplicate counting only considers rows with at least one present cell —
+  // a row that is `modified` solely because every cell was deleted must not
+  // block re-adding the same name elsewhere.
+  const counts = new Map<string, number>();
+  for (const row of rows.filter(hasPresentCell)) {
     const key = normalize(row.name.name.value);
     counts.set(key, (counts.get(key) ?? 0) + 1);
   }
@@ -72,8 +77,11 @@ export const validateMatrixProvider = (
     }
     valid &&= !row.name.error.value;
 
+    // A mixed-secret row (`initialValue === null`) also converts any of its
+    // originally-secret cells to plain when flipped to `false`.
     const flippedToPlain =
-      row.name.isSecret.initialValue === true &&
+      (row.name.isSecret.initialValue === true ||
+        row.name.isSecret.initialValue === null) &&
       row.name.isSecret.value === false;
     if (flippedToPlain) {
       for (const cell of Object.values(row.values)) {

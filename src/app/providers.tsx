@@ -7,6 +7,10 @@ const queryClient = new QueryClient({
     queries: {
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
+      // Background refetches would rebuild tab models under the user's edits.
+      // Freshness is explicit instead: discard, save and the manage-views
+      // mutations invalidate the queries they affect.
+      staleTime: Number.POSITIVE_INFINITY,
     },
   },
 });

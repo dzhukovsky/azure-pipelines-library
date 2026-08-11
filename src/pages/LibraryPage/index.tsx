@@ -1,5 +1,7 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { Button } from 'azure-devops-ui/Button';
 import { ObservableValue } from 'azure-devops-ui/Core/Observable';
+import { Dialog } from 'azure-devops-ui/Dialog';
 import { Header, TitleSize } from 'azure-devops-ui/Header';
 import type { IHeaderCommandBarItem } from 'azure-devops-ui/HeaderCommandBar';
 import { Page } from 'azure-devops-ui/Page';
@@ -9,7 +11,6 @@ import { Tab, TabBar } from 'azure-devops-ui/Tabs';
 import { InlineKeywordFilterBarItem } from 'azure-devops-ui/TextFilterBarItem';
 import { Filter, type IFilter } from 'azure-devops-ui/Utilities/Filter';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { mapHomeChanges } from '@/features/library-changes';
 import { ManageViewsDialog } from '@/features/matrix-views/components/ManageViewsDialog';
 import { useMatrixViews } from '@/features/matrix-views/hooks/useMatrixViews';
 import {
@@ -24,7 +25,7 @@ import {
   useNavigation,
 } from '@/shared/hooks/useNavigation';
 import { HomeTab } from './HomeTab';
-import type { HomeTabModel } from './HomeTab/HomeTabModel';
+import type { LibraryTabModel } from './LibraryTabModel';
 import { MatrixTab } from './MatrixTab';
 
 export const LibraryPage = () => {
@@ -41,17 +42,45 @@ export const LibraryPage = () => {
 
   const [tabContainerKey, setTabContainerKey] = useState<number>(0);
   const [isManageViewsOpen, setIsManageViewsOpen] = useState(false);
+  const [pendingTab, setPendingTab] = useState<string>();
 
   const openManageViews = useCallback(() => setIsManageViewsOpen(true), []);
 
   const filter = useFilter(queryParams.filter, setQueryParams);
-  const { headerCommands, renderTabBarCommands, onTabContextChange } =
-    useHeader(filter, setTabContainerKey, previewDialogOptions, openManageViews);
+  const {
+    headerCommands,
+    renderTabBarCommands,
+    registerTabModel,
+    hasChanges,
+    discardChanges,
+  } = useHeader(
+    filter,
+    setTabContainerKey,
+    previewDialogOptions,
+    openManageViews,
+  );
   const { currentTab, tabs } = useTabs(
     queryParams.tab,
     setQueryParams,
     filter,
-    onTabContextChange,
+    registerTabModel,
+  );
+
+  const onSelectedTabChanged = useCallback(
+    (tab: string) => {
+      if (tab === queryParams.tab) {
+        return;
+      }
+
+      if (hasChanges) {
+        // Leaving the tab unmounts its model, so confirm before losing edits.
+        setPendingTab(tab);
+        return;
+      }
+
+      setQueryParams({ tab });
+    },
+    [hasChanges, queryParams.tab, setQueryParams],
   );
 
   if (isLoading) {
@@ -69,7 +98,7 @@ export const LibraryPage = () => {
           />
           <TabBar
             selectedTabId={queryParams.tab}
-            onSelectedTabChanged={(tab) => setQueryParams({ tab })}
+            onSelectedTabChanged={onSelectedTabChanged}
             renderAdditionalContent={renderTabBarCommands}
             disableSticky={false}
           >
@@ -85,6 +114,27 @@ export const LibraryPage = () => {
       <PreviewChangesDialog options={previewDialogOptions} />
       {isManageViewsOpen && (
         <ManageViewsDialog onDismiss={() => setIsManageViewsOpen(false)} />
+      )}
+      {pendingTab !== undefined && (
+        <Dialog
+          titleProps={{ text: 'Discard changes?' }}
+          onDismiss={() => setPendingTab(undefined)}
+          footerButtonProps={[
+            { text: 'Cancel', onClick: () => setPendingTab(undefined) },
+            {
+              text: 'Discard and switch',
+              danger: true,
+              onClick: () => {
+                const tab = pendingTab;
+                setPendingTab(undefined);
+                discardChanges();
+                setQueryParams({ tab });
+              },
+            },
+          ]}
+        >
+          You have unsaved changes. Switching tabs will discard them.
+        </Dialog>
       )}
     </>
   );
@@ -121,7 +171,7 @@ const useTabs = (
   tab: string,
   setQueryParams: QueryParamsSetter<{ tab: string }>,
   filter: IFilter,
-  onTabContextChange: (tab: HomeTabModel) => void,
+  onTabContextChange: (model: LibraryTabModel | undefined) => void,
 ) => {
   tab = tab?.toLowerCase() || 'home';
 
@@ -148,7 +198,12 @@ const useTabs = (
         // Keyed per view: MatrixTab initializes its data provider from props
         // at mount, so switching between two matrix views must remount it.
         render: () => (
-          <MatrixTab key={view.id} filter={filter} groupIds={view.groupIds} />
+          <MatrixTab
+            key={view.id}
+            filter={filter}
+            groupIds={view.groupIds}
+            onTabContextChange={onTabContextChange}
+          />
         ),
       };
     }
@@ -157,9 +212,14 @@ const useTabs = (
   }, [filter, onTabContextChange, views]);
 
   const currentTab = tabs[tab];
-  if (!currentTab && !viewsLoading) {
-    setQueryParams({ tab: '' });
-  }
+
+  // An unknown tab id (deleted view, hand-edited url) falls back to Home once
+  // the view list has loaded. Effect, not render: this navigates.
+  useEffect(() => {
+    if (!currentTab && !viewsLoading) {
+      setQueryParams({ tab: '' });
+    }
+  }, [currentTab, viewsLoading, setQueryParams]);
 
   return {
     currentTab,
@@ -175,6 +235,44 @@ const useHeader = (
   >,
   onManageViews: () => void,
 ) => {
+  const queryClient = useQueryClient();
+
+  const [activeModel, setActiveModel] = useState<LibraryTabModel>();
+  const [hasChanges, setHasChanges] = useState(false);
+
+  // Stable and idempotent: tabs hand over a freshly built LibraryTabModel on
+  // every rebuild, and React runs the outgoing tab's cleanup (register
+  // `undefined`) before the incoming tab's effect, so the header always ends
+  // up bound to the model that is actually on screen.
+  const registerTabModel = useCallback((model?: LibraryTabModel) => {
+    setActiveModel(model);
+    setHasChanges(!!model?.observable.modified);
+  }, []);
+
+  // Keep hasChanges in sync with the registered model.
+  useEffect(() => {
+    if (!activeModel) {
+      return;
+    }
+
+    const onChange = () => setHasChanges(activeModel.observable.modified);
+
+    activeModel.observable.subscribe(onChange);
+    // Catch edits landed between registration and this effect running.
+    onChange();
+
+    return () => activeModel.observable.unsubscribe(onChange);
+  }, [activeModel]);
+
+  const discardChanges = useCallback(() => {
+    previewDialogOptions.value = undefined;
+    queryClient.invalidateQueries({ queryKey: ['variable-groups'] });
+    queryClient.invalidateQueries({ queryKey: ['secure-files'] });
+    // Remounting the tab container rebuilds every model from the fetched data;
+    // the fresh registration resets hasChanges on its own.
+    setTabContainerKey((prevId) => prevId + 1);
+  }, [previewDialogOptions, queryClient, setTabContainerKey]);
+
   const noChangesCommands: IHeaderCommandBarItem[] = useMemo(
     () => [
       {
@@ -234,17 +332,8 @@ const useHeader = (
     [onManageViews],
   );
 
-  const [headerCommands, setHeaderCommands] =
-    useState<IHeaderCommandBarItem[]>(noChangesCommands);
-
-  const discardChanges = useCallback(() => {
-    setTabContainerKey((prevId) => prevId + 1);
-    previewDialogOptions.value = undefined;
-    setHeaderCommands(noChangesCommands);
-  }, [previewDialogOptions, setTabContainerKey, noChangesCommands]);
-
-  const getHasChangesCommands = useCallback(
-    (model: HomeTabModel): IHeaderCommandBarItem[] => [
+  const hasChangesCommands: IHeaderCommandBarItem[] = useMemo(
+    () => [
       {
         id: 'preview-changes',
         important: true,
@@ -254,7 +343,16 @@ const useHeader = (
             primary={true}
             text="Preview changes"
             onClick={() => {
-              previewDialogOptions.value = { changes: mapHomeChanges(model) };
+              if (!activeModel) {
+                return;
+              }
+
+              // Paints Error states; the preview still opens so the user sees
+              // them in context.
+              activeModel.validate();
+              previewDialogOptions.value = {
+                changes: activeModel.getChanges(),
+              };
             }}
           />
         ),
@@ -266,15 +364,7 @@ const useHeader = (
         important: false,
       },
     ],
-    [previewDialogOptions, discardChanges],
-  );
-
-  const onTabContextChange = useCallback(
-    (model: HomeTabModel) =>
-      setHeaderCommands(
-        model.modified ? getHasChangesCommands(model) : noChangesCommands,
-      ),
-    [noChangesCommands, getHasChangesCommands],
+    [activeModel, discardChanges, previewDialogOptions],
   );
 
   const renderTabBarCommands = useCallback(
@@ -289,8 +379,10 @@ const useHeader = (
   );
 
   return {
-    headerCommands,
+    headerCommands: hasChanges ? hasChangesCommands : noChangesCommands,
     renderTabBarCommands,
-    onTabContextChange,
+    registerTabModel,
+    hasChanges,
+    discardChanges,
   };
 };

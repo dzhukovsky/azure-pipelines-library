@@ -3,8 +3,10 @@ import { ObservableArray } from 'azure-devops-ui/Core/Observable';
 import type { IFilter } from 'azure-devops-ui/Utilities/Filter';
 import type { ITreeItem } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import { useEffect, useState } from 'react';
+import { mapMatrixChanges } from '@/features/library-changes';
 import { useVariableGroups } from '@/features/variable-groups/hooks/useVariableGroups';
 import type { ObservableMatrixVariable } from '@/features/variable-groups/models';
+import type { LibraryTabModel } from '../LibraryTabModel';
 import { MatrixDataProvider } from './MatrixDataProvider';
 import {
   MatrixTree,
@@ -15,6 +17,7 @@ import {
 export type MatrixTabProps = {
   filter: IFilter;
   groupIds?: number[];
+  onTabContextChange: (model: LibraryTabModel | undefined) => void;
 };
 
 type TabState = {
@@ -64,7 +67,11 @@ const createTabState = (
   };
 };
 
-export const MatrixTab = ({ filter, groupIds }: MatrixTabProps) => {
+export const MatrixTab = ({
+  filter,
+  groupIds,
+  onTabContextChange,
+}: MatrixTabProps) => {
   const groups = useVariableGroups();
 
   const isLoading = groups.isLoading;
@@ -75,10 +82,28 @@ export const MatrixTab = ({ filter, groupIds }: MatrixTabProps) => {
   );
 
   useEffect(() => {
-    if (!isLoading && state.data !== groups.data) {
+    if (
+      !isLoading &&
+      // Never throw away pending edits: a rebuild would silently drop them.
+      !state.provider.modified &&
+      state.data !== groups.data
+    ) {
       setState(createTabState(groups.data, groupIds));
     }
-  }, [isLoading, groups.data, groupIds, state.data]);
+  }, [isLoading, groups.data, groupIds, state]);
+
+  // Hand the current provider to the page header, and take it back on unmount
+  // so the header never acts on a model that is no longer rendered.
+  useEffect(() => {
+    onTabContextChange({
+      observable: state.provider,
+      // Task 8 wires the real validator
+      validate: () => true,
+      getChanges: () => mapMatrixChanges(state.provider),
+    });
+
+    return () => onTabContextChange(undefined);
+  }, [state.provider, onTabContextChange]);
 
   if (error) {
     return <div>Error: {(error as Error).message}</div>;

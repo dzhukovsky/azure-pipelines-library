@@ -6,13 +6,14 @@ import { ObservableArray } from 'azure-devops-ui/Core/Observable';
 import type { IFilter } from 'azure-devops-ui/Utilities/Filter';
 import type { ITreeItem } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import { useEffect, useState } from 'react';
+import { mapHomeChanges } from '@/features/library-changes';
 import { useSecureFiles } from '@/features/secure-files/hooks/useSecureFiles';
 import { mapSecureFiles } from '@/features/secure-files/mapSecureFiles';
 import type { ObservableSecureFile } from '@/features/secure-files/models';
 import { useVariableGroups } from '@/features/variable-groups/hooks/useVariableGroups';
 import { mapVariableGroups } from '@/features/variable-groups/mapVariableGroups';
 import type { ObservableVariableGroup } from '@/features/variable-groups/models';
-import { useSubscribtion } from '@/shared/lib/observable';
+import type { LibraryTabModel } from '../LibraryTabModel';
 import { HomeTabModel } from './HomeTabModel';
 import { HomeTree, type HomeTreeItem } from './HomeTree';
 
@@ -72,7 +73,7 @@ export const HomeTab = ({
   onTabContextChange,
 }: {
   filter: IFilter;
-  onTabContextChange: (model: HomeTabModel) => void;
+  onTabContextChange: (model: LibraryTabModel | undefined) => void;
 }) => {
   const groups = useVariableGroups();
   const files = useSecureFiles();
@@ -89,19 +90,26 @@ export const HomeTab = ({
   useEffect(() => {
     if (
       !isLoading &&
+      // Never throw away pending edits: a rebuild would silently drop them.
+      !context.model.modified &&
       (context.groupsData !== groups.data || context.filesData !== files.data)
     ) {
       setContext(createTabContext(groups.data, files.data));
     }
-  }, [
-    isLoading,
-    groups.data,
-    files.data,
-    context.groupsData,
-    context.filesData,
-  ]);
+  }, [isLoading, groups.data, files.data, context]);
 
-  useSubscribtion(context.model, onTabContextChange);
+  // Hand the current model to the page header, and take it back on unmount so
+  // the header never acts on a model that is no longer rendered.
+  useEffect(() => {
+    onTabContextChange({
+      observable: context.model,
+      // Task 8 wires the real validator
+      validate: () => true,
+      getChanges: () => mapHomeChanges(context.model),
+    });
+
+    return () => onTabContextChange(undefined);
+  }, [context.model, onTabContextChange]);
 
   if (error) {
     return <div>Error: {(error as Error).message}</div>;

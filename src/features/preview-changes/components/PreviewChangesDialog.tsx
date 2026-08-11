@@ -51,37 +51,15 @@ export const PreviewChangesDialog = (props: IPreviewChangesDialogProps) => {
           return null;
         }
 
-        const itemProvider = new TreeItemProvider(
-          mapTreeItems(options.changes),
-        );
-
-        const invalid = hasErrors(options.changes);
-
-        const close = () => {
+        const clearOptions = () => {
           props.options.value = undefined;
         };
 
         return (
-          <CustomDialog
-            calloutContentClassName="preview-changes-dialog"
-            modal={true}
-            escDismiss={false}
-            lightDismiss={false}
-            onDismiss={close}
-          >
-            <PanelHeader
-              titleProps={{ text: 'Preview changes', size: TitleSize.Large }}
-              onDismiss={close}
-              showCloseButton={false}
-            />
-            {invalid && (
-              <MessageCard severity={MessageCardSeverity.Warning}>
-                Fix the highlighted errors before saving.
-              </MessageCard>
-            )}
-            <PreviewChangesTree itemProvider={itemProvider} />
-            <SaveFooter options={options} invalid={invalid} close={close} />
-          </CustomDialog>
+          <PreviewChangesDialogContent
+            options={options}
+            clearOptions={clearOptions}
+          />
         );
       }}
     </Observer>
@@ -89,77 +67,125 @@ export const PreviewChangesDialog = (props: IPreviewChangesDialogProps) => {
 };
 
 // A separate component (rather than inline in the Observer render prop)
-// because it needs hooks: the render prop body above runs on every
-// Observable notification and cannot hold its own state.
-const SaveFooter = ({
+// because it needs hooks and local state: the render prop body above runs
+// on every Observable notification and cannot hold its own state. This also
+// gives the "every fresh dialog opening starts clean" property for free —
+// closing the dialog sets `options` back to undefined, which unmounts this
+// component and discards saving/errors/reloadOnClose with it; reopening
+// mounts a brand-new instance with fresh useState defaults.
+//
+// All three dismiss paths (Close/Cancel button, the dialog's onDismiss, the
+// header's onDismiss) funnel through the same onClose so a pending reload
+// can never be bypassed by one of them changing independently.
+const PreviewChangesDialogContent = ({
   options,
-  invalid,
-  close,
+  clearOptions,
 }: {
   options: PreviewChangesDialogOptions;
-  invalid: boolean;
-  close: () => void;
+  clearOptions: () => void;
 }) => {
+  const itemProvider = useMemo(
+    () => new TreeItemProvider(mapTreeItems(options.changes)),
+    [options.changes],
+  );
+  const invalid = hasErrors(options.changes);
+
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<GroupSaveResult[]>();
-  // Set when the failed save still saved some groups: the data is now
-  // stale, but the dialog stays open so the errors remain visible. The
-  // reload (via options.onClosed) is deferred until the user dismisses it.
+  const [generalError, setGeneralError] = useState<string>();
+  // Set (and kept set — see onSaveClick) once any save attempt saved at
+  // least one group. From then on the pre-save `options.changes` snapshot
+  // is stale: resubmitting it would hit already-saved groups with a
+  // misleading conflict error, or, for matrix groups without a
+  // modifiedOnSnapshot, silently re-apply a rename onto already-renamed
+  // data. So once true, Save is disabled and the user must close (which
+  // triggers the deferred reload) before doing anything else.
   const [reloadOnClose, setReloadOnClose] = useState(false);
 
-  const onSaveClick = async () => {
-    setSaving(true);
-    setErrors(undefined);
-    const outcome = await options.onSave();
-    setSaving(false);
-    if (outcome.ok) {
-      close();
-    } else {
-      setErrors(outcome.results.filter((r) => !r.ok));
-      setReloadOnClose(outcome.results.some((r) => r.ok));
-    }
-    options.onSaved(outcome); // page invalidates/remounts on full success
-  };
-
-  const onCancelClick = () => {
-    close();
+  const onClose = () => {
+    clearOptions();
     if (reloadOnClose) {
       options.onClosed?.();
     }
   };
 
+  const onSaveClick = async () => {
+    setSaving(true);
+    setErrors(undefined);
+    setGeneralError(undefined);
+    try {
+      const outcome = await options.onSave();
+      if (outcome.ok) {
+        clearOptions();
+      } else {
+        setErrors(outcome.results.filter((r) => !r.ok));
+        setReloadOnClose((prev) => prev || outcome.results.some((r) => r.ok));
+      }
+      options.onSaved(outcome); // page invalidates/remounts on full success
+    } catch (e) {
+      // saveLibraryChanges is documented to never throw; this only guards
+      // against an unexpected bug so the modal — no esc/light-dismiss, no
+      // close button — can never get stuck showing nothing.
+      setGeneralError(
+        `Unexpected error while saving: ${e instanceof Error ? e.message : String(e)}`,
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // After any save attempt that produced errors (or saved partially), the
+  // dialog can no longer just be cancelled back to a clean slate — reads
+  // better as "Close" than "Cancel" from here on.
+  const closeText =
+    errors || generalError || reloadOnClose ? 'Close' : 'Cancel';
+
   return (
-    <>
-      {errors && (
-        <>
-          <MessageCard
-            severity={MessageCardSeverity.Error}
-            className="margin-16"
-          >
-            {errors.map((r) => `${r.groupName}: ${r.ok ? '' : r.error}`).join('\n')}
-          </MessageCard>
-          {reloadOnClose && (
-            <MessageCard
-              severity={MessageCardSeverity.Info}
-              className="margin-16"
-            >
-              Successfully saved groups were applied; press Cancel to reload.
-            </MessageCard>
-          )}
-        </>
+    <CustomDialog
+      calloutContentClassName="preview-changes-dialog"
+      modal={true}
+      escDismiss={false}
+      lightDismiss={false}
+      onDismiss={onClose}
+    >
+      <PanelHeader
+        titleProps={{ text: 'Preview changes', size: TitleSize.Large }}
+        onDismiss={onClose}
+        showCloseButton={false}
+      />
+      {invalid && (
+        <MessageCard severity={MessageCardSeverity.Warning}>
+          Fix the highlighted errors before saving.
+        </MessageCard>
+      )}
+      <PreviewChangesTree itemProvider={itemProvider} />
+      {(errors || generalError) && (
+        <MessageCard severity={MessageCardSeverity.Error} className="margin-16">
+          {generalError && <div>{generalError}</div>}
+          {errors?.map((r) => (
+            <div key={r.groupId}>
+              {r.groupName}: {r.ok ? '' : r.error}
+            </div>
+          ))}
+        </MessageCard>
+      )}
+      {reloadOnClose && (
+        <MessageCard severity={MessageCardSeverity.Info} className="margin-16">
+          Successfully saved groups were applied; press Close to reload.
+        </MessageCard>
       )}
       <PanelFooter
         buttonProps={[
-          { text: 'Cancel', onClick: onCancelClick, disabled: saving },
+          { text: closeText, onClick: onClose, disabled: saving },
           {
             text: saving ? 'Saving…' : 'Save changes',
             onClick: onSaveClick,
             primary: true,
-            disabled: invalid || saving,
+            disabled: invalid || saving || reloadOnClose,
           },
         ]}
       />
-    </>
+    </CustomDialog>
   );
 };
 

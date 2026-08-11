@@ -9,6 +9,8 @@ import { Tab, TabBar } from 'azure-devops-ui/Tabs';
 import { InlineKeywordFilterBarItem } from 'azure-devops-ui/TextFilterBarItem';
 import { Filter, type IFilter } from 'azure-devops-ui/Utilities/Filter';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ManageViewsDialog } from '@/features/matrix-views/components/ManageViewsDialog';
+import { useMatrixViews } from '@/features/matrix-views/hooks/useMatrixViews';
 import {
   PreviewChangesDialog,
   type PreviewChangesDialogOptions,
@@ -37,10 +39,13 @@ export const LibraryPage = () => {
   );
 
   const [tabContainerKey, setTabContainerKey] = useState<number>(0);
+  const [isManageViewsOpen, setIsManageViewsOpen] = useState(false);
+
+  const openManageViews = useCallback(() => setIsManageViewsOpen(true), []);
 
   const filter = useFilter(queryParams.filter, setQueryParams);
   const { headerCommands, renderTabBarCommands, onTabContextChange } =
-    useHeader(filter, setTabContainerKey, previewDialogOptions);
+    useHeader(filter, setTabContainerKey, previewDialogOptions, openManageViews);
   const { currentTab, tabs } = useTabs(
     queryParams.tab,
     setQueryParams,
@@ -77,6 +82,9 @@ export const LibraryPage = () => {
         </Page>
       </Surface>
       <PreviewChangesDialog options={previewDialogOptions} />
+      {isManageViewsOpen && (
+        <ManageViewsDialog onDismiss={() => setIsManageViewsOpen(false)} />
+      )}
     </>
   );
 };
@@ -116,26 +124,39 @@ const useTabs = (
 ) => {
   tab = tab?.toLowerCase() || 'home';
 
+  const { data: views, isLoading: viewsLoading } = useMatrixViews();
+
   const tabs = useMemo<
     Record<string, { name: string; render: () => React.ReactNode }>
-  >(
-    () => ({
+  >(() => {
+    const result: Record<
+      string,
+      { name: string; render: () => React.ReactNode }
+    > = {
       home: {
         name: 'Home',
         render: () => (
           <HomeTab filter={filter} onTabContextChange={onTabContextChange} />
         ),
       },
-      matrix: {
-        name: 'Matrix',
-        render: () => <MatrixTab filter={filter} />,
-      },
-    }),
-    [filter, onTabContextChange],
-  );
+    };
+
+    for (const view of views ?? []) {
+      result[view.id.toLowerCase()] = {
+        name: view.name,
+        // Keyed per view: MatrixTab initializes its data provider from props
+        // at mount, so switching between two matrix views must remount it.
+        render: () => (
+          <MatrixTab key={view.id} filter={filter} groupIds={view.groupIds} />
+        ),
+      };
+    }
+
+    return result;
+  }, [filter, onTabContextChange, views]);
 
   const currentTab = tabs[tab];
-  if (!currentTab) {
+  if (!currentTab && !viewsLoading) {
     setQueryParams({ tab: '' });
   }
 
@@ -151,6 +172,7 @@ const useHeader = (
   previewDialogOptions: ObservableValue<
     PreviewChangesDialogOptions | undefined
   >,
+  onManageViews: () => void,
 ) => {
   const noChangesCommands: IHeaderCommandBarItem[] = useMemo(
     () => [
@@ -203,12 +225,12 @@ const useHeader = (
         id: 'manage-views',
         text: 'Manage views',
         onActivate: () => {
-          alert('Manage views');
+          onManageViews();
         },
         important: false,
       },
     ],
-    [],
+    [onManageViews],
   );
 
   const [headerCommands, setHeaderCommands] =

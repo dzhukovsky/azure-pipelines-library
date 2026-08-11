@@ -1,9 +1,10 @@
+import type { VariableGroup } from 'azure-devops-extension-api/TaskAgent';
+import { ObservableArray } from 'azure-devops-ui/Core/Observable';
 import type { IFilter } from 'azure-devops-ui/Utilities/Filter';
 import type { ITreeItem } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import { useEffect, useState } from 'react';
 import { useVariableGroups } from '@/features/variable-groups/hooks/useVariableGroups';
 import type { ObservableMatrixVariable } from '@/features/variable-groups/models';
-import { useDerivedObservableArray } from '@/shared/hooks/useObservable';
 import { MatrixDataProvider } from './MatrixDataProvider';
 import {
   MatrixTree,
@@ -13,40 +14,67 @@ import {
 
 export type MatrixTabProps = {
   filter: IFilter;
+  groupIds?: number[];
 };
 
-type TabContext = {
+type TabState = {
+  data?: VariableGroup[];
+  provider: MatrixDataProvider;
   groupNames: VariableGroupName[];
+  items: ObservableArray<ITreeItem<MatrixTreeItem>>;
 };
 
-export const MatrixTab = ({ filter }: MatrixTabProps) => {
-  const [context, setContext] = useState<TabContext>(() => ({
-    groupNames: [],
-  }));
+// Built synchronously from the query cache — provider, group names and tree
+// items swap atomically and are fully populated in the same render, so a
+// freshly mounted or freshly loaded tab never renders an empty tree frame.
+const createTabState = (
+  data: VariableGroup[] | undefined,
+  groupIds?: number[],
+): TabState => {
+  const visibleGroups = !data
+    ? []
+    : groupIds
+      ? groupIds.flatMap((id) => {
+          const group = data.find((x) => x.id === id);
+          return group ? [group] : [];
+        })
+      : data;
 
-  const [provider, setProvider] = useState(() => new MatrixDataProvider([]));
-  const items = useDerivedObservableArray(provider.variables, mapTreeItems);
+  const provider = new MatrixDataProvider(visibleGroups);
+  const items = new ObservableArray<ITreeItem<MatrixTreeItem>>(
+    mapTreeItems(provider.variables.value),
+  );
 
+  provider.variables.subscribe(() => {
+    items.splice(0, items.length, ...mapTreeItems(provider.variables.value));
+  });
+
+  return {
+    data,
+    provider,
+    items,
+    groupNames: visibleGroups.map<VariableGroupName>((x) => ({
+      id: x.id,
+      name: x.name,
+    })),
+  };
+};
+
+export const MatrixTab = ({ filter, groupIds }: MatrixTabProps) => {
   const groups = useVariableGroups();
 
   const isLoading = groups.isLoading;
   const error = groups.error;
 
+  const [state, setState] = useState(() =>
+    createTabState(groups.data, groupIds),
+  );
+
   useEffect(() => {
-    if (!isLoading) {
-      const provider = new MatrixDataProvider(groups.data || []);
-
-      setContext({
-        groupNames:
-          groups.data?.map<VariableGroupName>((x) => ({
-            id: x.id,
-            name: x.name,
-          })) || [],
-      });
-
-      setProvider(provider);
+    if (!isLoading && state.data !== groups.data) {
+      setState(createTabState(groups.data, groupIds));
     }
-  }, [isLoading, groups.data]);
+  }, [isLoading, groups.data, groupIds, state.data]);
 
   if (error) {
     return <div>Error: {(error as Error).message}</div>;
@@ -54,12 +82,12 @@ export const MatrixTab = ({ filter }: MatrixTabProps) => {
 
   return (
     <MatrixTree
-      groupNames={context.groupNames}
-      items={items}
+      groupNames={state.groupNames}
+      items={state.items}
       filter={filter}
       loading={isLoading}
       addNewVariable={() => {
-        provider.addNewVariable();
+        state.provider.addNewVariable();
       }}
     />
   );

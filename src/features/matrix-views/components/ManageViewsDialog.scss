@@ -1,0 +1,24 @@
+.manage-views-dialog {
+    overflow: hidden;
+    min-width: 40vw;
+    max-width: 60vw;
+    max-height: 80vh;
+}
+
+.manage-views-dialog-content {
+    overflow-y: auto;
+    min-height: 120px;
+}
+
+.manage-views-dialog-row-name {
+    flex: 1 1 0;
+}
+
+.manage-views-dialog-row-groups {
+    flex: 2 1 0;
+    min-width: 0;
+}
+
+.manage-views-dialog-row-actions {
+    flex: 0 0 32px;
+}

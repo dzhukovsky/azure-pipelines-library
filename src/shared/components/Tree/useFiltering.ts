@@ -7,7 +7,7 @@ import {
   type ITreeItem,
   TreeItemProvider,
 } from 'azure-devops-ui/Utilities/TreeItemProvider';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { FilterFunc } from '../Table/useFiltering';
 
 function filterItems<T>(
@@ -33,8 +33,29 @@ export function useFiltering<T>(
   filter: IFilter,
   filterFunc: FilterFunc<T>,
 ) {
-  const filteredItems = useMemo(() => new TreeItemProvider<T>(), []);
-  const [isEmpty, setIsEmpty] = useState(true);
+  // Seeded synchronously (on mount and whenever the items array is replaced)
+  // so the first render already has the filtered rows — filling the provider
+  // from an effect leaves a frame where the tree looks empty.
+  const seed = useCallback(() => {
+    const filteredItems = new TreeItemProvider<T>();
+    const filtered = filterItems(items, filter, filterFunc);
+    filteredItems.splice(undefined, filteredItems.roots, [
+      {
+        items: filtered,
+      },
+    ]);
+    return { items, filteredItems, isEmpty: filtered.length === 0 };
+  }, [items, filter, filterFunc]);
+
+  const [state, setState] = useState(seed);
+  const seededFor = useRef<ITreeItem<T>[] | null>(items);
+
+  if (state.items !== items) {
+    seededFor.current = items;
+    setState(seed());
+  }
+
+  const filteredItems = state.filteredItems;
 
   useEffect(() => {
     const onChange = () => {
@@ -44,16 +65,22 @@ export function useFiltering<T>(
           items: filtered,
         },
       ]);
-      setIsEmpty(filtered.length === 0);
+      setState((prev) => ({ ...prev, isEmpty: filtered.length === 0 }));
     };
 
-    onChange();
+    // The render-time seed already covers the state this effect run was
+    // scheduled for; recompute only when the effect re-runs for other reasons.
+    if (seededFor.current === items) {
+      seededFor.current = null;
+    } else {
+      onChange();
+    }
 
     filter.subscribe(onChange, FILTER_CHANGE_EVENT);
     return () => filter.unsubscribe(onChange, FILTER_CHANGE_EVENT);
   }, [items, filter, filterFunc, filteredItems]);
 
-  return { filteredItems, isEmpty };
+  return { filteredItems, isEmpty: state.isEmpty };
 }
 
 export function useObservableFiltering<T>(
@@ -61,8 +88,31 @@ export function useObservableFiltering<T>(
   filter: IFilter,
   filterFunc: FilterFunc<T>,
 ) {
-  const filteredItems = useMemo(() => new TreeItemProvider<T>(), []);
-  const [isEmpty, setIsEmpty] = useState(true);
+  // Seeded synchronously (on mount and whenever the items observable is
+  // swapped) so the first render already has the filtered rows — filling the
+  // provider from an effect leaves a frame where the tree looks empty.
+  const seed = useCallback(() => {
+    const filteredItems = new TreeItemProvider<T>();
+    const filtered = filterItems(items.value, filter, filterFunc);
+    filteredItems.splice(undefined, filteredItems.roots, [
+      {
+        items: filtered,
+      },
+    ]);
+    return { items, filteredItems, isEmpty: filtered.length === 0 };
+  }, [items, filter, filterFunc]);
+
+  const [state, setState] = useState(seed);
+  const seededFor = useRef<IReadonlyObservableArray<ITreeItem<T>> | null>(
+    items,
+  );
+
+  if (state.items !== items) {
+    seededFor.current = items;
+    setState(seed());
+  }
+
+  const filteredItems = state.filteredItems;
 
   useEffect(() => {
     const onChange = () => {
@@ -72,10 +122,16 @@ export function useObservableFiltering<T>(
           items: filtered,
         },
       ]);
-      setIsEmpty(filtered.length === 0);
+      setState((prev) => ({ ...prev, isEmpty: filtered.length === 0 }));
     };
 
-    onChange();
+    // The render-time seed already covers the state this effect run was
+    // scheduled for; recompute only when the effect re-runs for other reasons.
+    if (seededFor.current === items) {
+      seededFor.current = null;
+    } else {
+      onChange();
+    }
 
     items.subscribe(onChange);
     filter.subscribe(onChange, FILTER_CHANGE_EVENT);
@@ -86,5 +142,5 @@ export function useObservableFiltering<T>(
     };
   }, [items, filter, filterFunc, filteredItems]);
 
-  return { filteredItems, isEmpty };
+  return { filteredItems, isEmpty: state.isEmpty };
 }

@@ -14,8 +14,26 @@ import { HomeTabModel } from './HomeTabModel';
 import { HomeTree, type HomeTreeItem } from './HomeTree';
 
 type TabContext = {
+  groupsData?: VariableGroup[];
+  filesData?: SecureFile[];
   items: ITreeItem<HomeTreeItem>[];
   model: HomeTabModel;
+};
+
+// Built synchronously from the query cache so that a freshly mounted tab
+// renders its rows on the first frame instead of flashing an empty tree.
+const createTabContext = (
+  groupsData: VariableGroup[] | undefined,
+  filesData: SecureFile[] | undefined,
+): TabContext => {
+  const model = createHomeTabModel(groupsData ?? [], filesData ?? []);
+
+  return {
+    groupsData,
+    filesData,
+    items: mapTreeItems(model),
+    model,
+  };
 };
 
 export const HomeTab = ({
@@ -25,27 +43,32 @@ export const HomeTab = ({
   filter: IFilter;
   onTabContextChange: (model: HomeTabModel) => void;
 }) => {
-  const [context, setContext] = useState<TabContext>(() => ({
-    items: [],
-    model: new HomeTabModel([], []),
-  }));
-
   const groups = useVariableGroups();
   const files = useSecureFiles();
 
   const isLoading = groups.isLoading || files.isLoading;
   const error = groups.error || files.error;
 
+  const [context, setContext] = useState<TabContext>(() =>
+    isLoading
+      ? createTabContext(undefined, undefined)
+      : createTabContext(groups.data, files.data),
+  );
+
   useEffect(() => {
-    if (!isLoading) {
-      const model = createHomeTabModel(groups.data ?? [], files.data ?? []);
-      const items = mapTreeItems(model);
-      setContext({
-        items,
-        model,
-      });
+    if (
+      !isLoading &&
+      (context.groupsData !== groups.data || context.filesData !== files.data)
+    ) {
+      setContext(createTabContext(groups.data, files.data));
     }
-  }, [isLoading, groups.data, files.data]);
+  }, [
+    isLoading,
+    groups.data,
+    files.data,
+    context.groupsData,
+    context.filesData,
+  ]);
 
   useSubscribtion(context.model, onTabContextChange);
 

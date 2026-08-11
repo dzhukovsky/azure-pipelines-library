@@ -8,6 +8,7 @@ import { CustomDialog } from 'azure-devops-ui/Dialog';
 import { TitleSize } from 'azure-devops-ui/Header';
 import { IconSize } from 'azure-devops-ui/Icon';
 import { renderListCell } from 'azure-devops-ui/List';
+import { MessageCard, MessageCardSeverity } from 'azure-devops-ui/MessageCard';
 import { Observer } from 'azure-devops-ui/Observer';
 import { PanelFooter, PanelHeader } from 'azure-devops-ui/Panel';
 import { type ITreeColumn, Tree } from 'azure-devops-ui/TreeEx';
@@ -16,7 +17,7 @@ import {
   TreeItemProvider,
 } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import { useMemo } from 'react';
-import type { LibraryChanges } from '@/features/library-changes';
+import { hasErrors, type LibraryChanges } from '@/features/library-changes';
 import { StateIcon } from '@/shared/components/StateIcon';
 import { TextFieldCell } from '@/shared/components/TextFieldCell';
 import { createActionColumn } from '@/shared/components/Tree/createActionColumn';
@@ -43,6 +44,8 @@ export const PreviewChangesDialog = (props: IPreviewChangesDialogProps) => {
           mapTreeItems(options.changes),
         );
 
+        const invalid = hasErrors(options.changes);
+
         const close = () => {
           props.options.value = undefined;
         };
@@ -60,6 +63,11 @@ export const PreviewChangesDialog = (props: IPreviewChangesDialogProps) => {
               onDismiss={close}
               showCloseButton={false}
             />
+            {invalid && (
+              <MessageCard severity={MessageCardSeverity.Warning}>
+                Fix the highlighted errors before saving.
+              </MessageCard>
+            )}
             <PreviewChangesTree itemProvider={itemProvider} />
             <PanelFooter
               buttonProps={[
@@ -71,6 +79,7 @@ export const PreviewChangesDialog = (props: IPreviewChangesDialogProps) => {
                   text: 'Save changes',
                   onClick: close,
                   primary: true,
+                  disabled: invalid,
                 },
               ]}
             />

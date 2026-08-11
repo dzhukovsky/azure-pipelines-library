@@ -3,7 +3,10 @@ import { ObservableArray } from 'azure-devops-ui/Core/Observable';
 import type { IFilter } from 'azure-devops-ui/Utilities/Filter';
 import type { ITreeItem } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import { useEffect, useState } from 'react';
-import { mapMatrixChanges } from '@/features/library-changes';
+import {
+  mapMatrixChanges,
+  validateMatrixProvider,
+} from '@/features/library-changes';
 import { useVariableGroups } from '@/features/variable-groups/hooks/useVariableGroups';
 import type { ObservableMatrixVariable } from '@/features/variable-groups/models';
 import type { LibraryTabModel } from '../LibraryTabModel';
@@ -97,8 +100,7 @@ export const MatrixTab = ({
   useEffect(() => {
     onTabContextChange({
       observable: state.provider,
-      // Task 8 wires the real validator
-      validate: () => true,
+      validate: () => validateMatrixProvider(state.provider),
       getChanges: () => mapMatrixChanges(state.provider),
     });
 

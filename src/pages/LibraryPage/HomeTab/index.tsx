@@ -6,7 +6,7 @@ import { ObservableArray } from 'azure-devops-ui/Core/Observable';
 import type { IFilter } from 'azure-devops-ui/Utilities/Filter';
 import type { ITreeItem } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import { useEffect, useState } from 'react';
-import { mapHomeChanges } from '@/features/library-changes';
+import { mapHomeChanges, validateHomeModel } from '@/features/library-changes';
 import { useSecureFiles } from '@/features/secure-files/hooks/useSecureFiles';
 import { mapSecureFiles } from '@/features/secure-files/mapSecureFiles';
 import type { ObservableSecureFile } from '@/features/secure-files/models';
@@ -103,8 +103,7 @@ export const HomeTab = ({
   useEffect(() => {
     onTabContextChange({
       observable: context.model,
-      // Task 8 wires the real validator
-      validate: () => true,
+      validate: () => validateHomeModel(context.model),
       getChanges: () => mapHomeChanges(context.model),
     });
 

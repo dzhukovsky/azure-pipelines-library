@@ -1,7 +1,6 @@
 import { IconSize } from 'azure-devops-ui/Icon';
 import { Observer } from 'azure-devops-ui/Observer';
 import { css } from 'azure-devops-ui/Util';
-import { States } from '@/shared/components/StateIcon';
 import { TextFieldCell } from '@/shared/components/TextFieldCell';
 import type { MatrixTreeRenderer } from '../MatrixTree';
 import { NameActions } from './NameActions';
@@ -49,9 +48,13 @@ export const variableRenderer: MatrixTreeRenderer['variable'] = {
       const variable = data.values[+columnId];
 
       return (
-        <Observer state={variable.state} isSecret={data.name.isSecret}>
-          {({ state, isSecret }) => {
-            const isUndefined = variable.isNew && state === States.Unchanged;
+        <Observer
+          state={variable.state}
+          present={variable.present}
+          isSecret={data.name.isSecret}
+        >
+          {({ state, present, isSecret }) => {
+            const isUndefined = variable.isNew && !present;
 
             return (
               <TextFieldCell

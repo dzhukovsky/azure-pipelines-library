@@ -61,7 +61,7 @@ export const ValueActions = ({
               tooltipProps={{ text: 'Add new variable' }}
               onMouseDown={(e) => e.preventDefault()}
               onClick={(e) => {
-                data.state.value = States.New;
+                variable.addValue(groupId);
                 const element = e.currentTarget;
                 window.requestAnimationFrame(() => selectClosestInput(element));
                 e.stopPropagation();

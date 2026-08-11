@@ -9,18 +9,30 @@ import {
   type ObservableObjectArray,
 } from '@/shared/lib/observable';
 
+export type MatrixGroupRef = { id: number; name: string; modifiedOn?: Date };
+
 export class MatrixDataProvider extends ObservableObject<MatrixDataProvider> {
-  readonly groupIds: GroupId[];
+  readonly groups: MatrixGroupRef[];
   readonly variables: ObservableObjectArray<ObservableMatrixVariable>;
 
   constructor(variableGroups: VariableGroup[]) {
     super();
-    this.groupIds = variableGroups.map((vg) => vg.id);
+    this.groups = variableGroups.map((vg) => ({
+      id: vg.id,
+      name: vg.name,
+      modifiedOn: vg.modifiedOn ?? vg.createdOn,
+    }));
     this.variables = this.addArrayProperty(mapVariables(variableGroups));
   }
 
+  get groupIds(): GroupId[] {
+    return this.groups.map((g) => g.id);
+  }
+
   addNewVariable() {
-    this.variables.push(new ObservableMatrixVariable('', [], this.groupIds));
+    this.variables.push(
+      new ObservableMatrixVariable('', {}, this.groupIds, true),
+    );
   }
 }
 

@@ -191,7 +191,7 @@ const useColumns = () => {
       }),
       createActionColumn<HistoryTreeItem>({
         id: 'changeCount',
-        name: 'Changes',
+        name: '',
         // Fixed width: the column only ever holds a small count, so it
         // should not grow with the dialog.
         width: new ObservableValue(120),
@@ -203,7 +203,7 @@ const useColumns = () => {
               0,
             );
             return (
-              <span className="secondary-text white-space-nowrap flex-self-center">
+              <span className="secondary-text white-space-nowrap flex-self-center flex-grow text-right">
                 {changeCount} {changeCount === 1 ? 'change' : 'changes'}
               </span>
             );

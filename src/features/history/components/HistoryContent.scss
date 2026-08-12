@@ -7,6 +7,7 @@
     // cells are the table's edge spacers and must stay at zero.
     .bolt-table-cell:not(.bolt-tree-cell):not(.bolt-table-cell-compact) {
         padding-left: 0.6875rem;
+        padding-right: 0.6875rem;
     }
 
     // Clicking PillGroup's "show more" switches the group to wrap mode,

@@ -45,6 +45,9 @@ export class ObservableMatrixVariable extends ObservableObject<ObservableMatrixV
   }
 
   addValue(groupId: GroupId) {
+    // Only for cells that never existed on the server; restoring a deleted
+    // existing cell is restoreVariable's job.
+    if (!this.values[groupId].isNew) return;
     this.values[groupId].restore();
   }
 

@@ -42,17 +42,17 @@ export const recordSaveHistory = async (
   outcome: SaveOutcome,
   queryClient: QueryClient,
 ): Promise<void> => {
-  const user = SDK.getUser();
-  const entries = buildHistoryEntries(
-    outcome,
-    { id: user.id, displayName: user.displayName },
-    new Date().toISOString(),
-    () => crypto.randomUUID(),
-  );
-  if (!entries.length) {
-    return;
-  }
   try {
+    const user = SDK.getUser();
+    const entries = buildHistoryEntries(
+      outcome,
+      { id: user.id, displayName: user.displayName },
+      new Date().toISOString(),
+      () => crypto.randomUUID(),
+    );
+    if (!entries.length) {
+      return;
+    }
     await appendHistoryEntries(entries);
     queryClient.invalidateQueries({ queryKey: historyQueryKey });
   } catch (e) {

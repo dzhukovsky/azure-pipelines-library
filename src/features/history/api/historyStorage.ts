@@ -23,8 +23,9 @@ const getDataManager = async () => {
 
 const getHistoryKey = () => `library-history-${SDK.getWebContext().project.id}`;
 
-export const getHistoryEntries = async (): Promise<HistoryEntry[]> => {
-  const dataManager = await getDataManager();
+type DataManager = Awaited<ReturnType<typeof getDataManager>>;
+
+const readEntries = async (dataManager: DataManager): Promise<HistoryEntry[]> => {
   const entries = await dataManager.getValue<HistoryEntry[]>(getHistoryKey(), {
     defaultValue: [],
   });
@@ -32,11 +33,17 @@ export const getHistoryEntries = async (): Promise<HistoryEntry[]> => {
   return entries ?? [];
 };
 
+export const getHistoryEntries = async (): Promise<HistoryEntry[]> => {
+  const dataManager = await getDataManager();
+
+  return readEntries(dataManager);
+};
+
 export const appendHistoryEntries = async (
   entries: HistoryEntry[],
 ): Promise<HistoryEntry[]> => {
   const dataManager = await getDataManager();
-  const existing = await getHistoryEntries();
+  const existing = await readEntries(dataManager);
   // Newest first; prune the tail so the document stays small (keys only).
   const merged = [...entries, ...existing].slice(0, MAX_HISTORY_ENTRIES);
 

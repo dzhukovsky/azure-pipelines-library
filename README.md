@@ -1,5 +1,9 @@
 # azdo-advanced-library
 
+## Editing & History
+
+The Home and Matrix tabs support inline editing of variable groups and their variables directly in the grid — add, edit, rename, delete, and toggle secret status per row or cell, with per-field state indicators (new/modified/deleted) as you go. Edits are staged locally; use "Preview changes" to review a diff of every pending change and see validation errors before committing anything. Saving applies only the groups you changed and is extension-managed: each group's history is appended as an entry keyed by project, independent of the native Azure DevOps Library UI. Before saving, each group is checked against its last-known `modifiedOn` timestamp; if it was modified externally in the meantime, that group's save is skipped with a per-group conflict error while unaffected groups still save, and the resulting history shows an interruption marker so the gap is visible later.
+
 ## Project Structure
 ```
 src/

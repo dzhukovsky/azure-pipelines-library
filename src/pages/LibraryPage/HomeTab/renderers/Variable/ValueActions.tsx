@@ -1,9 +1,6 @@
 import { Button } from 'azure-devops-ui/Button';
 import { Observer } from 'azure-devops-ui/Observer';
-import type {
-  ITreeItemEx,
-  ITreeItemProvider,
-} from 'azure-devops-ui/Utilities/TreeItemProvider';
+import type { ITreeItemEx } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import type { ObservableVariable } from '@/features/variable-groups/models';
 import { StateIcon, States } from '@/shared/components/StateIcon';
 import { useTreeRow } from '@/shared/components/Tree/useTreeRow';
@@ -15,7 +12,6 @@ export const ValueActions = ({
 }: {
   data: ObservableVariable;
   treeItem: ITreeItemEx<HomeTreeItem>;
-  itemProvider: ITreeItemProvider<HomeTreeItem>;
 }) => {
   const { hasMouse, hasFocus, onBlur } = useTreeRow();
   const hasMouseOrFocus = hasMouse || hasFocus;

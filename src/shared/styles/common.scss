@@ -43,3 +43,9 @@ input[type="password"] {
 td.padding-left-12 {
     padding-left: 12px;
 }
+
+// A flex item refuses to shrink below its content unless it is allowed to,
+// so a long label pushes past its cell instead of ellipsising inside it.
+.min-width-0 {
+    min-width: 0;
+}

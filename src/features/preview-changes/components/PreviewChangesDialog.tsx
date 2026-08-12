@@ -211,7 +211,7 @@ const useColumns = () => {
               text: group.previousName
                 ? `${group.previousName} → ${group.name}`
                 : group.name,
-              textClassName: 'padding-vertical-8',
+              textClassName: 'padding-vertical-8 min-width-0',
               iconProps: {
                 iconName: 'fluent-LibraryColor',
                 size: IconSize.medium,
@@ -244,7 +244,7 @@ const useColumns = () => {
           if (file) {
             return renderListCell({
               text: file.name,
-              textClassName: 'padding-vertical-8',
+              textClassName: 'padding-vertical-8 min-width-0',
               iconProps: {
                 iconName: 'fluent-DocumentKeyRegular',
                 size: IconSize.medium,
@@ -256,7 +256,7 @@ const useColumns = () => {
           if (fileProperty) {
             return renderListCell({
               text: fileProperty.name,
-              textClassName: 'padding-vertical-8',
+              textClassName: 'padding-vertical-8 min-width-0',
             });
           }
 

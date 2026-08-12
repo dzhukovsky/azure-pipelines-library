@@ -67,7 +67,7 @@ const ActionCell = <T,>(props: {
       treeColumn={props.column}
       role={props.role}
     >
-      <div className="flex-row flex-grow">
+      <div className="flex-row flex-grow min-width-0">
         {props.renderCell(options)}
         {props.renderActions(options)}
       </div>

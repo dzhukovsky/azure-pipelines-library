@@ -95,7 +95,7 @@ const ActionCell = memo(
           {(props: IMouseWithinStatus & IFocusWithinStatus) => (
             <div
               role="none"
-              className="flex-row flex-grow"
+              className="flex-row flex-grow min-width-0"
               onBlur={props.onBlur}
               onFocus={props.onFocus}
               onMouseEnter={props.onMouseEnter}

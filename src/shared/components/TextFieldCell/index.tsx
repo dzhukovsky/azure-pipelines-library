@@ -21,6 +21,9 @@ export type TextFieldCellProps = {
   | 'onChange'
   | 'onBlur'
   | 'onKeyDown'
+  | 'onClick'
+  | 'onDoubleClick'
+  | 'onMouseDown'
   | 'autoFocus'
 >;
 

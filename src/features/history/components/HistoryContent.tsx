@@ -271,7 +271,7 @@ const useColumns = (resolveGroup: GroupResolver) => {
 
               return renderListCell({
                 text: renamedFrom ? `${renamedFrom} → ${name}` : name,
-                textClassName: 'padding-vertical-8',
+                textClassName: 'padding-vertical-8 min-width-0',
                 iconProps: {
                   iconName: 'fluent-LibraryColor',
                   size: IconSize.medium,
@@ -283,7 +283,7 @@ const useColumns = (resolveGroup: GroupResolver) => {
             if (change) {
               return renderListCell({
                 text: changeText(change),
-                textClassName: 'padding-vertical-8',
+                textClassName: 'padding-vertical-8 min-width-0',
               });
             }
 

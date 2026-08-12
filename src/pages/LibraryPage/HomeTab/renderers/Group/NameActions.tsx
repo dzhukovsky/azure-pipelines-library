@@ -1,8 +1,5 @@
 import { Button } from 'azure-devops-ui/Button';
-import type {
-  ITreeItemEx,
-  ITreeItemProvider,
-} from 'azure-devops-ui/Utilities/TreeItemProvider';
+import type { ITreeItemEx } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import type { ObservableVariableGroup } from '@/features/variable-groups/models';
 import { useTreeRow } from '@/shared/components/Tree/useTreeRow';
 import type { HomeTreeItem } from '../../HomeTree';
@@ -11,7 +8,6 @@ export const NameActions = (props: {
   data: ObservableVariableGroup;
   treeItem: ITreeItemEx<HomeTreeItem>;
   rowIndex: number;
-  itemProvider: ITreeItemProvider<HomeTreeItem>;
 }) => {
   const { data, rowIndex } = props;
   const { hasMouse, hasFocus } = useTreeRow();

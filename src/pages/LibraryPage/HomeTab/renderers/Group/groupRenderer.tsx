@@ -16,13 +16,8 @@ export const groupRenderer: HomeTreeRenderer['group'] = {
           size: IconSize.medium,
         },
       }),
-    renderActions: ({ data, treeItem, rowIndex, provider }) => (
-      <NameActions
-        data={data}
-        treeItem={treeItem}
-        rowIndex={rowIndex}
-        itemProvider={provider}
-      />
+    renderActions: ({ data, treeItem, rowIndex }) => (
+      <NameActions data={data} treeItem={treeItem} rowIndex={rowIndex} />
     ),
   },
   value: {

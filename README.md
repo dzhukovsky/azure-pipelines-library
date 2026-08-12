@@ -39,14 +39,9 @@ src/
 │   ├── HistoryPage/
 │   ├── LibraryPage/
 │   │   ├── HomeTab/
-│   │   │   ├── ActionCells/
 │   │   │   ├── HomeTabModel.ts
-│   │   │   ├── index.tsx
-│   │   │   └── VariablesTree.tsx
+│   │   │   └── index.tsx
 │   │   ├── MatrixTab/
-│   │   │   ├── MatrixTab.tsx
-│   │   │   └── VariablesMatrix.tsx
-│   │   ├── index.scss
 │   │   └── index.tsx
 │   └── SettingsPage/
 │
@@ -54,19 +49,16 @@ src/
 │   ├── api/
 │   │   ├── clients/
 │   │   ├── configurations.ts
-│   │   ├── identityImage.ts
 │   │   └── settingsService.ts
 │   │
 │   ├── components/
-│   │   ├── State/
 │   │   ├── Table/
 │   │   ├── TextFieldCell/
 │   │   └── Tree/
 │   │
 │   ├── hooks/
 │   │   ├── useNavigation.ts
-│   │   ├── useObservable.ts
-│   │   └── useTabModel.ts
+│   │   └── useObservable.ts
 │   │
 │   ├── lib/
 │   │   ├── exportHelper.ts

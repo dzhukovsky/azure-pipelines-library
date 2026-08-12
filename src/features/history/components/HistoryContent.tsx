@@ -1,16 +1,23 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { Ago } from 'azure-devops-ui/Ago';
 import { Icon, IconSize } from 'azure-devops-ui/Icon';
+import { Pill, PillSize } from 'azure-devops-ui/Pill';
+import { PillGroup, PillGroupOverflow } from 'azure-devops-ui/PillGroup';
 import { Spinner, SpinnerSize } from 'azure-devops-ui/Spinner';
 import type { IIdentityDetailsProvider } from 'azure-devops-ui/VssPersona';
 import { VssPersona } from 'azure-devops-ui/VssPersona';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useVariableGroups } from '@/features/variable-groups/hooks/useVariableGroups';
 import { getProjectUrl } from '@/shared/api/configurations';
 import { StateIcon, States } from '@/shared/components/StateIcon';
+import {
+  buildSaveEvents,
+  type HistoryListItem,
+  type SaveEventItem,
+} from '../buildSaveEvents';
 import { buildTimeline } from '../buildTimeline';
 import { historyQueryKey, useHistory } from '../hooks/useHistory';
-import type { HistoryEntry, HistoryEntryChange, TimelineItem } from '../models';
+import type { HistoryEntry, HistoryEntryChange } from '../models';
 
 const statusState = {
   added: States.New,
@@ -34,6 +41,84 @@ const getActorIdentityDetailsProvider = (
   };
 };
 
+const SaveEventRow = ({ event }: { event: SaveEventItem }) => {
+  const [expanded, setExpanded] = useState(false);
+
+  const changeCount = event.entries.reduce(
+    (sum, entry) => sum + entry.changes.length,
+    0,
+  );
+
+  const toggle = () => setExpanded((prev) => !prev);
+
+  return (
+    <div className="flex-column depth-4 padding-8 rhythm-vertical-8">
+      <button
+        type="button"
+        className="flex-row flex-center rhythm-horizontal-8 cursor-pointer"
+        style={{
+          background: 'none',
+          border: 0,
+          padding: 0,
+          font: 'inherit',
+          color: 'inherit',
+          textAlign: 'left',
+          width: '100%',
+        }}
+        aria-expanded={expanded}
+        onClick={toggle}
+      >
+        <Icon
+          iconName={expanded ? 'ChevronDown' : 'ChevronRight'}
+          size={IconSize.small}
+        />
+        <VssPersona
+          identityDetailsProvider={getActorIdentityDetailsProvider(
+            event.actor,
+          )}
+          size="extra-small"
+        />
+        <span className="secondary-text">{event.actor.displayName}</span>
+        <Ago date={new Date(event.timestamp)} />
+        <PillGroup className="flex-grow" overflow={PillGroupOverflow.wrap}>
+          {event.entries.map((entry) => (
+            <Pill key={entry.groupId} size={PillSize.compact}>
+              {entry.groupName}
+            </Pill>
+          ))}
+        </PillGroup>
+        <span className="secondary-text no-wrap">
+          {changeCount} {changeCount === 1 ? 'change' : 'changes'}
+        </span>
+      </button>
+      {expanded && (
+        <div
+          className="flex-column rhythm-vertical-8"
+          style={{ paddingLeft: 24 }}
+        >
+          {event.entries.map((entry) => (
+            <div key={entry.id} className="flex-column rhythm-vertical-4">
+              <div className="flex-row flex-center rhythm-horizontal-8">
+                <Icon iconName="fluent-LibraryColor" size={IconSize.medium} />
+                <strong>{entry.groupName}</strong>
+              </div>
+              {entry.changes.map((change) => (
+                <div
+                  key={`${change.key}-${change.status}`}
+                  className="flex-row flex-center rhythm-horizontal-8"
+                >
+                  <StateIcon state={statusState[change.status]} />
+                  <span>{changeText(change)}</span>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const HistoryContent = () => {
   const history = useHistory();
   const groups = useVariableGroups();
@@ -48,7 +133,7 @@ export const HistoryContent = () => {
     queryClient.invalidateQueries({ queryKey: ['variable-groups'] });
   }, []);
 
-  const timeline = useMemo<TimelineItem[] | undefined>(() => {
+  const items = useMemo<HistoryListItem[] | undefined>(() => {
     if (!history.data) return undefined;
     const currentModifiedOn: Record<number, string | undefined> =
       Object.fromEntries(
@@ -57,14 +142,14 @@ export const HistoryContent = () => {
           (g.modifiedOn ?? g.createdOn)?.toISOString(),
         ]),
       );
-    return buildTimeline(history.data, currentModifiedOn);
+    return buildSaveEvents(buildTimeline(history.data, currentModifiedOn));
   }, [history.data, groups.data]);
 
-  if (!timeline) {
+  if (!items) {
     return <Spinner size={SpinnerSize.large} className="margin-16" />;
   }
 
-  if (!timeline.length) {
+  if (!items.length) {
     return (
       <div className="margin-16 secondary-text">
         No history yet. Changes saved through this extension will appear
@@ -73,22 +158,12 @@ export const HistoryContent = () => {
     );
   }
 
-  // Every external marker is immediately followed by the entry that
-  // triggered it (see buildTimeline), so that entry's id makes a stable key.
-  const keyedTimeline = timeline.map((item, index) => ({
-    item,
-    key:
-      item.kind === 'entry'
-        ? item.entry.id
-        : `external-${(timeline[index + 1] as { entry: HistoryEntry }).entry.id}`,
-  }));
-
   return (
     <div className="flex-column rhythm-vertical-8 padding-16">
-      {keyedTimeline.map(({ item, key }) =>
+      {items.map((item) =>
         item.kind === 'external' ? (
           <div
-            key={key}
+            key={item.key}
             className="flex-row flex-center rhythm-horizontal-8 padding-8"
           >
             <Icon iconName="fluent-WarningColor" size={IconSize.medium} />
@@ -105,35 +180,7 @@ export const HistoryContent = () => {
             </span>
           </div>
         ) : (
-          <div
-            key={key}
-            className="flex-column depth-4 padding-8 rhythm-vertical-4"
-          >
-            <div className="flex-row flex-center rhythm-horizontal-8">
-              <strong>{item.entry.groupName}</strong>
-              <VssPersona
-                identityDetailsProvider={getActorIdentityDetailsProvider(
-                  item.entry.actor,
-                )}
-                size="extra-small"
-              />
-              <span className="secondary-text">
-                {item.entry.actor.displayName}
-              </span>
-              <Ago date={new Date(item.entry.timestamp)} />
-            </div>
-            <div className="flex-column rhythm-vertical-4">
-              {item.entry.changes.map((change) => (
-                <div
-                  key={`${change.key}-${change.status}`}
-                  className="flex-row flex-center rhythm-horizontal-8"
-                >
-                  <StateIcon state={statusState[change.status]} />
-                  <span>{changeText(change)}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+          <SaveEventRow key={item.key} event={item} />
         ),
       )}
     </div>

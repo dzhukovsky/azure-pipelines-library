@@ -187,7 +187,15 @@ const useColumns = () => {
 
           return <span className="flex-row flex-grow" />;
         },
-        renderActions: ({ data }) => {
+        renderActions: () => undefined,
+      }),
+      createActionColumn<HistoryTreeItem>({
+        id: 'changeCount',
+        name: 'Changes',
+        // Fixed width: the column only ever holds a small count, so it
+        // should not grow with the dialog.
+        width: new ObservableValue(120),
+        renderCell: ({ data }) => {
           const save = data.save;
           if (save) {
             const changeCount = save.entries.reduce(
@@ -195,12 +203,15 @@ const useColumns = () => {
               0,
             );
             return (
-              <span className="secondary-text white-space-nowrap flex-self-center margin-horizontal-8">
+              <span className="secondary-text white-space-nowrap flex-self-center">
                 {changeCount} {changeCount === 1 ? 'change' : 'changes'}
               </span>
             );
           }
 
+          return <span className="flex-row flex-grow" />;
+        },
+        renderActions: ({ data }) => {
           const change = data.change;
           if (change) {
             return <StateIcon state={statusState[change.status]} />;

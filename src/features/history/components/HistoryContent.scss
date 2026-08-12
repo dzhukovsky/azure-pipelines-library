@@ -1,12 +1,22 @@
 .history-tree {
     // Clicking PillGroup's "show more" switches the group to wrap mode,
     // which puts margin-bottom: 8px on every pill to space wrapped lines
-    // apart. Nothing compensates the last line's margin, so the row ends up
-    // bottom-heavy and the pills sit above the row's center. Cancel exactly
-    // that trailing gap on the container; the spacing between wrapped lines
-    // is untouched.
+    // apart. That margin is the only vertical gap the group has, so the
+    // last line ends flush against the row's bottom edge while the first
+    // line starts flush against its top. Pair it with an equal top gap:
+    // the block then sits centered with 8px of breathing room on both
+    // sides, and the spacing between wrapped lines stays as designed.
     .bolt-pill-group.overflow-wrap > .bolt-pill-group-inner {
         align-items: center;
-        margin-bottom: -8px;
+        padding-top: 8px;
+    }
+
+    // The "show more" affordance is a Button nested in a Pill, so it
+    // inherits the button's own padding and line height and ends up taller
+    // than the plain text pills beside it. Strip both back so it matches
+    // the pills it sits among.
+    .bolt-pill .bolt-pill-button.bolt-button {
+        line-height: 1;
+        padding: 0;
     }
 }

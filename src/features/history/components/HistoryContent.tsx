@@ -2,12 +2,17 @@ import './HistoryContent.scss';
 
 import { useQueryClient } from '@tanstack/react-query';
 import { Ago } from 'azure-devops-ui/Ago';
-import { ObservableValue } from 'azure-devops-ui/Core/Observable';
+import {
+  ObservableLike,
+  ObservableValue,
+} from 'azure-devops-ui/Core/Observable';
 import { Icon, IconSize } from 'azure-devops-ui/Icon';
 import { renderListCell } from 'azure-devops-ui/List';
 import { Pill, PillSize } from 'azure-devops-ui/Pill';
 import { PillGroup, PillGroupOverflow } from 'azure-devops-ui/PillGroup';
 import { Spinner, SpinnerSize } from 'azure-devops-ui/Spinner';
+import { SimpleTableCell } from 'azure-devops-ui/Table';
+import { Tooltip } from 'azure-devops-ui/TooltipEx';
 import { type ITreeColumn, Tree } from 'azure-devops-ui/TreeEx';
 import type { ITreeItem } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import {
@@ -16,7 +21,7 @@ import {
 } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import type { IIdentityDetailsProvider } from 'azure-devops-ui/VssPersona';
 import { VssPersona } from 'azure-devops-ui/VssPersona';
-import { useEffect, useMemo } from 'react';
+import { Fragment, useEffect, useMemo } from 'react';
 import { useVariableGroups } from '@/features/variable-groups/hooks/useVariableGroups';
 import { getProjectUrl } from '@/shared/api/configurations';
 import { StateIcon, States } from '@/shared/components/StateIcon';
@@ -62,28 +67,97 @@ type HistoryTreeItem = {
   external?: ExternalItem;
 };
 
-const mapTreeItems = (
-  items: HistoryListItem[],
-): ITreeItem<HistoryTreeItem>[] =>
+const mapTreeItems = (items: HistoryListItem[]): ITreeItem<HistoryTreeItem>[] =>
   items.map<ITreeItem<HistoryTreeItem>>((item) =>
     item.kind === 'external'
       ? { data: { external: item } }
       : {
           data: { save: item },
           expanded: false,
-          childItems: item.entries.map<ITreeItem<HistoryTreeItem>>(
-            (entry) => ({
-              data: { group: entry },
-              // Groups come pre-expanded so opening a save event shows the
-              // changed variables right away.
-              expanded: true,
-              childItems: entry.changes.map<ITreeItem<HistoryTreeItem>>(
-                (change) => ({ data: { change } }),
-              ),
-            }),
-          ),
+          childItems: item.entries.map<ITreeItem<HistoryTreeItem>>((entry) => ({
+            data: { group: entry },
+            // Groups come pre-expanded so opening a save event shows the
+            // changed variables right away.
+            expanded: true,
+            childItems: entry.changes.map<ITreeItem<HistoryTreeItem>>(
+              (change) => ({ data: { change } }),
+            ),
+          })),
         },
   );
+
+const ExternalMarkerCell = ({ external }: { external: ExternalItem }) => {
+  const detectedAt = external.detectedAt
+    ? ` (${new Date(external.detectedAt).toLocaleString()})`
+    : '';
+  const text = `${external.groupName} was changed outside the extension${detectedAt}. History continuity is interrupted.`;
+
+  return (
+    <Tooltip text={text} overflowOnly>
+      <div className="flex-row flex-center rhythm-horizontal-8 padding-vertical-8">
+        <Icon iconName="fluent-WarningColor" size={IconSize.medium} />
+        <span className="text-ellipsis">
+          <strong>{external.groupName}</strong> was changed outside the
+          extension
+          {external.detectedAt && (
+            <>
+              {' '}
+              (<Ago date={new Date(external.detectedAt)} />)
+            </>
+          )}
+          . History continuity is interrupted.
+        </span>
+      </div>
+    </Tooltip>
+  );
+};
+
+// The external-change warning is a sentence, not a value that belongs to a
+// column: let the first cell span the whole table for those rows and drop
+// the remaining cells, so the text is never squeezed into one column.
+const spanExternalRows = (
+  column: ITreeColumn<HistoryTreeItem>,
+  colspan?: number,
+): ITreeColumn<HistoryTreeItem> => ({
+  ...column,
+  renderCell: (
+    rowIndex,
+    columnIndex,
+    tableColumn,
+    treeItem,
+    ariaRowIndex,
+    role,
+  ) => {
+    const { external } = ObservableLike.getValue(treeItem.underlyingItem.data);
+
+    if (!external) {
+      return column.renderCell(
+        rowIndex,
+        columnIndex,
+        tableColumn,
+        treeItem,
+        ariaRowIndex,
+        role,
+      );
+    }
+
+    // Columns without a colspan render no cell at all for these rows — the
+    // spanning cell above already covers their width.
+    return colspan ? (
+      SimpleTableCell({
+        children: <ExternalMarkerCell external={external} />,
+        className: 'bolt-tree-cell',
+        colspan,
+        columnIndex,
+        contentClassName: 'padding-vertical-0',
+        role,
+        tableColumn,
+      })
+    ) : (
+      <Fragment key={columnIndex} />
+    );
+  },
+});
 
 const useColumns = () => {
   const columns = useMemo(() => {
@@ -92,136 +166,124 @@ const useColumns = () => {
     };
 
     const columns: ITreeColumn<HistoryTreeItem>[] = [
-      createExpandableActionColumn<HistoryTreeItem>({
-        id: 'change',
-        name: 'Change',
-        contentClassName: 'padding-vertical-0 padding-right-0',
-        onSize,
-        renderCell: ({ data }) => {
-          const save = data.save;
-          if (save) {
-            return (
-              <div className="flex-row flex-center rhythm-horizontal-8 padding-vertical-8">
-                <VssPersona
-                  identityDetailsProvider={getActorIdentityDetailsProvider(
-                    save.actor,
-                  )}
-                  size="extra-small"
-                />
-                <span>{save.actor.displayName}</span>
-                <span className="secondary-text">
-                  <Ago date={new Date(save.timestamp)} />
+      spanExternalRows(
+        createExpandableActionColumn<HistoryTreeItem>({
+          id: 'change',
+          name: 'Change',
+          contentClassName: 'padding-vertical-0 padding-right-0',
+          onSize,
+          renderCell: ({ data }) => {
+            const save = data.save;
+            if (save) {
+              return (
+                <div className="flex-row flex-center rhythm-horizontal-8 padding-vertical-8">
+                  <VssPersona
+                    identityDetailsProvider={getActorIdentityDetailsProvider(
+                      save.actor,
+                    )}
+                    size="extra-small"
+                  />
+                  <span>{save.actor.displayName}</span>
+                  <span className="secondary-text">
+                    <Ago date={new Date(save.timestamp)} />
+                  </span>
+                </div>
+              );
+            }
+
+            const group = data.group;
+            if (group) {
+              return renderListCell({
+                text: group.groupName,
+                textClassName: 'padding-vertical-8',
+                iconProps: {
+                  iconName: 'fluent-LibraryColor',
+                  size: IconSize.medium,
+                },
+              });
+            }
+
+            const change = data.change;
+            if (change) {
+              return renderListCell({
+                text: changeText(change),
+                textClassName: 'padding-vertical-8',
+              });
+            }
+
+            return undefined;
+          },
+          renderActions: () => undefined,
+          width: new ObservableValue(-40),
+        }),
+        // The warning spans every content column of the table.
+        3,
+      ),
+      spanExternalRows(
+        createActionColumn<HistoryTreeItem>({
+          id: 'groups',
+          name: 'Groups',
+          width: new ObservableValue(-60),
+          renderCell: ({ data }) => {
+            const save = data.save;
+            if (save) {
+              return (
+                // fade keeps every save on one row: the group list is clipped
+                // with a fade and a "show more" pill once it outgrows the
+                // column, and expanding the row lists all the groups anyway.
+                <PillGroup
+                  className="flex-center"
+                  overflow={PillGroupOverflow.fade}
+                >
+                  {save.entries.map((entry) => (
+                    <Pill key={entry.groupId} size={PillSize.compact}>
+                      {entry.groupName}
+                    </Pill>
+                  ))}
+                </PillGroup>
+              );
+            }
+
+            return <span className="flex-row flex-grow" />;
+          },
+          renderActions: () => undefined,
+        }),
+      ),
+      spanExternalRows(
+        createActionColumn<HistoryTreeItem>({
+          id: 'changeCount',
+          name: '',
+          // Fixed width: the column only ever holds a small count, so it
+          // should not grow with the dialog.
+          width: new ObservableValue(120),
+          renderCell: ({ data }) => {
+            const save = data.save;
+            if (save) {
+              const changeCount = save.entries.reduce(
+                (sum, entry) => sum + entry.changes.length,
+                0,
+              );
+              return (
+                // Same horizontal insets StateIcon carries, so the count and
+                // the per-variable status icons below it end on one line.
+                <span className="secondary-text white-space-nowrap flex-self-center flex-grow text-right padding-horizontal-8 margin-horizontal-4">
+                  {changeCount} {changeCount === 1 ? 'change' : 'changes'}
                 </span>
-              </div>
-            );
-          }
+              );
+            }
 
-          const group = data.group;
-          if (group) {
-            return renderListCell({
-              text: group.groupName,
-              textClassName: 'padding-vertical-8',
-              iconProps: {
-                iconName: 'fluent-LibraryColor',
-                size: IconSize.medium,
-              },
-            });
-          }
+            return <span className="flex-row flex-grow" />;
+          },
+          renderActions: ({ data }) => {
+            const change = data.change;
+            if (change) {
+              return <StateIcon state={statusState[change.status]} />;
+            }
 
-          const change = data.change;
-          if (change) {
-            return renderListCell({
-              text: changeText(change),
-              textClassName: 'padding-vertical-8',
-            });
-          }
-
-          const external = data.external;
-          if (external) {
-            return (
-              <div className="flex-row flex-center rhythm-horizontal-8 padding-vertical-8">
-                <Icon iconName="fluent-WarningColor" size={IconSize.medium} />
-                <span>
-                  <strong>{external.groupName}</strong> was changed outside
-                  the extension
-                  {external.detectedAt && (
-                    <>
-                      {' '}
-                      (<Ago date={new Date(external.detectedAt)} />)
-                    </>
-                  )}
-                  . History continuity is interrupted.
-                </span>
-              </div>
-            );
-          }
-
-          return undefined;
-        },
-        renderActions: () => undefined,
-        width: new ObservableValue(-40),
-      }),
-      createActionColumn<HistoryTreeItem>({
-        id: 'groups',
-        name: 'Groups',
-        width: new ObservableValue(-60),
-        renderCell: ({ data }) => {
-          const save = data.save;
-          if (save) {
-            return (
-              // fade keeps every save on one row: the group list is clipped
-              // with a fade and a "show more" pill once it outgrows the
-              // column, and expanding the row lists all the groups anyway.
-              <PillGroup
-                className="flex-center"
-                overflow={PillGroupOverflow.fade}
-              >
-                {save.entries.map((entry) => (
-                  <Pill key={entry.groupId} size={PillSize.compact}>
-                    {entry.groupName}
-                  </Pill>
-                ))}
-              </PillGroup>
-            );
-          }
-
-          return <span className="flex-row flex-grow" />;
-        },
-        renderActions: () => undefined,
-      }),
-      createActionColumn<HistoryTreeItem>({
-        id: 'changeCount',
-        name: '',
-        // Fixed width: the column only ever holds a small count, so it
-        // should not grow with the dialog.
-        width: new ObservableValue(120),
-        renderCell: ({ data }) => {
-          const save = data.save;
-          if (save) {
-            const changeCount = save.entries.reduce(
-              (sum, entry) => sum + entry.changes.length,
-              0,
-            );
-            return (
-              // Same horizontal insets StateIcon carries, so the count and
-              // the per-variable status icons below it end on one line.
-              <span className="secondary-text white-space-nowrap flex-self-center flex-grow text-right padding-horizontal-8 margin-horizontal-4">
-                {changeCount} {changeCount === 1 ? 'change' : 'changes'}
-              </span>
-            );
-          }
-
-          return <span className="flex-row flex-grow" />;
-        },
-        renderActions: ({ data }) => {
-          const change = data.change;
-          if (change) {
-            return <StateIcon state={statusState[change.status]} />;
-          }
-
-          return undefined;
-        },
-      }),
+            return undefined;
+          },
+        }),
+      ),
     ];
 
     return columns;
@@ -290,8 +352,7 @@ export const HistoryContent = () => {
   if (!itemProvider.roots.length) {
     return (
       <div className="margin-16 secondary-text">
-        No history yet. Changes saved through this extension will appear
-        here.
+        No history yet. Changes saved through this extension will appear here.
       </div>
     );
   }

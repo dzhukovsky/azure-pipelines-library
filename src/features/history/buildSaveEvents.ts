@@ -32,18 +32,18 @@ export const buildSaveEvents = (
   timeline: TimelineItem[],
 ): HistoryListItem[] => {
   const items: HistoryListItem[] = [];
+  const markersPerGroup = new Map<number, number>();
 
-  timeline.forEach((item, index) => {
+  timeline.forEach((item) => {
     if (item.kind === 'external') {
-      // Every external marker is immediately followed by the entry that
-      // triggered it (buildTimeline invariant) — its id makes a stable key.
-      const next = timeline[index + 1] as Extract<
-        TimelineItem,
-        { kind: 'entry' }
-      >;
+      // A group can break more than once, and markers can end up adjacent
+      // once the timeline is ordered by time, so key them by what makes one
+      // marker distinct: its group and when the change was detected.
+      const seen = (markersPerGroup.get(item.groupId) ?? 0) + 1;
+      markersPerGroup.set(item.groupId, seen);
       items.push({
         kind: 'external',
-        key: `external-${item.groupId}-${next.entry.id}`,
+        key: `external-${item.groupId}-${item.detectedAt ?? seen}`,
         groupId: item.groupId,
         groupName: item.groupName,
         detectedAt: item.detectedAt,

@@ -24,6 +24,26 @@ describe('buildTimeline', () => {
     expect(timeline.map((t) => t.kind)).toEqual(['entry', 'entry']);
   });
 
+  test('markers are ordered by when the external change happened', () => {
+    const entries = [
+      entry({ id: 'newer', groupId: 1, timestamp: '2026-01-05T00:00:00Z',
+        modifiedOnBefore: '2026-01-04T00:00:00Z', modifiedOnAfter: '2026-01-05T00:00:00Z' }),
+      entry({ id: 'older', groupId: 2, groupName: 'other', timestamp: '2026-01-01T00:00:00Z',
+        modifiedOnBefore: '2025-12-31T00:00:00Z', modifiedOnAfter: '2026-01-01T00:00:00Z' }),
+    ];
+
+    // Group 2 was touched outside the extension after both saves, so its
+    // marker belongs above group 1's newer entry, not next to its own.
+    const timeline = buildTimeline(entries, {
+      1: '2026-01-05T00:00:00Z',
+      2: '2026-01-09T00:00:00Z',
+    });
+
+    expect(timeline.map((t) => t.kind)).toEqual(['external', 'entry', 'entry']);
+    expect(timeline[0]).toMatchObject({ groupId: 2, detectedAt: '2026-01-09T00:00:00Z' });
+    expect(timeline[1]).toMatchObject({ entry: { id: 'newer' } });
+  });
+
   test('current modifiedOn ahead of the latest entry inserts a marker on top', () => {
     const entries = [
       entry({ id: '1', modifiedOnBefore: '2026-01-01T00:00:00Z',

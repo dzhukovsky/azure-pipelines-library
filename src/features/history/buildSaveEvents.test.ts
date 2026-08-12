@@ -59,7 +59,25 @@ describe('buildSaveEvents', () => {
     expect(items.map((i) => i.kind)).toEqual(['save', 'external', 'save']);
     const external = items[1];
     if (external.kind !== 'external') throw new Error('expected external');
-    expect(external.key).toBe('external-2-b');
     expect(external.groupName).toBe('prod');
+  });
+
+  test('adjacent markers keep distinct keys', () => {
+    const items = buildSaveEvents([
+      { kind: 'external', groupId: 1, groupName: 'dev', detectedAt: '2026-02-02T00:00:00Z' },
+      { kind: 'external', groupId: 2, groupName: 'prod', detectedAt: '2026-02-01T00:00:00Z' },
+      { kind: 'external', groupId: 2, groupName: 'prod' },
+      { kind: 'external', groupId: 2, groupName: 'prod' },
+      asItem(entry({ id: 'a' })),
+    ]);
+
+    expect(items.map((i) => i.kind)).toEqual([
+      'external',
+      'external',
+      'external',
+      'external',
+      'save',
+    ]);
+    expect(new Set(items.map((i) => i.key)).size).toBe(items.length);
   });
 });

@@ -9,8 +9,10 @@ const sameInstant = (a?: string, b?: string) =>
  * Inserts an 'external' marker wherever the chain breaks:
  *  - latest entry of a group: entry.modifiedOnAfter !== currentModifiedOn[groupId]
  *  - consecutive entries of a group: older.modifiedOnAfter !== newer.modifiedOnBefore
- * Markers are placed immediately before (i.e. displayed above) the entry whose
- * "before" side is broken; a break at the head goes to the very top.
+ * Markers are detected next to the entry whose chain they break, then the whole
+ * list is ordered newest-first by when things actually happened — an external
+ * change is dated by the modifiedOn that revealed it, so it sorts among the
+ * saves of every other group rather than only within its own chain.
  */
 export const buildTimeline = (
   entries: HistoryEntry[],
@@ -47,5 +49,22 @@ export const buildTimeline = (
     seenNewerOfGroup.set(entry.groupId, entry);
   }
 
-  return timeline;
+  // A marker with no detected time has nothing of its own to sort by; it was
+  // inserted directly above the entry it belongs to, so it borrows that
+  // entry's time and the stable sort keeps it there.
+  const timeOf = (item: TimelineItem, index: number): number => {
+    if (item.kind === 'entry') {
+      return Date.parse(item.entry.timestamp);
+    }
+    if (item.detectedAt) {
+      return Date.parse(item.detectedAt);
+    }
+    const next = timeline[index + 1];
+    return next?.kind === 'entry' ? Date.parse(next.entry.timestamp) : 0;
+  };
+
+  return timeline
+    .map((item, index) => ({ item, time: timeOf(item, index) }))
+    .sort((a, b) => b.time - a.time)
+    .map(({ item }) => item);
 };

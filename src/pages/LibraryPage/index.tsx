@@ -11,6 +11,7 @@ import { Tab, TabBar } from 'azure-devops-ui/Tabs';
 import { InlineKeywordFilterBarItem } from 'azure-devops-ui/TextFilterBarItem';
 import { Filter, type IFilter } from 'azure-devops-ui/Utilities/Filter';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { recordSaveHistory } from '@/features/history/recordSaveHistory';
 import { ManageViewsDialog } from '@/features/matrix-views/components/ManageViewsDialog';
 import { useMatrixViews } from '@/features/matrix-views/hooks/useMatrixViews';
 import {
@@ -356,7 +357,7 @@ const useHeader = (
                 changes,
                 onSave: () => saveLibraryChanges(changes),
                 onSaved: (outcome) => {
-                  // Task 12: record history here
+                  void recordSaveHistory(outcome, queryClient);
                   if (outcome.ok) {
                     // Full success: reload immediately, closing the dialog.
                     discardChanges();
@@ -380,7 +381,7 @@ const useHeader = (
         important: false,
       },
     ],
-    [activeModel, discardChanges, previewDialogOptions],
+    [activeModel, discardChanges, previewDialogOptions, queryClient],
   );
 
   const renderTabBarCommands = useCallback(

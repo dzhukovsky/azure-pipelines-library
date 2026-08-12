@@ -29,4 +29,12 @@
         line-height: 1;
         padding: 0;
     }
+
+    // The same icon reads level against a text field, whose input centres its
+    // own text, and a pixel high against a plain label, which does not — so
+    // the correction belongs to the label, not to the glyph everything else
+    // shares.
+    .history-warning-icon {
+        transform: translateY(1px);
+    }
 }

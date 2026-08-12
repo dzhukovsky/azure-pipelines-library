@@ -50,10 +50,12 @@ const statusState = {
 const changeText = (c: HistoryEntryChange) =>
   c.status === 'renamed' ? `${c.key} → ${c.renamedTo}` : c.key;
 
-// Drawn exactly like the group and variable icons in these rows.
+// Drawn exactly like the group and variable icons in these rows; the class
+// only carries the correction for standing next to a plain label.
 const warningIconProps: IIconProps = {
   iconName: 'fluent-WarningColor',
   size: IconSize.medium,
+  className: 'history-warning-icon',
 };
 
 const WarningLabel = ({

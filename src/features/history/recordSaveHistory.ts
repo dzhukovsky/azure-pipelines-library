@@ -30,7 +30,11 @@ export const buildHistoryEntries = (
       changes: r.changes.map((c) => {
         const status = getChangeStatus(c);
         return {
-          key: status === 'renamed' ? (c.previousKey ?? c.key) : c.key,
+          // The server preserves entries by key: 'added' has no server-side
+          // key yet, so use the new key; every other status (including a
+          // rename that was immediately deleted) must record the key the
+          // entry actually had on the server.
+          key: status === 'added' ? c.key : (c.previousKey ?? c.key),
           status,
           renamedTo: status === 'renamed' ? c.key : undefined,
         };

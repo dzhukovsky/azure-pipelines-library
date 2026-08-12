@@ -1,14 +1,15 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { Ago } from 'azure-devops-ui/Ago';
 import { Icon, IconSize } from 'azure-devops-ui/Icon';
 import { Spinner, SpinnerSize } from 'azure-devops-ui/Spinner';
 import type { IIdentityDetailsProvider } from 'azure-devops-ui/VssPersona';
 import { VssPersona } from 'azure-devops-ui/VssPersona';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useVariableGroups } from '@/features/variable-groups/hooks/useVariableGroups';
 import { getProjectUrl } from '@/shared/api/configurations';
 import { StateIcon, States } from '@/shared/components/StateIcon';
 import { buildTimeline } from '../buildTimeline';
-import { useHistory } from '../hooks/useHistory';
+import { historyQueryKey, useHistory } from '../hooks/useHistory';
 import type { HistoryEntry, HistoryEntryChange, TimelineItem } from '../models';
 
 const statusState = {
@@ -36,6 +37,16 @@ const getActorIdentityDetailsProvider = (
 export const HistoryContent = () => {
   const history = useHistory();
   const groups = useVariableGroups();
+  const queryClient = useQueryClient();
+
+  // History and variable groups are cached with staleTime: Infinity, so a
+  // component that stays mounted across saves could otherwise show
+  // permanently stale data. Refetch once whenever this view is opened.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: mount-only refresh, not tied to queryClient identity
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: historyQueryKey });
+    queryClient.invalidateQueries({ queryKey: ['variable-groups'] });
+  }, []);
 
   const timeline = useMemo<TimelineItem[] | undefined>(() => {
     if (!history.data) return undefined;

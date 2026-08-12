@@ -17,6 +17,7 @@ const outcome: SaveOutcome = {
         { key: 'a', valueChanged: true, value: 'x', isSecret: false, isSecretChanged: false, state: States.New },
         { key: 'renamed', previousKey: 'old', valueChanged: false, isSecret: false, isSecretChanged: false, state: States.Modified },
         { key: 'gone', valueChanged: false, isSecret: false, isSecretChanged: false, state: States.Deleted },
+        { key: 'new', previousKey: 'old2', valueChanged: false, isSecret: false, isSecretChanged: false, state: States.Deleted },
       ],
     },
     { groupId: 2, groupName: 'failed', ok: false, error: 'boom' },
@@ -41,6 +42,9 @@ describe('buildHistoryEntries', () => {
       { key: 'a', status: 'added', renamedTo: undefined },
       { key: 'old', status: 'renamed', renamedTo: 'renamed' },
       { key: 'gone', status: 'deleted', renamedTo: undefined },
+      // Deleted after being renamed: the server never saw the new name, so
+      // history must record the key the entry actually had on the server.
+      { key: 'old2', status: 'deleted', renamedTo: undefined },
     ]);
     expect(JSON.stringify(e)).not.toContain('"x"'); // no variable values stored
   });

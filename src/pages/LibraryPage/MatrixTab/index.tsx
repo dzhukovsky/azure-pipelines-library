@@ -4,6 +4,7 @@ import type { IFilter } from 'azure-devops-ui/Utilities/Filter';
 import type { ITreeItem } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import { useEffect, useState } from 'react';
 import {
+  clearMatrixProviderErrors,
   mapMatrixChanges,
   validateMatrixProvider,
 } from '@/features/library-changes';
@@ -106,6 +107,20 @@ export const MatrixTab = ({
 
     return () => onTabContextChange(undefined);
   }, [state.provider, onTabContextChange]);
+
+  // Validation errors are only set from the Preview button; nothing else
+  // clears them. Once the user reverts the edit that caused an error
+  // (provider back to unmodified), drop the stale errors so Error icons
+  // don't linger.
+  useEffect(() => {
+    const onChange = () => {
+      if (!state.provider.modified) {
+        clearMatrixProviderErrors(state.provider);
+      }
+    };
+    state.provider.subscribe(onChange);
+    return () => state.provider.unsubscribe(onChange);
+  }, [state.provider]);
 
   if (error) {
     return <div>Error: {(error as Error).message}</div>;

@@ -8,7 +8,13 @@ import { HomeTabModel } from '@/pages/LibraryPage/HomeTab/HomeTabModel';
 import { MatrixDataProvider } from '@/pages/LibraryPage/MatrixTab/MatrixDataProvider';
 import { mapHomeChanges } from './fromHomeModel';
 import { mapMatrixChanges } from './fromMatrixProvider';
-import { hasErrors, validateHomeModel, validateMatrixProvider } from './validate';
+import {
+  clearHomeModelErrors,
+  clearMatrixProviderErrors,
+  hasErrors,
+  validateHomeModel,
+  validateMatrixProvider,
+} from './validate';
 
 const makeModel = (variables: ObservableVariable[]) =>
   new HomeTabModel(
@@ -64,6 +70,51 @@ describe('validateHomeModel', () => {
 
     s.value.value = 'now-visible';
     expect(validateHomeModel(model)).toBe(true);
+  });
+
+  test('renaming a secret variable without re-entering the value is an error', () => {
+    const s = new ObservableVariable('secret', 'shh', true, false);
+    const model = makeModel([s]);
+
+    s.name.value = 'renamed-secret';
+    expect(validateHomeModel(model)).toBe(false);
+    expect(s.error.value).toBe(
+      'Re-enter the value when renaming a secret variable',
+    );
+
+    s.value.value = 'now-visible';
+    expect(validateHomeModel(model)).toBe(true);
+  });
+
+  test('renaming a plain variable validates clean', () => {
+    const p = new ObservableVariable('plain', 'value', false, false);
+    const model = makeModel([p]);
+
+    p.name.value = 'renamed-plain';
+    expect(validateHomeModel(model)).toBe(true);
+    expect(p.error.value).toBeUndefined();
+  });
+});
+
+describe('clearHomeModelErrors', () => {
+  test('clears errors and resets states after reverting the edit that caused them', () => {
+    const a = new ObservableVariable('a', '1', false, false);
+    const b = new ObservableVariable('b', '2', false, false);
+    const model = makeModel([a, b]);
+
+    b.name.value = 'a'; // duplicate -> error on both
+    expect(validateHomeModel(model)).toBe(false);
+    expect(a.state.value.type).toBe('Error');
+    expect(b.state.value.type).toBe('Error');
+
+    b.name.reset(); // revert the offending edit
+    expect(model.modified).toBe(false);
+
+    clearHomeModelErrors(model);
+    expect(a.error.value).toBeUndefined();
+    expect(b.error.value).toBeUndefined();
+    expect(a.state.value.type).toBe('Unchanged');
+    expect(b.state.value.type).toBe('Unchanged');
   });
 });
 
@@ -158,6 +209,26 @@ describe('validateMatrixProvider', () => {
     expect(validateMatrixProvider(provider)).toBe(true);
   });
 
+  test('renaming a row with an untouched present secret cell is an error on that cell only', () => {
+    const provider = makeProvider([
+      { id: 10, name: 'dev', variables: { secret: { value: 'shh', isSecret: true } } },
+      { id: 20, name: 'prod', variables: { secret: { value: 'shh2', isSecret: false } } },
+    ]);
+    const row = provider.variables.value[0];
+    expect(row.name.isSecret.value).toBeNull(); // mixed secret flags -> null
+
+    row.name.name.value = 'renamed-secret';
+
+    expect(validateMatrixProvider(provider)).toBe(false);
+    expect(row.values[10].error.value).toBe(
+      'Re-enter the value when renaming a secret variable',
+    );
+    expect(row.values[20].error.value).toBeUndefined(); // plain sibling untouched
+
+    row.values[10].value.value = 'now-visible';
+    expect(validateMatrixProvider(provider)).toBe(true);
+  });
+
   test('a row deleted from every group does not block re-adding the same name', () => {
     const provider = makeProvider([
       { id: 10, name: 'dev', variables: { gone: { value: '1', isSecret: false } } },
@@ -174,6 +245,36 @@ describe('validateMatrixProvider', () => {
     expect(validateMatrixProvider(provider)).toBe(true);
     expect(row.name.error.value).toBeUndefined();
     expect(added.name.error.value).toBeUndefined();
+  });
+});
+
+describe('clearMatrixProviderErrors', () => {
+  test('clears errors and resets states after reverting the edit that caused them', () => {
+    const provider = makeProvider([
+      {
+        id: 10,
+        name: 'dev',
+        variables: {
+          A: { value: '1', isSecret: false },
+          B: { value: '2', isSecret: false },
+        },
+      },
+    ]);
+    const [rowA, rowB] = provider.variables.value;
+    rowB.name.name.value = 'A'; // duplicate -> error on both
+
+    expect(validateMatrixProvider(provider)).toBe(false);
+    expect(rowA.name.error.value).toBe('Duplicate variable name');
+    expect(rowB.name.error.value).toBe('Duplicate variable name');
+
+    rowB.name.name.reset(); // revert the offending edit
+    expect(provider.modified).toBe(false);
+
+    clearMatrixProviderErrors(provider);
+    expect(rowA.name.error.value).toBeUndefined();
+    expect(rowB.name.error.value).toBeUndefined();
+    expect(rowA.name.state.value.type).toBe('Unchanged');
+    expect(rowB.name.state.value.type).toBe('Unchanged');
   });
 });
 

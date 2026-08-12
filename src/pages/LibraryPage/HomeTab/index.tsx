@@ -6,7 +6,11 @@ import { ObservableArray } from 'azure-devops-ui/Core/Observable';
 import type { IFilter } from 'azure-devops-ui/Utilities/Filter';
 import type { ITreeItem } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import { useEffect, useState } from 'react';
-import { mapHomeChanges, validateHomeModel } from '@/features/library-changes';
+import {
+  clearHomeModelErrors,
+  mapHomeChanges,
+  validateHomeModel,
+} from '@/features/library-changes';
 import { useSecureFiles } from '@/features/secure-files/hooks/useSecureFiles';
 import { mapSecureFiles } from '@/features/secure-files/mapSecureFiles';
 import type { ObservableSecureFile } from '@/features/secure-files/models';
@@ -109,6 +113,19 @@ export const HomeTab = ({
 
     return () => onTabContextChange(undefined);
   }, [context.model, onTabContextChange]);
+
+  // Validation errors are only set from the Preview button; nothing else
+  // clears them. Once the user reverts the edit that caused an error (model
+  // back to unmodified), drop the stale errors so Error icons don't linger.
+  useEffect(() => {
+    const onChange = () => {
+      if (!context.model.modified) {
+        clearHomeModelErrors(context.model);
+      }
+    };
+    context.model.subscribe(onChange);
+    return () => context.model.unsubscribe(onChange);
+  }, [context.model]);
 
   if (error) {
     return <div>Error: {(error as Error).message}</div>;

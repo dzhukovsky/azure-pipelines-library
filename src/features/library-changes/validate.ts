@@ -4,14 +4,34 @@ import type { LibraryChanges } from './types';
 
 const normalize = (name: string) => name.trim().toLocaleLowerCase();
 
+/** Clears every variable error on the model. Exported so callers can clear
+ * stale errors (e.g. after the user reverts the edit that caused them)
+ * without running a full validation pass. */
+export const clearHomeModelErrors = (model: HomeTabModel): void => {
+  for (const group of model.variableGroups.value) {
+    group.variables.value.forEach((v) => {
+      v.error.value = undefined;
+    });
+  }
+};
+
+/** Clears every row-name and cell error on the provider. See
+ * clearHomeModelErrors for why this is exported separately from validation. */
+export const clearMatrixProviderErrors = (provider: MatrixDataProvider): void => {
+  provider.variables.value.forEach((row) => {
+    row.name.error.value = undefined;
+    Object.values(row.values).forEach((cell) => {
+      cell.error.value = undefined;
+    });
+  });
+};
+
 export const validateHomeModel = (model: HomeTabModel): boolean => {
   let valid = true;
+  clearHomeModelErrors(model);
 
   for (const group of model.variableGroups.value) {
     const variables = group.variables.value;
-    variables.forEach((v) => {
-      v.error.value = undefined;
-    });
 
     const present = variables.filter((v) => v.present.value);
 
@@ -33,6 +53,13 @@ export const validateHomeModel = (model: HomeTabModel): boolean => {
       ) {
         v.error.value =
           'Re-enter the value when converting a secret to plain text';
+      } else if (
+        !v.isNew &&
+        v.name.modified &&
+        v.isSecret.value === true &&
+        !v.value.modified
+      ) {
+        v.error.value = 'Re-enter the value when renaming a secret variable';
       }
       valid &&= !v.error.value;
     }
@@ -45,14 +72,8 @@ export const validateMatrixProvider = (
   provider: MatrixDataProvider,
 ): boolean => {
   let valid = true;
+  clearMatrixProviderErrors(provider);
   const rows = provider.variables.value;
-
-  rows.forEach((row) => {
-    row.name.error.value = undefined;
-    Object.values(row.values).forEach((cell) => {
-      cell.error.value = undefined;
-    });
-  });
 
   const hasPresentCell = (row: (typeof rows)[number]) =>
     Object.values(row.values).some((c) => c.present.value);
@@ -92,6 +113,25 @@ export const validateMatrixProvider = (
         ) {
           cell.error.value =
             'Re-enter the value when converting a secret to plain text';
+          valid = false;
+        }
+      }
+    }
+
+    // A rename discards the server-stored secret value for every present
+    // secret cell (the server keys secrets by name), so require re-entry.
+    const renamed = !row.name.isNew && row.name.name.modified;
+    if (renamed) {
+      for (const cell of Object.values(row.values)) {
+        const effectiveSecret = row.name.isSecret.value ?? cell.isSecretInitial;
+        if (
+          cell.present.value &&
+          effectiveSecret === true &&
+          !cell.value.modified &&
+          !cell.error.value
+        ) {
+          cell.error.value =
+            'Re-enter the value when renaming a secret variable';
           valid = false;
         }
       }

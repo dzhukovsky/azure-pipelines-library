@@ -1,5 +1,3 @@
-import './HistoryContent.scss';
-
 import { useQueryClient } from '@tanstack/react-query';
 import { Ago } from 'azure-devops-ui/Ago';
 import { ObservableValue } from 'azure-devops-ui/Core/Observable';
@@ -169,9 +167,12 @@ const useColumns = () => {
           const save = data.save;
           if (save) {
             return (
+              // fade keeps every save on one row: the group list is clipped
+              // with a fade and a "show more" pill once it outgrows the
+              // column, and expanding the row lists all the groups anyway.
               <PillGroup
                 className="flex-center"
-                overflow={PillGroupOverflow.wrap}
+                overflow={PillGroupOverflow.fade}
               >
                 {save.entries.map((entry) => (
                   <Pill key={entry.groupId} size={PillSize.compact}>

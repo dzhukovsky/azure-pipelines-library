@@ -203,7 +203,9 @@ const useColumns = () => {
               0,
             );
             return (
-              <span className="secondary-text white-space-nowrap flex-self-center flex-grow text-right">
+              // Same horizontal insets StateIcon carries, so the count and
+              // the per-variable status icons below it end on one line.
+              <span className="secondary-text white-space-nowrap flex-self-center flex-grow text-right padding-horizontal-8 margin-horizontal-4">
                 {changeCount} {changeCount === 1 ? 'change' : 'changes'}
               </span>
             );

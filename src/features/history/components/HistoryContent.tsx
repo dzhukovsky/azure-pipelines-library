@@ -1,3 +1,5 @@
+import './HistoryContent.scss';
+
 import { useQueryClient } from '@tanstack/react-query';
 import { Ago } from 'azure-devops-ui/Ago';
 import { Icon, IconSize } from 'azure-devops-ui/Icon';
@@ -52,7 +54,7 @@ const SaveEventRow = ({ event }: { event: SaveEventItem }) => {
   const toggle = () => setExpanded((prev) => !prev);
 
   return (
-    <div className="flex-column depth-4 padding-8 rhythm-vertical-8">
+    <div className="history-save-event flex-column depth-4 padding-8 rhythm-vertical-8">
       <button
         type="button"
         className="flex-row flex-center rhythm-horizontal-8 cursor-pointer"

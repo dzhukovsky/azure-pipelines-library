@@ -9,8 +9,8 @@ import {
   validateMatrixProvider,
 } from '@/features/library-changes';
 import { useVariableGroups } from '@/features/variable-groups/hooks/useVariableGroups';
-import type { ObservableMatrixVariable } from '@/features/variable-groups/models';
 import type { LibraryTabModel } from '../LibraryTabModel';
+import { findTreeItem, mapTreeItems } from './mapTreeItems';
 import { MatrixDataProvider } from './MatrixDataProvider';
 import {
   MatrixTree,
@@ -21,14 +21,18 @@ import {
 export type MatrixTabProps = {
   filter: IFilter;
   groupIds?: number[];
+  groupingPatterns?: string[];
   onTabContextChange: (model: LibraryTabModel | undefined) => void;
 };
 
 type TabState = {
   data?: VariableGroup[];
+  groupIds?: number[];
+  groupingPatterns?: readonly string[];
   provider: MatrixDataProvider;
   groupNames: VariableGroupName[];
   items: ObservableArray<ITreeItem<MatrixTreeItem>>;
+  collapsedFolders: Set<string>;
 };
 
 // Built synchronously from the query cache — provider, group names and tree
@@ -37,6 +41,7 @@ type TabState = {
 const createTabState = (
   data: VariableGroup[] | undefined,
   groupIds?: number[],
+  groupingPatterns?: readonly string[],
 ): TabState => {
   const visibleGroups = !data
     ? []
@@ -48,22 +53,30 @@ const createTabState = (
       : data;
 
   const provider = new MatrixDataProvider(visibleGroups);
+  const collapsedFolders = new Set<string>();
   const items = new ObservableArray<ITreeItem<MatrixTreeItem>>(
-    mapTreeItems(provider.variables.value),
+    mapTreeItems(provider.variables.value, groupingPatterns, collapsedFolders),
   );
 
   // Rebuild only when rows are added/removed; the synthetic `modified`
   // notify (fired on value edits) must not recreate tree items (focus loss).
   provider.variables.subscribe((e) => {
     if (e?.addedItems?.length || e?.removedItems?.length) {
-      items.splice(0, items.length, ...mapTreeItems(provider.variables.value));
+      items.splice(
+        0,
+        items.length,
+        ...mapTreeItems(provider.variables.value, groupingPatterns, collapsedFolders),
+      );
     }
   });
 
   return {
     data,
+    groupIds,
+    groupingPatterns,
     provider,
     items,
+    collapsedFolders,
     groupNames: visibleGroups.map<VariableGroupName>((x) => ({
       id: x.id,
       name: x.name,
@@ -74,6 +87,7 @@ const createTabState = (
 export const MatrixTab = ({
   filter,
   groupIds,
+  groupingPatterns,
   onTabContextChange,
 }: MatrixTabProps) => {
   const groups = useVariableGroups();
@@ -82,7 +96,7 @@ export const MatrixTab = ({
   const error = groups.error;
 
   const [state, setState] = useState(() =>
-    createTabState(groups.data, groupIds),
+    createTabState(groups.data, groupIds, groupingPatterns),
   );
 
   useEffect(() => {
@@ -90,11 +104,13 @@ export const MatrixTab = ({
       !isLoading &&
       // Never throw away pending edits: a rebuild would silently drop them.
       !state.provider.modified &&
-      state.data !== groups.data
+      (state.data !== groups.data ||
+        state.groupingPatterns?.join('\n') !== groupingPatterns?.join('\n') ||
+        state.groupIds?.join() !== groupIds?.join())
     ) {
-      setState(createTabState(groups.data, groupIds));
+      setState(createTabState(groups.data, groupIds, groupingPatterns));
     }
-  }, [isLoading, groups.data, groupIds, state]);
+  }, [isLoading, groups.data, groupIds, groupingPatterns, state]);
 
   // Hand the current provider to the page header, and take it back on unmount
   // so the header never acts on a model that is no longer rendered.
@@ -135,21 +151,26 @@ export const MatrixTab = ({
       addNewVariable={() => {
         state.provider.addNewVariable();
       }}
+      onToggleItem={(data, expanded) => {
+        if (data.type !== 'folder') {
+          return;
+        }
+
+        if (expanded) {
+          state.collapsedFolders.delete(data.data.folderPath);
+        } else {
+          state.collapsedFolders.add(data.data.folderPath);
+        }
+
+        // The filtered provider's items are copies of `state.items`'s entries,
+        // so a user toggle never reaches the source array on its own. Patch the
+        // matching item (folders can be nested) in place — it's only read on
+        // the next rebuild.
+        const item = findTreeItem(state.items.value, data);
+        if (item) {
+          item.expanded = expanded;
+        }
+      }}
     />
   );
-};
-
-const mapTreeItems = (variables: ObservableMatrixVariable[]) => {
-  const rootItems = [
-    ...variables.map<ITreeItem<MatrixTreeItem>>((variable) => ({
-      data: {
-        type: 'variable',
-        data: variable,
-      },
-      childItems: [],
-      expanded: false,
-    })),
-  ];
-
-  return rootItems;
 };

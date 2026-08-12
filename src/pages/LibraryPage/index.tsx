@@ -211,6 +211,7 @@ const useTabs = (
             key={view.id}
             filter={filter}
             groupIds={view.groupIds}
+            groupingPatterns={view.groupingPatterns}
             onTabContextChange={onTabContextChange}
           />
         ),

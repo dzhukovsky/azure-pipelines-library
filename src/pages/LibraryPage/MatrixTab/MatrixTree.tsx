@@ -34,10 +34,13 @@ export type MatrixTreeProps = {
   filter: IFilter;
   loading?: boolean;
   addNewVariable: () => void;
+  onToggleItem?: (data: MatrixTreeItem, expanded: boolean) => void;
 };
 
 export type MatrixVariableFolder = {
   folderName: string;
+  // Lowercased '/'-joined ancestor chain — identity for collapse tracking.
+  folderPath: string;
   variables: ObservableMatrixVariable[];
 };
 
@@ -126,6 +129,7 @@ export const MatrixTree = ({
   filter,
   loading,
   addNewVariable,
+  onToggleItem,
 }: MatrixTreeProps) => {
   const { filteredItems, isEmpty } = useObservableFiltering(
     items,
@@ -152,7 +156,9 @@ export const MatrixTree = ({
             renderRow={renderRow}
             onToggle={(_, item) => {
               if (item.underlyingItem.childItems?.length) {
+                const expanded = !item.underlyingItem.expanded;
                 filteredItems.toggle(item.underlyingItem);
+                onToggleItem?.(item.underlyingItem.data, expanded);
               }
             }}
           />

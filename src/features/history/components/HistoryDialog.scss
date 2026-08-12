@@ -1,9 +1,10 @@
+// Same footprint as the Preview changes dialog — both show a tree of
+// changes and should not resize relative to each other.
 .history-dialog {
     overflow: hidden;
-    min-width: 40vw;
-    max-width: 600px;
-    min-height: 40vh;
+    min-height: 60vh;
     max-height: 80vh;
+    min-width: 60vw;
 }
 
 .history-dialog-content {

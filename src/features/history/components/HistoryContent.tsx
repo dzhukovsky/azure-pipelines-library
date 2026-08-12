@@ -1,3 +1,5 @@
+import './HistoryContent.scss';
+
 import { useQueryClient } from '@tanstack/react-query';
 import { Ago } from 'azure-devops-ui/Ago';
 import { ObservableValue } from 'azure-devops-ui/Core/Observable';
@@ -157,12 +159,12 @@ const useColumns = () => {
           return undefined;
         },
         renderActions: () => undefined,
-        width: new ObservableValue(-55),
+        width: new ObservableValue(-40),
       }),
       createActionColumn<HistoryTreeItem>({
         id: 'groups',
         name: 'Groups',
-        width: new ObservableValue(-45),
+        width: new ObservableValue(-60),
         renderCell: ({ data }) => {
           const save = data.save;
           if (save) {

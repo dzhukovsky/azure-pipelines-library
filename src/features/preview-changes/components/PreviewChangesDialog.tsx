@@ -154,7 +154,10 @@ const PreviewChangesDialogContent = ({
         showCloseButton={false}
       />
       {invalid && (
-        <MessageCard severity={MessageCardSeverity.Warning}>
+        <MessageCard
+          severity={MessageCardSeverity.Warning}
+          className="margin-16"
+        >
           Fix the highlighted errors before saving.
         </MessageCard>
       )}

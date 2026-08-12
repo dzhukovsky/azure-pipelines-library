@@ -179,11 +179,12 @@ const spanDetailRows = (
     return colspan ? (
       ExpandableTreeCell({
         children: (
-          <Tooltip text={externalDetailText} overflowOnly>
-            <span className="text-ellipsis padding-vertical-8">
-              {externalDetailText}
-            </span>
-          </Tooltip>
+          <div className="flex-row flex-center rhythm-horizontal-8 padding-vertical-8">
+            <Icon iconName="fluent-WarningColor" size={IconSize.medium} />
+            <Tooltip text={externalDetailText} overflowOnly>
+              <span className="text-ellipsis">{externalDetailText}</span>
+            </Tooltip>
+          </div>
         ),
         colspan,
         columnIndex,

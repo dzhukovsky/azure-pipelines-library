@@ -7,7 +7,7 @@ import {
   ObservableLike,
   ObservableValue,
 } from 'azure-devops-ui/Core/Observable';
-import { IconSize } from 'azure-devops-ui/Icon';
+import { IconSize, type IIconProps } from 'azure-devops-ui/Icon';
 import { renderListCell } from 'azure-devops-ui/List';
 import { Pill, PillSize } from 'azure-devops-ui/Pill';
 import { PillGroup, PillGroupOverflow } from 'azure-devops-ui/PillGroup';
@@ -50,6 +50,25 @@ const statusState = {
 const changeText = (c: HistoryEntryChange) =>
   c.status === 'renamed' ? `${c.key} → ${c.renamedTo}` : c.key;
 
+// Drawn exactly like the group and variable icons in these rows.
+const warningIconProps: IIconProps = {
+  iconName: 'fluent-WarningColor',
+  size: IconSize.medium,
+};
+
+const WarningLabel = ({
+  text,
+  textClassName,
+}: {
+  text: string;
+  textClassName?: string;
+}) =>
+  renderListCell({
+    text,
+    textClassName,
+    iconProps: warningIconProps,
+  });
+
 type Actor = { id: string; displayName: string };
 
 const getActorIdentityDetailsProvider = (
@@ -70,10 +89,14 @@ const ActorCell = ({ actor, date }: { actor?: Actor; date?: Date }) => (
   <div className="flex-row flex-center rhythm-horizontal-8 padding-vertical-8">
     {actor && (
       <>
-        <VssPersona
-          identityDetailsProvider={getActorIdentityDetailsProvider(actor)}
-          size="extra-small"
-        />
+        {/* The persona sits a pixel above the text it stands next to; the
+            Home tab corrects it the same way (see LastModifiedByCell). */}
+        <span style={{ marginTop: 1 }}>
+          <VssPersona
+            identityDetailsProvider={getActorIdentityDetailsProvider(actor)}
+            size="extra-small"
+          />
+        </span>
         <span>{actor.displayName}</span>
       </>
     )}
@@ -177,16 +200,12 @@ const spanDetailRows = (
     // spanning cell above already covers their width.
     return colspan ? (
       ExpandableTreeCell({
-        // renderListCell is what the group and variable rows use, so the
-        // icon lines up with its label exactly as it does there.
-        children: renderListCell({
-          text: externalDetailText,
-          textClassName: 'padding-vertical-8',
-          iconProps: {
-            iconName: 'fluent-WarningColor',
-            size: IconSize.medium,
-          },
-        }),
+        children: (
+          <WarningLabel
+            text={externalDetailText}
+            textClassName="padding-vertical-8"
+          />
+        ),
         colspan,
         columnIndex,
         contentClassName: 'padding-vertical-0',
@@ -317,9 +336,9 @@ const useColumns = (resolveGroup: GroupResolver) => {
         createActionColumn<HistoryTreeItem>({
           id: 'changeCount',
           name: '',
-          // Fixed width: the column only ever holds a small count, so it
-          // should not grow with the dialog.
-          width: new ObservableValue(120),
+          // Fixed width: the column only ever holds a count or the external
+          // marker, so it should not grow with the dialog.
+          width: new ObservableValue(160),
           renderCell: ({ data }) => {
             const save = data.save;
             if (save) {
@@ -339,14 +358,10 @@ const useColumns = (resolveGroup: GroupResolver) => {
             if (data.external) {
               return (
                 <span className="flex-row flex-grow justify-end padding-horizontal-8 margin-horizontal-4">
-                  {renderListCell({
-                    text: 'interrupted',
-                    textClassName: 'secondary-text white-space-nowrap',
-                    iconProps: {
-                      iconName: 'fluent-WarningColor',
-                      size: IconSize.medium,
-                    },
-                  })}
+                  <WarningLabel
+                    text="external change"
+                    textClassName="secondary-text white-space-nowrap"
+                  />
                 </span>
               );
             }

@@ -1,7 +1,7 @@
-.history-save-event {
+.history-tree {
     // PillGroup's wrap mode adds margin-bottom: 8px to every pill for
     // spacing between wrapped lines; compensate on the inner container so a
-    // single-line group keeps the row vertically centered while wrapped
+    // single-line group stays vertically centered in its row while wrapped
     // lines still get their gap.
     .bolt-pill-group.overflow-wrap > .bolt-pill-group-inner {
         margin-bottom: -8px;

@@ -2,18 +2,29 @@ import './HistoryContent.scss';
 
 import { useQueryClient } from '@tanstack/react-query';
 import { Ago } from 'azure-devops-ui/Ago';
+import { ObservableValue } from 'azure-devops-ui/Core/Observable';
 import { Icon, IconSize } from 'azure-devops-ui/Icon';
+import { renderListCell } from 'azure-devops-ui/List';
 import { Pill, PillSize } from 'azure-devops-ui/Pill';
 import { PillGroup, PillGroupOverflow } from 'azure-devops-ui/PillGroup';
 import { Spinner, SpinnerSize } from 'azure-devops-ui/Spinner';
+import { type ITreeColumn, Tree } from 'azure-devops-ui/TreeEx';
+import type { ITreeItem } from 'azure-devops-ui/Utilities/TreeItemProvider';
+import {
+  type ITreeItemProvider,
+  TreeItemProvider,
+} from 'azure-devops-ui/Utilities/TreeItemProvider';
 import type { IIdentityDetailsProvider } from 'azure-devops-ui/VssPersona';
 import { VssPersona } from 'azure-devops-ui/VssPersona';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useVariableGroups } from '@/features/variable-groups/hooks/useVariableGroups';
 import { getProjectUrl } from '@/shared/api/configurations';
 import { StateIcon, States } from '@/shared/components/StateIcon';
+import { createActionColumn } from '@/shared/components/Tree/createActionColumn';
+import { createExpandableActionColumn } from '@/shared/components/Tree/createExpandableActionColumn';
 import {
   buildSaveEvents,
+  type ExternalItem,
   type HistoryListItem,
   type SaveEventItem,
 } from '../buildSaveEvents';
@@ -43,81 +54,187 @@ const getActorIdentityDetailsProvider = (
   };
 };
 
-const SaveEventRow = ({ event }: { event: SaveEventItem }) => {
-  const [expanded, setExpanded] = useState(false);
+// Same optional-field row shape the Preview changes tree uses.
+type HistoryTreeItem = {
+  save?: SaveEventItem;
+  group?: HistoryEntry;
+  change?: HistoryEntryChange;
+  external?: ExternalItem;
+};
 
-  const changeCount = event.entries.reduce(
-    (sum, entry) => sum + entry.changes.length,
-    0,
+const mapTreeItems = (
+  items: HistoryListItem[],
+): ITreeItem<HistoryTreeItem>[] =>
+  items.map<ITreeItem<HistoryTreeItem>>((item) =>
+    item.kind === 'external'
+      ? { data: { external: item } }
+      : {
+          data: { save: item },
+          expanded: false,
+          childItems: item.entries.map<ITreeItem<HistoryTreeItem>>(
+            (entry) => ({
+              data: { group: entry },
+              // Groups come pre-expanded so opening a save event shows the
+              // changed variables right away.
+              expanded: true,
+              childItems: entry.changes.map<ITreeItem<HistoryTreeItem>>(
+                (change) => ({ data: { change } }),
+              ),
+            }),
+          ),
+        },
   );
 
-  const toggle = () => setExpanded((prev) => !prev);
+const useColumns = () => {
+  const columns = useMemo(() => {
+    const onSize = (_event: MouseEvent, index: number, width: number) => {
+      (columns[index].width as ObservableValue<number>).value = width;
+    };
 
-  return (
-    <div className="history-save-event flex-column depth-4 padding-8 rhythm-vertical-8">
-      <button
-        type="button"
-        className="flex-row flex-center rhythm-horizontal-8 cursor-pointer"
-        style={{
-          background: 'none',
-          border: 0,
-          padding: 0,
-          font: 'inherit',
-          color: 'inherit',
-          textAlign: 'left',
-          width: '100%',
-        }}
-        aria-expanded={expanded}
-        onClick={toggle}
-      >
-        <Icon
-          iconName={expanded ? 'ChevronDown' : 'ChevronRight'}
-          size={IconSize.small}
-        />
-        <VssPersona
-          identityDetailsProvider={getActorIdentityDetailsProvider(
-            event.actor,
-          )}
-          size="extra-small"
-        />
-        <span className="secondary-text">{event.actor.displayName}</span>
-        <Ago date={new Date(event.timestamp)} />
-        <PillGroup className="flex-grow" overflow={PillGroupOverflow.wrap}>
-          {event.entries.map((entry) => (
-            <Pill key={entry.groupId} size={PillSize.compact}>
-              {entry.groupName}
-            </Pill>
-          ))}
-        </PillGroup>
-        <span className="secondary-text no-wrap">
-          {changeCount} {changeCount === 1 ? 'change' : 'changes'}
-        </span>
-      </button>
-      {expanded && (
-        <div
-          className="flex-column rhythm-vertical-8"
-          style={{ paddingLeft: 24 }}
-        >
-          {event.entries.map((entry) => (
-            <div key={entry.id} className="flex-column rhythm-vertical-4">
-              <div className="flex-row flex-center rhythm-horizontal-8">
-                <Icon iconName="fluent-LibraryColor" size={IconSize.medium} />
-                <strong>{entry.groupName}</strong>
+    const columns: ITreeColumn<HistoryTreeItem>[] = [
+      createExpandableActionColumn<HistoryTreeItem>({
+        id: 'change',
+        name: 'Change',
+        contentClassName: 'padding-vertical-0 padding-right-0',
+        onSize,
+        renderCell: ({ data }) => {
+          const save = data.save;
+          if (save) {
+            return (
+              <div className="flex-row flex-center rhythm-horizontal-8 padding-vertical-8">
+                <VssPersona
+                  identityDetailsProvider={getActorIdentityDetailsProvider(
+                    save.actor,
+                  )}
+                  size="extra-small"
+                />
+                <span>{save.actor.displayName}</span>
+                <span className="secondary-text">
+                  <Ago date={new Date(save.timestamp)} />
+                </span>
               </div>
-              {entry.changes.map((change) => (
-                <div
-                  key={`${change.key}-${change.status}`}
-                  className="flex-row flex-center rhythm-horizontal-8"
-                >
-                  <StateIcon state={statusState[change.status]} />
-                  <span>{changeText(change)}</span>
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+            );
+          }
+
+          const group = data.group;
+          if (group) {
+            return renderListCell({
+              text: group.groupName,
+              textClassName: 'padding-vertical-8',
+              iconProps: {
+                iconName: 'fluent-LibraryColor',
+                size: IconSize.medium,
+              },
+            });
+          }
+
+          const change = data.change;
+          if (change) {
+            return renderListCell({
+              text: changeText(change),
+              textClassName: 'padding-vertical-8',
+            });
+          }
+
+          const external = data.external;
+          if (external) {
+            return (
+              <div className="flex-row flex-center rhythm-horizontal-8 padding-vertical-8">
+                <Icon iconName="fluent-WarningColor" size={IconSize.medium} />
+                <span>
+                  <strong>{external.groupName}</strong> was changed outside
+                  the extension
+                  {external.detectedAt && (
+                    <>
+                      {' '}
+                      (<Ago date={new Date(external.detectedAt)} />)
+                    </>
+                  )}
+                  . History continuity is interrupted.
+                </span>
+              </div>
+            );
+          }
+
+          return undefined;
+        },
+        renderActions: () => undefined,
+        width: new ObservableValue(-55),
+      }),
+      createActionColumn<HistoryTreeItem>({
+        id: 'groups',
+        name: 'Groups',
+        width: new ObservableValue(-45),
+        renderCell: ({ data }) => {
+          const save = data.save;
+          if (save) {
+            return (
+              <PillGroup
+                className="flex-center"
+                overflow={PillGroupOverflow.wrap}
+              >
+                {save.entries.map((entry) => (
+                  <Pill key={entry.groupId} size={PillSize.compact}>
+                    {entry.groupName}
+                  </Pill>
+                ))}
+              </PillGroup>
+            );
+          }
+
+          return <span className="flex-row flex-grow" />;
+        },
+        renderActions: ({ data }) => {
+          const save = data.save;
+          if (save) {
+            const changeCount = save.entries.reduce(
+              (sum, entry) => sum + entry.changes.length,
+              0,
+            );
+            return (
+              <span className="secondary-text white-space-nowrap flex-self-center margin-horizontal-8">
+                {changeCount} {changeCount === 1 ? 'change' : 'changes'}
+              </span>
+            );
+          }
+
+          const change = data.change;
+          if (change) {
+            return <StateIcon state={statusState[change.status]} />;
+          }
+
+          return undefined;
+        },
+      }),
+    ];
+
+    return columns;
+  }, []);
+
+  return { columns };
+};
+
+const HistoryTree = ({
+  itemProvider,
+}: {
+  itemProvider: ITreeItemProvider<HistoryTreeItem>;
+}) => {
+  const { columns } = useColumns();
+  return (
+    <Tree<HistoryTreeItem>
+      id={'history-tree'}
+      className="history-tree text-field-table-wrap"
+      columns={columns}
+      scrollable={true}
+      itemProvider={itemProvider}
+      showLines={false}
+      virtualize={false}
+      onToggle={(_, item) => {
+        if (item.underlyingItem.childItems?.length) {
+          itemProvider.toggle(item.underlyingItem);
+        }
+      }}
+    />
   );
 };
 
@@ -135,7 +252,7 @@ export const HistoryContent = () => {
     queryClient.invalidateQueries({ queryKey: ['variable-groups'] });
   }, []);
 
-  const items = useMemo<HistoryListItem[] | undefined>(() => {
+  const itemProvider = useMemo(() => {
     if (!history.data) return undefined;
     const currentModifiedOn: Record<number, string | undefined> =
       Object.fromEntries(
@@ -144,14 +261,17 @@ export const HistoryContent = () => {
           (g.modifiedOn ?? g.createdOn)?.toISOString(),
         ]),
       );
-    return buildSaveEvents(buildTimeline(history.data, currentModifiedOn));
+    const items = buildSaveEvents(
+      buildTimeline(history.data, currentModifiedOn),
+    );
+    return new TreeItemProvider(mapTreeItems(items));
   }, [history.data, groups.data]);
 
-  if (!items) {
+  if (!itemProvider) {
     return <Spinner size={SpinnerSize.large} className="margin-16" />;
   }
 
-  if (!items.length) {
+  if (!itemProvider.roots.length) {
     return (
       <div className="margin-16 secondary-text">
         No history yet. Changes saved through this extension will appear
@@ -160,31 +280,5 @@ export const HistoryContent = () => {
     );
   }
 
-  return (
-    <div className="flex-column rhythm-vertical-8 padding-16">
-      {items.map((item) =>
-        item.kind === 'external' ? (
-          <div
-            key={item.key}
-            className="flex-row flex-center rhythm-horizontal-8 padding-8"
-          >
-            <Icon iconName="fluent-WarningColor" size={IconSize.medium} />
-            <span>
-              <strong>{item.groupName}</strong> was changed outside the
-              extension
-              {item.detectedAt && (
-                <>
-                  {' '}
-                  (<Ago date={new Date(item.detectedAt)} />)
-                </>
-              )}
-              . History continuity is interrupted.
-            </span>
-          </div>
-        ) : (
-          <SaveEventRow key={item.key} event={item} />
-        ),
-      )}
-    </div>
-  );
+  return <HistoryTree itemProvider={itemProvider} />;
 };

@@ -1,3 +1,5 @@
+import './GroupNameCell.scss';
+
 import { IconSize } from 'azure-devops-ui/Icon';
 import { renderListCell } from 'azure-devops-ui/List';
 import { Observer } from 'azure-devops-ui/Observer';
@@ -50,6 +52,7 @@ export const GroupNameCell = ({ data }: { data: ObservableVariableGroup }) => {
               ...groupIconProps,
               style: { paddingLeft: 0, marginLeft: 0 },
             }}
+            className="group-name-input"
             placeholder="Name (required)"
             autoFocus
             onChange={(e) => {

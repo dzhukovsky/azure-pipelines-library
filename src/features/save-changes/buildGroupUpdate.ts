@@ -54,7 +54,14 @@ export function buildVariableGroupParameters(
     description: current.description,
     type: current.type,
     providerData: current.providerData,
-    variableGroupProjectReferences: current.variableGroupProjectReferences,
+    // A project-scoped group is named by its project reference, so a rename
+    // that only changes the name above is accepted and then ignored.
+    variableGroupProjectReferences: change.nameChanged
+      ? current.variableGroupProjectReferences?.map((reference) => ({
+          ...reference,
+          name: change.name,
+        }))
+      : current.variableGroupProjectReferences,
     variables,
   };
 }

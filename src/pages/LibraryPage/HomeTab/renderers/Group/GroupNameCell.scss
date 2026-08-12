@@ -1,0 +1,6 @@
+// renderListCell leaves 6px between the icon and the label; the text field
+// that replaces it brings its own 11px, so the name would jump right the
+// moment editing starts.
+input.group-name-input {
+    padding-left: 6px;
+}

@@ -100,7 +100,7 @@ describe('buildVariableGroupParameters', () => {
     );
   });
 
-  test('carries group metadata and rename of the group itself', () => {
+  test('carries group metadata and renames the group in its project too', () => {
     const change = baseChange([]);
     change.name = 'newName';
     change.nameChanged = true;
@@ -108,6 +108,14 @@ describe('buildVariableGroupParameters', () => {
     expect(params.name).toBe('newName');
     expect(params.description).toBe('desc');
     expect(params.type).toBe('Vsts');
+    // The project reference carries the name a project-scoped group shows.
+    expect(params.variableGroupProjectReferences).toEqual([
+      { name: 'newName' },
+    ]);
+  });
+
+  test('leaves the project references alone when the name is untouched', () => {
+    const params = buildVariableGroupParameters(currentGroup(), baseChange([]));
     expect(params.variableGroupProjectReferences).toEqual([{ name: 'group' }]);
   });
 });

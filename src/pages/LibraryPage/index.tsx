@@ -11,6 +11,7 @@ import { Tab, TabBar } from 'azure-devops-ui/Tabs';
 import { InlineKeywordFilterBarItem } from 'azure-devops-ui/TextFilterBarItem';
 import { Filter, type IFilter } from 'azure-devops-ui/Utilities/Filter';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { HistoryDialog } from '@/features/history/components/HistoryDialog';
 import { recordSaveHistory } from '@/features/history/recordSaveHistory';
 import { ManageViewsDialog } from '@/features/matrix-views/components/ManageViewsDialog';
 import { useMatrixViews } from '@/features/matrix-views/hooks/useMatrixViews';
@@ -44,9 +45,11 @@ export const LibraryPage = () => {
 
   const [tabContainerKey, setTabContainerKey] = useState<number>(0);
   const [isManageViewsOpen, setIsManageViewsOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [pendingTab, setPendingTab] = useState<string>();
 
   const openManageViews = useCallback(() => setIsManageViewsOpen(true), []);
+  const openHistory = useCallback(() => setIsHistoryOpen(true), []);
 
   const filter = useFilter(queryParams.filter, setQueryParams);
   const {
@@ -60,6 +63,7 @@ export const LibraryPage = () => {
     setTabContainerKey,
     previewDialogOptions,
     openManageViews,
+    openHistory,
   );
   const { currentTab, tabs } = useTabs(
     queryParams.tab,
@@ -116,6 +120,9 @@ export const LibraryPage = () => {
       <PreviewChangesDialog options={previewDialogOptions} />
       {isManageViewsOpen && (
         <ManageViewsDialog onDismiss={() => setIsManageViewsOpen(false)} />
+      )}
+      {isHistoryOpen && (
+        <HistoryDialog onDismiss={() => setIsHistoryOpen(false)} />
       )}
       {pendingTab !== undefined && (
         <Dialog
@@ -236,6 +243,7 @@ const useHeader = (
     PreviewChangesDialogOptions | undefined
   >,
   onManageViews: () => void,
+  onHistory: () => void,
 ) => {
   const queryClient = useQueryClient();
 
@@ -318,7 +326,7 @@ const useHeader = (
         id: 'history',
         text: 'History',
         onActivate: () => {
-          alert('History');
+          onHistory();
         },
         important: false,
       },
@@ -331,7 +339,7 @@ const useHeader = (
         important: false,
       },
     ],
-    [onManageViews],
+    [onManageViews, onHistory],
   );
 
   const hasChangesCommands: IHeaderCommandBarItem[] = useMemo(

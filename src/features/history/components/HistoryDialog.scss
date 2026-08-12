@@ -1,0 +1,11 @@
+.history-dialog {
+    overflow: hidden;
+    min-width: 40vw;
+    max-width: 600px;
+    max-height: 80vh;
+}
+
+.history-dialog-content {
+    overflow-y: auto;
+    min-height: 120px;
+}

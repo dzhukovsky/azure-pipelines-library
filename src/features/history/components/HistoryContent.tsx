@@ -1,6 +1,7 @@
 import './HistoryContent.scss';
 
 import { useQueryClient } from '@tanstack/react-query';
+import type { IdentityRef } from 'azure-devops-extension-api/WebApi';
 import { Ago } from 'azure-devops-ui/Ago';
 import {
   ObservableLike,
@@ -47,8 +48,10 @@ const statusState = {
 const changeText = (c: HistoryEntryChange) =>
   c.status === 'renamed' ? `${c.key} → ${c.renamedTo}` : c.key;
 
+type Actor = { id: string; displayName: string };
+
 const getActorIdentityDetailsProvider = (
-  actor: HistoryEntry['actor'],
+  actor: Actor,
 ): IIdentityDetailsProvider => {
   const projectUrl = getProjectUrl();
 
@@ -59,18 +62,46 @@ const getActorIdentityDetailsProvider = (
   };
 };
 
+// Every row that names a person — a save or a change made outside the
+// extension — presents them the same way.
+const ActorCell = ({ actor, date }: { actor?: Actor; date?: Date }) => (
+  <div className="flex-row flex-center rhythm-horizontal-8 padding-vertical-8">
+    {actor && (
+      <>
+        <VssPersona
+          identityDetailsProvider={getActorIdentityDetailsProvider(actor)}
+          size="extra-small"
+        />
+        <span>{actor.displayName}</span>
+      </>
+    )}
+    {date && (
+      <span className="secondary-text">
+        <Ago date={date} />
+      </span>
+    )}
+  </div>
+);
+
 // Same optional-field row shape the Preview changes tree uses.
 type HistoryTreeItem = {
   save?: SaveEventItem;
   group?: HistoryEntry;
   change?: HistoryEntryChange;
   external?: ExternalItem;
+  externalDetail?: ExternalItem;
 };
 
 const mapTreeItems = (items: HistoryListItem[]): ITreeItem<HistoryTreeItem>[] =>
   items.map<ITreeItem<HistoryTreeItem>>((item) =>
     item.kind === 'external'
-      ? { data: { external: item } }
+      ? {
+          data: { external: item },
+          expanded: false,
+          // The warning reads like the other rows; what it means is one
+          // expand away.
+          childItems: [{ data: { externalDetail: item } }],
+        }
       : {
           data: { save: item },
           expanded: false,
@@ -88,51 +119,26 @@ const mapTreeItems = (items: HistoryListItem[]): ITreeItem<HistoryTreeItem>[] =>
 
 /**
  * Groups get renamed, so an entry's stored name can be out of date: resolve
- * the name the group carries today and fall back to the recorded one only
- * when the group is gone.
+ * what the group looks like today — including who last touched it, which is
+ * the person behind an external change — and fall back to the recorded name
+ * only when the group is gone.
  */
-export type GroupNameResolver = (
+export type GroupResolver = (
   groupId: number,
   recordedName: string,
-) => string;
+) => { name: string; modifiedBy?: IdentityRef };
 
-const ExternalMarkerCell = ({
-  external,
-  groupName,
-}: {
-  external: ExternalItem;
-  groupName: string;
-}) => {
-  const detectedAt = external.detectedAt
-    ? ` (${new Date(external.detectedAt).toLocaleString()})`
-    : '';
-  const text = `${groupName} was changed outside the extension${detectedAt}. History continuity is interrupted.`;
+// The row's own cell only holds the identity and time, like every other row;
+// the explanation lives in the detail row underneath it, where it has the
+// whole table to itself.
+const externalDetailText = (groupName: string) =>
+  `${groupName} was changed outside the extension, so the history above it does not describe how it reached its current state.`;
 
-  return (
-    <Tooltip text={text} overflowOnly>
-      <div className="flex-row flex-center rhythm-horizontal-8 padding-vertical-8">
-        <Icon iconName="fluent-WarningColor" size={IconSize.medium} />
-        <span className="text-ellipsis">
-          <strong>{groupName}</strong> was changed outside the extension
-          {external.detectedAt && (
-            <>
-              {' '}
-              (<Ago date={new Date(external.detectedAt)} />)
-            </>
-          )}
-          . History continuity is interrupted.
-        </span>
-      </div>
-    </Tooltip>
-  );
-};
-
-// The external-change warning is a sentence, not a value that belongs to a
-// column: let the first cell span the whole table for those rows and drop
-// the remaining cells, so the text is never squeezed into one column.
-const spanExternalRows = (
+// The detail row is a sentence, not a value that belongs to a column: let its
+// first cell span the whole table and drop the remaining cells.
+const spanDetailRows = (
   column: ITreeColumn<HistoryTreeItem>,
-  resolveGroupName: GroupNameResolver,
+  resolveGroup: GroupResolver,
   colspan?: number,
 ): ITreeColumn<HistoryTreeItem> => ({
   ...column,
@@ -144,9 +150,11 @@ const spanExternalRows = (
     ariaRowIndex,
     role,
   ) => {
-    const { external } = ObservableLike.getValue(treeItem.underlyingItem.data);
+    const { externalDetail } = ObservableLike.getValue(
+      treeItem.underlyingItem.data,
+    );
 
-    if (!external) {
+    if (!externalDetail) {
       return column.renderCell(
         rowIndex,
         columnIndex,
@@ -157,15 +165,20 @@ const spanExternalRows = (
       );
     }
 
+    const { name } = resolveGroup(
+      externalDetail.groupId,
+      externalDetail.groupName,
+    );
+    const text = externalDetailText(name);
+
     // Columns without a colspan render no cell at all for these rows — the
     // spanning cell above already covers their width.
     return colspan ? (
       SimpleTableCell({
         children: (
-          <ExternalMarkerCell
-            external={external}
-            groupName={resolveGroupName(external.groupId, external.groupName)}
-          />
+          <Tooltip text={text} overflowOnly>
+            <span className="text-ellipsis padding-vertical-8">{text}</span>
+          </Tooltip>
         ),
         className: 'bolt-tree-cell',
         colspan,
@@ -180,14 +193,14 @@ const spanExternalRows = (
   },
 });
 
-const useColumns = (resolveGroupName: GroupNameResolver) => {
+const useColumns = (resolveGroup: GroupResolver) => {
   const columns = useMemo(() => {
     const onSize = (_event: MouseEvent, index: number, width: number) => {
       (columns[index].width as ObservableValue<number>).value = width;
     };
 
     const columns: ITreeColumn<HistoryTreeItem>[] = [
-      spanExternalRows(
+      spanDetailRows(
         createExpandableActionColumn<HistoryTreeItem>({
           id: 'change',
           name: 'Change',
@@ -197,25 +210,32 @@ const useColumns = (resolveGroupName: GroupNameResolver) => {
             const save = data.save;
             if (save) {
               return (
-                <div className="flex-row flex-center rhythm-horizontal-8 padding-vertical-8">
-                  <VssPersona
-                    identityDetailsProvider={getActorIdentityDetailsProvider(
-                      save.actor,
-                    )}
-                    size="extra-small"
-                  />
-                  <span>{save.actor.displayName}</span>
-                  <span className="secondary-text">
-                    <Ago date={new Date(save.timestamp)} />
-                  </span>
-                </div>
+                <ActorCell actor={save.actor} date={new Date(save.timestamp)} />
+              );
+            }
+
+            const external = data.external;
+            if (external) {
+              const { modifiedBy } = resolveGroup(
+                external.groupId,
+                external.groupName,
+              );
+              return (
+                <ActorCell
+                  actor={modifiedBy}
+                  date={
+                    external.detectedAt
+                      ? new Date(external.detectedAt)
+                      : undefined
+                  }
+                />
               );
             }
 
             const group = data.group;
             if (group) {
               return renderListCell({
-                text: resolveGroupName(group.groupId, group.groupName),
+                text: resolveGroup(group.groupId, group.groupName).name,
                 textClassName: 'padding-vertical-8',
                 iconProps: {
                   iconName: 'fluent-LibraryColor',
@@ -237,11 +257,11 @@ const useColumns = (resolveGroupName: GroupNameResolver) => {
           renderActions: () => undefined,
           width: new ObservableValue(-40),
         }),
-        resolveGroupName,
-        // The warning spans every content column of the table.
+        resolveGroup,
+        // The detail row spans every content column of the table.
         3,
       ),
-      spanExternalRows(
+      spanDetailRows(
         createActionColumn<HistoryTreeItem>({
           id: 'groups',
           name: 'Groups',
@@ -259,9 +279,23 @@ const useColumns = (resolveGroupName: GroupNameResolver) => {
                 >
                   {save.entries.map((entry) => (
                     <Pill key={entry.groupId} size={PillSize.compact}>
-                      {resolveGroupName(entry.groupId, entry.groupName)}
+                      {resolveGroup(entry.groupId, entry.groupName).name}
                     </Pill>
                   ))}
+                </PillGroup>
+              );
+            }
+
+            const external = data.external;
+            if (external) {
+              return (
+                <PillGroup
+                  className="flex-center"
+                  overflow={PillGroupOverflow.fade}
+                >
+                  <Pill size={PillSize.compact}>
+                    {resolveGroup(external.groupId, external.groupName).name}
+                  </Pill>
                 </PillGroup>
               );
             }
@@ -270,9 +304,9 @@ const useColumns = (resolveGroupName: GroupNameResolver) => {
           },
           renderActions: () => undefined,
         }),
-        resolveGroupName,
+        resolveGroup,
       ),
-      spanExternalRows(
+      spanDetailRows(
         createActionColumn<HistoryTreeItem>({
           id: 'changeCount',
           name: '',
@@ -303,27 +337,35 @@ const useColumns = (resolveGroupName: GroupNameResolver) => {
               return <StateIcon state={statusState[change.status]} />;
             }
 
+            if (data.external) {
+              return (
+                <span className="flex-self-center padding-horizontal-8 margin-horizontal-4">
+                  <Icon iconName="fluent-WarningColor" size={IconSize.medium} />
+                </span>
+              );
+            }
+
             return undefined;
           },
         }),
-        resolveGroupName,
+        resolveGroup,
       ),
     ];
 
     return columns;
-  }, [resolveGroupName]);
+  }, [resolveGroup]);
 
   return { columns };
 };
 
 const HistoryTree = ({
   itemProvider,
-  resolveGroupName,
+  resolveGroup,
 }: {
   itemProvider: ITreeItemProvider<HistoryTreeItem>;
-  resolveGroupName: GroupNameResolver;
+  resolveGroup: GroupResolver;
 }) => {
-  const { columns } = useColumns(resolveGroupName);
+  const { columns } = useColumns(resolveGroup);
   return (
     <Tree<HistoryTreeItem>
       id={'history-tree'}
@@ -356,11 +398,15 @@ export const HistoryContent = () => {
     queryClient.invalidateQueries({ queryKey: ['variable-groups'] });
   }, []);
 
-  const resolveGroupName = useMemo<GroupNameResolver>(() => {
-    const currentNames = new Map(
-      (groups.data ?? []).map((group) => [group.id, group.name]),
-    );
-    return (groupId, recordedName) => currentNames.get(groupId) ?? recordedName;
+  const resolveGroup = useMemo<GroupResolver>(() => {
+    const current = new Map((groups.data ?? []).map((g) => [g.id, g]));
+    return (groupId, recordedName) => {
+      const group = current.get(groupId);
+      return {
+        name: group?.name ?? recordedName,
+        modifiedBy: group?.modifiedBy ?? group?.createdBy,
+      };
+    };
   }, [groups.data]);
 
   const itemProvider = useMemo(() => {
@@ -391,9 +437,6 @@ export const HistoryContent = () => {
   }
 
   return (
-    <HistoryTree
-      itemProvider={itemProvider}
-      resolveGroupName={resolveGroupName}
-    />
+    <HistoryTree itemProvider={itemProvider} resolveGroup={resolveGroup} />
   );
 };

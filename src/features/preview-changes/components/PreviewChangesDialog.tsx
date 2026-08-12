@@ -113,15 +113,10 @@ const PreviewChangesDialogContent = ({
     setSaving(true);
     setErrors(undefined);
     setGeneralError(undefined);
+
+    let outcome: SaveOutcome;
     try {
-      const outcome = await options.onSave();
-      if (outcome.ok) {
-        clearOptions();
-      } else {
-        setErrors(outcome.results.filter((r) => !r.ok));
-        setReloadOnClose((prev) => prev || outcome.results.some((r) => r.ok));
-      }
-      options.onSaved(outcome); // page invalidates/remounts on full success
+      outcome = await options.onSave();
     } catch (e) {
       // saveLibraryChanges is documented to never throw; this only guards
       // against an unexpected bug so the modal — no esc/light-dismiss, no
@@ -129,8 +124,21 @@ const PreviewChangesDialogContent = ({
       setGeneralError(
         `Unexpected error while saving: ${e instanceof Error ? e.message : String(e)}`,
       );
-    } finally {
       setSaving(false);
+      return;
+    }
+
+    if (!outcome.ok) {
+      setErrors(outcome.results.filter((r) => !r.ok));
+      setReloadOnClose((prev) => prev || outcome.results.some((r) => r.ok));
+      setSaving(false);
+    }
+
+    // Closing takes this component with it, so nothing may touch its state
+    // afterwards — leave both to the end.
+    options.onSaved(outcome); // page invalidates/remounts on full success
+    if (outcome.ok) {
+      clearOptions();
     }
   };
 

@@ -7,12 +7,11 @@ import {
   ObservableLike,
   ObservableValue,
 } from 'azure-devops-ui/Core/Observable';
-import { Icon, IconSize } from 'azure-devops-ui/Icon';
+import { IconSize } from 'azure-devops-ui/Icon';
 import { renderListCell } from 'azure-devops-ui/List';
 import { Pill, PillSize } from 'azure-devops-ui/Pill';
 import { PillGroup, PillGroupOverflow } from 'azure-devops-ui/PillGroup';
 import { Spinner, SpinnerSize } from 'azure-devops-ui/Spinner';
-import { Tooltip } from 'azure-devops-ui/TooltipEx';
 import {
   ExpandableTreeCell,
   type ITreeColumn,
@@ -178,14 +177,16 @@ const spanDetailRows = (
     // spanning cell above already covers their width.
     return colspan ? (
       ExpandableTreeCell({
-        children: (
-          <div className="flex-row flex-center rhythm-horizontal-8 padding-vertical-8">
-            <Icon iconName="fluent-WarningColor" size={IconSize.medium} />
-            <Tooltip text={externalDetailText} overflowOnly>
-              <span className="text-ellipsis">{externalDetailText}</span>
-            </Tooltip>
-          </div>
-        ),
+        // renderListCell is what the group and variable rows use, so the
+        // icon lines up with its label exactly as it does there.
+        children: renderListCell({
+          text: externalDetailText,
+          textClassName: 'padding-vertical-8',
+          iconProps: {
+            iconName: 'fluent-WarningColor',
+            size: IconSize.medium,
+          },
+        }),
         colspan,
         columnIndex,
         contentClassName: 'padding-vertical-0',
@@ -337,9 +338,15 @@ const useColumns = (resolveGroup: GroupResolver) => {
 
             if (data.external) {
               return (
-                <span className="flex-row flex-center flex-grow justify-end rhythm-horizontal-4 white-space-nowrap padding-horizontal-8 margin-horizontal-4">
-                  <Icon iconName="fluent-WarningColor" size={IconSize.medium} />
-                  <span className="secondary-text">interrupted</span>
+                <span className="flex-row flex-grow justify-end padding-horizontal-8 margin-horizontal-4">
+                  {renderListCell({
+                    text: 'interrupted',
+                    textClassName: 'secondary-text white-space-nowrap',
+                    iconProps: {
+                      iconName: 'fluent-WarningColor',
+                      size: IconSize.medium,
+                    },
+                  })}
                 </span>
               );
             }

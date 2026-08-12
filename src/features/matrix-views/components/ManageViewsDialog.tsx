@@ -158,7 +158,8 @@ export const ManageViewsDialog = ({ onDismiss }: IManageViewsDialogProps) => {
 const patternExamples: [string, string][] = [
   ['_app.{}:*', 'folder named by the captured text'],
   ['_app.{}.{secret:Secrets}:*', 'nested "Secrets" folder for .secret keys'],
-  ['{Secrets}', 'same as {*:Secrets} — any text, fixed folder name'],
+  ['{UserInterface}.*', 'same as {UserInterface:UserInterface} — the segment must equal it'],
+  ['{*:Secrets}', 'any text, fixed folder name'],
   ['{secret:Secrets,qwe:Qwe Items}', 'condition:alias list, first match wins'],
   ['{*qwer*ww*:Secrets}', 'conditions may use * wildcards'],
 ];

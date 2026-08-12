@@ -18,8 +18,9 @@ export type GroupedItems<T> = {
 // Brace content is a comma-separated list of `condition:alias` entries,
 // normalized so every shorthand shares one processing path:
 //   {}                -> {*:}        folder named by the captured text
-//   {Alias}           -> {*:Alias}   any text, fixed folder name
+//   {Word}            -> {Word:Word} segment must be "Word", folder "Word"
 //   {secret:Secrets}  as written     segment must match the condition glob
+//   {*:Secrets}       as written     any text, fixed folder name
 // Conditions are globs themselves (`{*qwer*ww*:Secrets}`); an empty alias
 // falls back to the captured text. The pattern must cover the whole name.
 type PatternEntry = {
@@ -43,7 +44,9 @@ const parseEntries = (content: string): PatternEntry[] =>
   content.split(',').map((entry) => {
     const separator = entry.indexOf(':');
     if (separator < 0) {
-      return { condition: '*', alias: entry.trim() };
+      // {Word} -> {Word:Word}: a literal condition, not a catch-all.
+      const text = entry.trim();
+      return { condition: text || '*', alias: text };
     }
 
     const condition = entry.slice(0, separator).trim();

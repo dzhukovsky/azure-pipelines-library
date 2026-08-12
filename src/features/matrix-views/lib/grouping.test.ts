@@ -71,11 +71,29 @@ describe('groupByPatterns', () => {
     expect(result.ungrouped).toEqual(['_app.billing.public:Api']);
   });
 
-  test('{Alias} is shorthand for {*:Alias}', () => {
+  test('{Word} is shorthand for {Word:Word} — a literal condition, not a catch-all', () => {
+    const result = groupByPatterns(
+      ['UserInterface.Color', 'Backend.Timeout'],
+      identity,
+      ['{UserInterface}.*'],
+    );
+
+    expect(result.folders).toEqual([
+      {
+        name: 'UserInterface',
+        path: 'userinterface',
+        folders: [],
+        items: ['UserInterface.Color'],
+      },
+    ]);
+    expect(result.ungrouped).toEqual(['Backend.Timeout']);
+  });
+
+  test('{*:Alias} is the explicit catch-all with a fixed folder name', () => {
     const result = groupByPatterns(
       ['_app.billing:X'],
       identity,
-      ['_app.{Apps}:*'],
+      ['_app.{*:Apps}:*'],
     );
 
     expect(result.folders.map((f) => f.name)).toEqual(['Apps']);

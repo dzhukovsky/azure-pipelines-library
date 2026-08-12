@@ -1,3 +1,5 @@
+import './index.scss';
+
 import { useQueryClient } from '@tanstack/react-query';
 import { Button } from 'azure-devops-ui/Button';
 import { ObservableValue } from 'azure-devops-ui/Core/Observable';
@@ -47,6 +49,9 @@ export const LibraryPage = () => {
   const [isManageViewsOpen, setIsManageViewsOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [pendingTab, setPendingTab] = useState<string>();
+  const [showComparison, setShowComparison] = useState(false);
+
+  const isMatrixTab = (queryParams.tab || 'home').toLowerCase() !== 'home';
 
   const openManageViews = useCallback(() => setIsManageViewsOpen(true), []);
   const openHistory = useCallback(() => setIsHistoryOpen(true), []);
@@ -64,12 +69,14 @@ export const LibraryPage = () => {
     previewDialogOptions,
     openManageViews,
     openHistory,
+    isMatrixTab ? { showComparison, setShowComparison } : undefined,
   );
   const { currentTab, tabs } = useTabs(
     queryParams.tab,
     setQueryParams,
     filter,
     registerTabModel,
+    showComparison,
   );
 
   const onSelectedTabChanged = useCallback(
@@ -181,6 +188,7 @@ const useTabs = (
   setQueryParams: QueryParamsSetter<{ tab: string }>,
   filter: IFilter,
   onTabContextChange: (model: LibraryTabModel | undefined) => void,
+  showComparison: boolean,
 ) => {
   tab = tab?.toLowerCase() || 'home';
 
@@ -212,6 +220,7 @@ const useTabs = (
             filter={filter}
             groupIds={view.groupIds}
             groupingPatterns={view.groupingPatterns}
+            showComparison={showComparison}
             onTabContextChange={onTabContextChange}
           />
         ),
@@ -219,7 +228,7 @@ const useTabs = (
     }
 
     return result;
-  }, [filter, onTabContextChange, views]);
+  }, [filter, onTabContextChange, views, showComparison]);
 
   const currentTab = tabs[tab];
 
@@ -245,6 +254,10 @@ const useHeader = (
   >,
   onManageViews: () => void,
   onHistory: () => void,
+  comparisonToggle?: {
+    showComparison: boolean;
+    setShowComparison: (value: boolean) => void;
+  },
 ) => {
   const queryClient = useQueryClient();
 
@@ -395,13 +408,43 @@ const useHeader = (
 
   const renderTabBarCommands = useCallback(
     () => (
-      <InlineKeywordFilterBarItem
-        filter={filter}
-        filterItemKey="keyword"
-        isTextItem={false}
-      />
+      // rhythm-horizontal-8 spaces the children apart: a margin utility on the
+      // button itself loses to `.bolt-button { margin: 0 }` on specificity.
+      <div className="flex-row flex-center rhythm-horizontal-8">
+        {comparisonToggle && (
+          <Button
+            subtle
+            // The icon font has one weight, so the button's 600 would make the
+            // browser fake a bolder glyph.
+            iconProps={{
+              iconName: 'DiffSideBySide',
+              className: 'font-weight-normal',
+            }}
+            // The name stays put while aria-pressed carries the state — a
+            // toggle that renames itself reads as two different controls.
+            ariaLabel="Row comparison"
+            ariaPressed={comparisonToggle.showComparison}
+            className="comparison-toggle"
+            tooltipProps={{
+              text: comparisonToggle.showComparison
+                ? 'Hide row comparison'
+                : 'Show row comparison',
+            }}
+            onClick={() =>
+              comparisonToggle.setShowComparison(
+                !comparisonToggle.showComparison,
+              )
+            }
+          />
+        )}
+        <InlineKeywordFilterBarItem
+          filter={filter}
+          filterItemKey="keyword"
+          isTextItem={false}
+        />
+      </div>
     ),
-    [filter],
+    [filter, comparisonToggle],
   );
 
   return {

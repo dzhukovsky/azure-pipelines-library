@@ -1,0 +1,13 @@
+// The icon set singles this glyph out with font-size: 1.25rem at medium size,
+// a quarter larger than every other icon around it, and offers no built-in
+// class that undoes it. Four classes to outweigh its own selector.
+.comparison-toggle .fabric-icon.ms-Icon--DiffSideBySide.medium {
+    font-size: 1rem;
+}
+
+// Bolt's `active` class fills the whole button with palette-black-alpha-20,
+// which shouts next to the filter. Tint the glyph instead, driven straight
+// off the state the button already exposes.
+.comparison-toggle[aria-pressed="true"] .fabric-icon {
+    color: var(--communication-foreground);
+}

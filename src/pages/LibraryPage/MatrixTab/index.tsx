@@ -22,6 +22,7 @@ export type MatrixTabProps = {
   filter: IFilter;
   groupIds?: number[];
   groupingPatterns?: string[];
+  showComparison?: boolean;
   onTabContextChange: (model: LibraryTabModel | undefined) => void;
 };
 
@@ -88,6 +89,7 @@ export const MatrixTab = ({
   filter,
   groupIds,
   groupingPatterns,
+  showComparison,
   onTabContextChange,
 }: MatrixTabProps) => {
   const groups = useVariableGroups();
@@ -148,6 +150,7 @@ export const MatrixTab = ({
       items={state.items}
       filter={filter}
       loading={isLoading}
+      showComparison={showComparison}
       addNewVariable={() => {
         state.provider.addNewVariable();
       }}

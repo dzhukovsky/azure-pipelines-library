@@ -11,7 +11,7 @@ import type {
   ITreeItem,
   ITreeItemProvider,
 } from 'azure-devops-ui/Utilities/TreeItemProvider';
-import { useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { ObservableMatrixVariable } from '@/features/variable-groups/models';
 import type { FilterFunc } from '@/shared/components/Table/useFiltering';
 import { createActionColumn } from '@/shared/components/Tree/createActionColumn';
@@ -20,7 +20,9 @@ import { getRenderers } from '@/shared/components/Tree/createTreeColumns';
 import { getLoadingProvider } from '@/shared/components/Tree/loadingProvider';
 import type { TreeRenderer, TypedData } from '@/shared/components/Tree/types';
 import { useObservableFiltering } from '@/shared/components/Tree/useFiltering';
+import type { RowFocusChangeHandler } from '@/shared/components/Tree/useRowRenderer';
 import { useRowRenderer } from '@/shared/components/Tree/useRowRenderer';
+import { ComparisonPanel } from './ComparisonPanel';
 import { folderRenderer, variableRenderer } from './renderers';
 
 export type VariableGroupName = {
@@ -33,6 +35,7 @@ export type MatrixTreeProps = {
   groupNames: VariableGroupName[];
   filter: IFilter;
   loading?: boolean;
+  showComparison?: boolean;
   addNewVariable: () => void;
   onToggleItem?: (data: MatrixTreeItem, expanded: boolean) => void;
 };
@@ -128,6 +131,7 @@ export const MatrixTree = ({
   groupNames,
   filter,
   loading,
+  showComparison,
   addNewVariable,
   onToggleItem,
 }: MatrixTreeProps) => {
@@ -138,7 +142,26 @@ export const MatrixTree = ({
   );
   const { columns } = useColumns(groupNames, filteredItems);
 
-  const renderRow = useRowRenderer(columns);
+  const [focusedVariable, setFocusedVariable] =
+    useState<ObservableMatrixVariable>();
+  // "Last focus wins": moving focus between rows fires the new row's focus
+  // before the old row's (debounced) blur, so a blur only clears the state
+  // if its row is still the one being shown.
+  const onRowFocusChange = useCallback<RowFocusChangeHandler<MatrixTreeItem>>(
+    (item, hasFocus) => {
+      const data = item.underlyingItem.data;
+      if (data.type !== 'variable') {
+        return;
+      }
+
+      setFocusedVariable((prev) =>
+        hasFocus ? data.data : prev === data.data ? undefined : prev,
+      );
+    },
+    [],
+  );
+
+  const renderRow = useRowRenderer(columns, onRowFocusChange);
   return (
     (!loading && isEmpty && <span>No items found</span>) || (
       <div className="flex-column spacing-8">
@@ -163,6 +186,12 @@ export const MatrixTree = ({
             }}
           />
         </Card>
+        {showComparison && focusedVariable && (
+          <ComparisonPanel
+            variable={focusedVariable}
+            groupNames={groupNames}
+          />
+        )}
         <div className="flex-row margin-vertical-16">
           <Button
             iconProps={{ iconName: 'Add' }}

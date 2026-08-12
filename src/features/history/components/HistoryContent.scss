@@ -1,4 +1,14 @@
 .history-tree {
+    // Header labels sit 0.6875rem in (bolt-table-header-cell-content's own
+    // padding). The first column's cell content starts behind the expand
+    // chevron, which lands on the same offset; the other columns render
+    // flush against the cell edge, so their values started ~10px left of
+    // the header above them. Pad them to the header's offset. The compact
+    // cells are the table's edge spacers and must stay at zero.
+    .bolt-table-cell:not(.bolt-tree-cell):not(.bolt-table-cell-compact) {
+        padding-left: 0.6875rem;
+    }
+
     // Clicking PillGroup's "show more" switches the group to wrap mode,
     // which puts margin-bottom: 8px on every pill to space wrapped lines
     // apart. That margin is the only vertical gap the group has, so the

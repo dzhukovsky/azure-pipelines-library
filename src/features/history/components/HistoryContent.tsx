@@ -38,7 +38,7 @@ import {
 } from '../buildSaveEvents';
 import { buildTimeline } from '../buildTimeline';
 import { historyQueryKey, useHistory } from '../hooks/useHistory';
-import type { HistoryEntry, HistoryEntryChange } from '../models';
+import type { HistoryEntryChange, HistorySaveEntry } from '../models';
 
 const statusState = {
   added: States.New,
@@ -113,7 +113,7 @@ const ActorCell = ({ actor, date }: { actor?: Actor; date?: Date }) => (
 // Same optional-field row shape the Preview changes tree uses.
 type HistoryTreeItem = {
   save?: SaveEventItem;
-  group?: HistoryEntry;
+  group?: HistorySaveEntry;
   change?: HistoryEntryChange;
   external?: ExternalItem;
   externalGroup?: ExternalItem;
@@ -244,13 +244,14 @@ const useColumns = (resolveGroup: GroupResolver) => {
 
             const external = data.external;
             if (external) {
-              const { modifiedBy } = resolveGroup(
-                external.groupId,
-                external.groupName,
-              );
               return (
                 <ActorCell
-                  actor={modifiedBy}
+                  // A recorded change knows who made it; one nobody has saved
+                  // over yet is still the group's latest, so read it off there.
+                  actor={
+                    external.actor ??
+                    resolveGroup(external.groupId, external.groupName).modifiedBy
+                  }
                   date={
                     external.detectedAt
                       ? new Date(external.detectedAt)
@@ -264,8 +265,12 @@ const useColumns = (resolveGroup: GroupResolver) => {
             // names the single group it hit the same way.
             const group = data.group ?? data.externalGroup;
             if (group) {
+              const name = resolveGroup(group.groupId, group.groupName).name;
+              const renamedFrom =
+                'renamedFrom' in group ? group.renamedFrom : undefined;
+
               return renderListCell({
-                text: resolveGroup(group.groupId, group.groupName).name,
+                text: renamedFrom ? `${renamedFrom} → ${name}` : name,
                 textClassName: 'padding-vertical-8',
                 iconProps: {
                   iconName: 'fluent-LibraryColor',
@@ -344,8 +349,11 @@ const useColumns = (resolveGroup: GroupResolver) => {
           renderCell: ({ data }) => {
             const save = data.save;
             if (save) {
+              // Renaming the group is a change of its own, and can be the
+              // only one a save carries.
               const changeCount = save.entries.reduce(
-                (sum, entry) => sum + entry.changes.length,
+                (sum, entry) =>
+                  sum + entry.changes.length + (entry.renamedFrom ? 1 : 0),
                 0,
               );
               return (

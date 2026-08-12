@@ -1,4 +1,8 @@
-import { type IContextualMenuProps, MenuButton } from 'azure-devops-ui/Menu';
+import {
+  type IContextualMenuProps,
+  MenuButton,
+  MenuItemType,
+} from 'azure-devops-ui/Menu';
 import { Observer } from 'azure-devops-ui/Observer';
 import { useMemo } from 'react';
 import { stringify as yamlStringify } from 'yaml';
@@ -29,6 +33,17 @@ export const ValueActions = ({ data }: { data: ObservableVariableGroup }) => {
       menuProps: {
         id: 'group-menu',
         items: [
+          {
+            id: 'rename',
+            text: 'Rename',
+            iconProps: { iconName: 'Rename' },
+            onActivate: () => {
+              // The name cell turns into a field and takes the focus; the
+              // change lands in the model like any other edit.
+              data.renaming.value = true;
+            },
+          },
+          { id: 'export-separator', itemType: MenuItemType.Divider },
           {
             id: 'download-json',
             text: 'Download as JSON',
@@ -64,7 +79,7 @@ export const ValueActions = ({ data }: { data: ObservableVariableGroup }) => {
         ],
       },
     };
-  }, [data.id]);
+  }, [data.id, data.renaming]);
 
   if (!hasMouseOrFocus) {
     return (

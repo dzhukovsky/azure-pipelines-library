@@ -39,13 +39,25 @@ export const getHistoryEntries = async (): Promise<HistoryEntry[]> => {
   return readEntries(dataManager);
 };
 
+/**
+ * Reads the history, hands it to `addEntries` newest-first, and writes the
+ * returned entries back in front of it. Callers that need to look at what is
+ * already recorded — to tell an external change from one of our own saves —
+ * get it without a second round trip.
+ */
 export const appendHistoryEntries = async (
-  entries: HistoryEntry[],
+  addEntries: (existing: HistoryEntry[]) => HistoryEntry[],
 ): Promise<HistoryEntry[]> => {
   const dataManager = await getDataManager();
   const existing = await readEntries(dataManager);
+  const added = addEntries(existing);
+
+  if (!added.length) {
+    return existing;
+  }
+
   // Newest first; prune the tail so the document stays small (keys only).
-  const merged = [...entries, ...existing].slice(0, MAX_HISTORY_ENTRIES);
+  const merged = [...added, ...existing].slice(0, MAX_HISTORY_ENTRIES);
 
   return dataManager.setValue(getHistoryKey(), merged);
 };

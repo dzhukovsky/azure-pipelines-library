@@ -9,6 +9,7 @@ const normalize = (name: string) => name.trim().toLocaleLowerCase();
  * without running a full validation pass. */
 export const clearHomeModelErrors = (model: HomeTabModel): void => {
   for (const group of model.variableGroups.value) {
+    group.error.value = undefined;
     group.variables.value.forEach((v) => {
       v.error.value = undefined;
     });
@@ -29,6 +30,22 @@ export const clearMatrixProviderErrors = (provider: MatrixDataProvider): void =>
 export const validateHomeModel = (model: HomeTabModel): boolean => {
   let valid = true;
   clearHomeModelErrors(model);
+
+  const groups = model.variableGroups.value.filter((g) => g.present.value);
+  const groupCounts = new Map<string, number>();
+  for (const group of groups) {
+    const key = normalize(group.name.value);
+    groupCounts.set(key, (groupCounts.get(key) ?? 0) + 1);
+  }
+
+  for (const group of groups) {
+    if (!group.name.value.trim()) {
+      group.error.value = 'Name is required';
+    } else if ((groupCounts.get(normalize(group.name.value)) ?? 0) > 1) {
+      group.error.value = 'Duplicate group name';
+    }
+    valid &&= !group.error.value;
+  }
 
   for (const group of model.variableGroups.value) {
     const variables = group.variables.value;

@@ -208,7 +208,9 @@ const useColumns = () => {
           const group = data.group;
           if (group) {
             return renderListCell({
-              text: group.name,
+              text: group.previousName
+                ? `${group.previousName} → ${group.name}`
+                : group.name,
               textClassName: 'padding-vertical-8',
               iconProps: {
                 iconName: 'fluent-LibraryColor',

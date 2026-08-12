@@ -14,6 +14,7 @@ export type GroupChange = {
   groupId: number;
   name: string; // current name
   nameChanged: boolean;
+  previousName?: string; // set when the group itself was renamed
   modifiedOnSnapshot?: Date; // what the model was built from — concurrency check input
   state: State;
   variables: VariableChange[];

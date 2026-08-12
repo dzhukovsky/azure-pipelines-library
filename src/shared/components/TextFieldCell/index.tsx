@@ -13,7 +13,15 @@ export type TextFieldCellProps = {
   iconProps?: IIconProps;
 } & Pick<
   React.InputHTMLAttributes<HTMLInputElement>,
-  'className' | 'type' | 'readOnly' | 'required' | 'placeholder' | 'onChange'
+  | 'className'
+  | 'type'
+  | 'readOnly'
+  | 'required'
+  | 'placeholder'
+  | 'onChange'
+  | 'onBlur'
+  | 'onKeyDown'
+  | 'autoFocus'
 >;
 
 export function TextFieldCell({

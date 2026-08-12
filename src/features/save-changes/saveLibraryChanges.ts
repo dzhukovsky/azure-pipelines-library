@@ -12,7 +12,10 @@ export type GroupSaveResult =
       groupName: string;
       ok: true;
       updated: VariableGroup;
+      /** The group as we found it, which is what an external change looks like. */
+      nameBefore?: string;
       modifiedOnBefore?: Date;
+      modifiedByBefore?: { id: string; displayName: string };
       changes: VariableChange[];
     }
   | { groupId: number; groupName: string; ok: false; error: string };
@@ -32,12 +35,18 @@ export const saveLibraryChanges = async (
       const current = await getVariableGroupById(change.groupId);
       const parameters = buildVariableGroupParameters(current, change);
       const updated = await updateVariableGroupById(change.groupId, parameters);
+      const modifiedByBefore = current.modifiedBy ?? current.createdBy;
       results.push({
         groupId: change.groupId,
         groupName: change.name,
         ok: true,
         updated,
+        nameBefore: current.name,
         modifiedOnBefore: current.modifiedOn,
+        modifiedByBefore: modifiedByBefore && {
+          id: modifiedByBefore.id,
+          displayName: modifiedByBefore.displayName,
+        },
         changes: change.variables,
       });
     } catch (e) {

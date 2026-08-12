@@ -1,13 +1,13 @@
-import type { HistoryEntry, TimelineItem } from './models';
+import type { HistoryActor, HistorySaveEntry, TimelineItem } from './models';
 
 export type SaveEventItem = {
   kind: 'save';
   /** Stable render key — the first entry's id. */
   key: string;
   timestamp: string;
-  actor: HistoryEntry['actor'];
+  actor: HistoryActor;
   /** One entry per affected group, in timeline order. */
-  entries: HistoryEntry[];
+  entries: HistorySaveEntry[];
 };
 
 export type ExternalItem = {
@@ -16,6 +16,8 @@ export type ExternalItem = {
   groupId: number;
   groupName: string;
   detectedAt?: string;
+  /** Recorded with the change; a live marker has none. */
+  actor?: HistoryActor;
 };
 
 export type HistoryListItem = SaveEventItem | ExternalItem;
@@ -47,6 +49,7 @@ export const buildSaveEvents = (
         groupId: item.groupId,
         groupName: item.groupName,
         detectedAt: item.detectedAt,
+        actor: item.actor,
       });
       return;
     }

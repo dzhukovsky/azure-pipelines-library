@@ -96,6 +96,57 @@ describe('validateHomeModel', () => {
   });
 });
 
+describe('validateHomeModel — group names', () => {
+  const makeGroups = (...names: string[]) =>
+    new HomeTabModel(
+      names.map(
+        (name, index) =>
+          new ObservableVariableGroup(index + 1, name, [], false),
+      ),
+      [],
+    );
+
+  test('renaming a group to an empty name is an error', () => {
+    const model = makeGroups('group');
+    const [group] = model.variableGroups.value;
+
+    group.name.value = '  ';
+
+    expect(validateHomeModel(model)).toBe(false);
+    expect(group.state.value.type).toBe('Error');
+    expect(hasErrors(mapHomeChanges(model))).toBe(true);
+  });
+
+  test('renaming a group onto another one errors both', () => {
+    const model = makeGroups('first', 'second');
+    const [first, second] = model.variableGroups.value;
+
+    second.name.value = 'FIRST ';
+
+    expect(validateHomeModel(model)).toBe(false);
+    expect(first.state.value.type).toBe('Error');
+    expect(second.state.value.type).toBe('Error');
+
+    second.name.value = 'third';
+    expect(validateHomeModel(model)).toBe(true);
+    expect(first.state.value.type).toBe('Unchanged');
+  });
+
+  test('a plain rename validates clean and carries the previous name', () => {
+    const model = makeGroups('group');
+    const [group] = model.variableGroups.value;
+
+    group.name.value = 'renamed';
+
+    expect(validateHomeModel(model)).toBe(true);
+    expect(mapHomeChanges(model).groups[0]).toMatchObject({
+      name: 'renamed',
+      nameChanged: true,
+      previousName: 'group',
+    });
+  });
+});
+
 describe('clearHomeModelErrors', () => {
   test('clears errors and resets states after reverting the edit that caused them', () => {
     const a = new ObservableVariable('a', '1', false, false);

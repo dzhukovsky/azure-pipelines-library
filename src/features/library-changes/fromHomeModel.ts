@@ -20,6 +20,7 @@ const mapGroup = (g: ObservableVariableGroup): GroupChange => ({
   groupId: g.id,
   name: g.name.value,
   nameChanged: g.name.modified,
+  previousName: g.name.modified ? g.name.initialValue : undefined,
   modifiedOnSnapshot: g.modifiedOn,
   state: g.state.value,
   variables: getArrayChanges(g.variables)

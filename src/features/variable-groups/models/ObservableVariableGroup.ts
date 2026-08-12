@@ -1,4 +1,5 @@
 import type { IdentityRef } from 'azure-devops-extension-api/WebApi';
+import { ObservableValue } from 'azure-devops-ui/Core/Observable';
 import {
   type ObservableObjectArray,
   type ObservableObjectValue,
@@ -13,6 +14,12 @@ export class ObservableVariableGroup extends StateObject<ObservableVariableGroup
 
   readonly name: ObservableObjectValue<string>;
   readonly variables: ObservableObjectArray<ObservableVariable>;
+
+  /**
+   * View state, not part of the group: the name is a label until the row's
+   * menu asks to rename it, and an editable field from then on.
+   */
+  readonly renaming = new ObservableValue(false);
 
   constructor(
     id: number,

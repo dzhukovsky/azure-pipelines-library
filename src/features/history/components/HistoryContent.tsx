@@ -12,9 +12,12 @@ import { renderListCell } from 'azure-devops-ui/List';
 import { Pill, PillSize } from 'azure-devops-ui/Pill';
 import { PillGroup, PillGroupOverflow } from 'azure-devops-ui/PillGroup';
 import { Spinner, SpinnerSize } from 'azure-devops-ui/Spinner';
-import { SimpleTableCell } from 'azure-devops-ui/Table';
 import { Tooltip } from 'azure-devops-ui/TooltipEx';
-import { type ITreeColumn, Tree } from 'azure-devops-ui/TreeEx';
+import {
+  ExpandableTreeCell,
+  type ITreeColumn,
+  Tree,
+} from 'azure-devops-ui/TreeEx';
 import type { ITreeItem } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import {
   type ITreeItemProvider,
@@ -89,6 +92,7 @@ type HistoryTreeItem = {
   group?: HistoryEntry;
   change?: HistoryEntryChange;
   external?: ExternalItem;
+  externalGroup?: ExternalItem;
   externalDetail?: ExternalItem;
 };
 
@@ -98,9 +102,15 @@ const mapTreeItems = (items: HistoryListItem[]): ITreeItem<HistoryTreeItem>[] =>
       ? {
           data: { external: item },
           expanded: false,
-          // The warning reads like the other rows; what it means is one
-          // expand away.
-          childItems: [{ data: { externalDetail: item } }],
+          // Mirrors a save event's shape — the affected group, and inside it
+          // what happened to it — so both kinds of row expand alike.
+          childItems: [
+            {
+              data: { externalGroup: item },
+              expanded: true,
+              childItems: [{ data: { externalDetail: item } }],
+            },
+          ],
         }
       : {
           data: { save: item },
@@ -128,17 +138,16 @@ export type GroupResolver = (
   recordedName: string,
 ) => { name: string; modifiedBy?: IdentityRef };
 
-// The row's own cell only holds the identity and time, like every other row;
-// the explanation lives in the detail row underneath it, where it has the
-// whole table to itself.
-const externalDetailText = (groupName: string) =>
-  `${groupName} was changed outside the extension, so the history above it does not describe how it reached its current state.`;
+// The group is named by the row above this one, so the sentence only has to
+// say what happened to it.
+const externalDetailText =
+  'Changed outside the extension, so the entries below no longer describe how this group reached its current state.';
 
 // The detail row is a sentence, not a value that belongs to a column: let its
-// first cell span the whole table and drop the remaining cells.
+// first cell span the whole table and drop the remaining cells. It stays an
+// ExpandableTreeCell so it keeps the indentation of the rows around it.
 const spanDetailRows = (
   column: ITreeColumn<HistoryTreeItem>,
-  resolveGroup: GroupResolver,
   colspan?: number,
 ): ITreeColumn<HistoryTreeItem> => ({
   ...column,
@@ -165,27 +174,23 @@ const spanDetailRows = (
       );
     }
 
-    const { name } = resolveGroup(
-      externalDetail.groupId,
-      externalDetail.groupName,
-    );
-    const text = externalDetailText(name);
-
     // Columns without a colspan render no cell at all for these rows — the
     // spanning cell above already covers their width.
     return colspan ? (
-      SimpleTableCell({
+      ExpandableTreeCell({
         children: (
-          <Tooltip text={text} overflowOnly>
-            <span className="text-ellipsis padding-vertical-8">{text}</span>
+          <Tooltip text={externalDetailText} overflowOnly>
+            <span className="text-ellipsis padding-vertical-8">
+              {externalDetailText}
+            </span>
           </Tooltip>
         ),
-        className: 'bolt-tree-cell',
         colspan,
         columnIndex,
         contentClassName: 'padding-vertical-0',
         role,
-        tableColumn,
+        treeColumn: tableColumn,
+        treeItem,
       })
     ) : (
       <Fragment key={columnIndex} />
@@ -232,7 +237,9 @@ const useColumns = (resolveGroup: GroupResolver) => {
               );
             }
 
-            const group = data.group;
+            // A save lists one row per affected group; an external change
+            // names the single group it hit the same way.
+            const group = data.group ?? data.externalGroup;
             if (group) {
               return renderListCell({
                 text: resolveGroup(group.groupId, group.groupName).name,
@@ -257,7 +264,6 @@ const useColumns = (resolveGroup: GroupResolver) => {
           renderActions: () => undefined,
           width: new ObservableValue(-40),
         }),
-        resolveGroup,
         // The detail row spans every content column of the table.
         3,
       ),
@@ -304,7 +310,6 @@ const useColumns = (resolveGroup: GroupResolver) => {
           },
           renderActions: () => undefined,
         }),
-        resolveGroup,
       ),
       spanDetailRows(
         createActionColumn<HistoryTreeItem>({
@@ -329,6 +334,15 @@ const useColumns = (resolveGroup: GroupResolver) => {
               );
             }
 
+            if (data.external) {
+              return (
+                <span className="flex-row flex-center flex-grow justify-end rhythm-horizontal-4 white-space-nowrap padding-horizontal-8 margin-horizontal-4">
+                  <Icon iconName="fluent-WarningColor" size={IconSize.medium} />
+                  <span className="secondary-text">interrupted</span>
+                </span>
+              );
+            }
+
             return <span className="flex-row flex-grow" />;
           },
           renderActions: ({ data }) => {
@@ -337,18 +351,9 @@ const useColumns = (resolveGroup: GroupResolver) => {
               return <StateIcon state={statusState[change.status]} />;
             }
 
-            if (data.external) {
-              return (
-                <span className="flex-self-center padding-horizontal-8 margin-horizontal-4">
-                  <Icon iconName="fluent-WarningColor" size={IconSize.medium} />
-                </span>
-              );
-            }
-
             return undefined;
           },
         }),
-        resolveGroup,
       ),
     ];
 

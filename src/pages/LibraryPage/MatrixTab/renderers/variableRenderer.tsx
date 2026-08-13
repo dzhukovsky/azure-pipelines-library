@@ -28,6 +28,9 @@ export const variableRenderer: MatrixTreeRenderer['variable'] = {
   value: {
     renderCell: ({ data, columnId }) => {
       const variable = data.values[+columnId];
+      if (!variable) {
+        return null;
+      }
 
       return (
         <Observer
@@ -59,6 +62,9 @@ export const variableRenderer: MatrixTreeRenderer['variable'] = {
     },
     renderActions: ({ data, columnId }) => {
       const variable = data.values[+columnId];
+      if (!variable) {
+        return null;
+      }
       return (
         <ValueActions data={variable} variable={data} groupId={+columnId} />
       );

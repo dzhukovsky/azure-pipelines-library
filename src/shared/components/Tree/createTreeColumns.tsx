@@ -69,25 +69,29 @@ export function getRenderers<
   return {
     renderCell: (options) => {
       const renderer = getRenderer(renderers, options.data.type);
-      return renderer[rendererName].renderCell({
-        rowIndex: options.rowIndex,
-        treeItem: options.treeItem,
-        data: options.data.data,
-        provider: itemProvider,
-        columnId: columnId ?? rendererName,
-        columnName: columnName ?? rendererName,
-      });
+      return (
+        renderer[rendererName]?.renderCell({
+          rowIndex: options.rowIndex,
+          treeItem: options.treeItem,
+          data: options.data.data,
+          provider: itemProvider,
+          columnId: columnId ?? rendererName,
+          columnName: columnName ?? rendererName,
+        }) ?? null
+      );
     },
     renderActions: (options) => {
       const renderer = getRenderer(renderers, options.data.type);
-      return renderer[rendererName].renderActions({
-        rowIndex: options.rowIndex,
-        treeItem: options.treeItem,
-        data: options.data.data,
-        provider: itemProvider,
-        columnId: columnId ?? rendererName,
-        columnName: columnName ?? rendererName,
-      });
+      return (
+        renderer[rendererName]?.renderActions({
+          rowIndex: options.rowIndex,
+          treeItem: options.treeItem,
+          data: options.data.data,
+          provider: itemProvider,
+          columnId: columnId ?? rendererName,
+          columnName: columnName ?? rendererName,
+        }) ?? null
+      );
     },
   };
 }

@@ -47,12 +47,14 @@ export class ObservableMatrixVariable extends ObservableObject<ObservableMatrixV
   addValue(groupId: GroupId) {
     // Only for cells that never existed on the server; restoring a deleted
     // existing cell is restoreVariable's job.
-    if (!this.values[groupId].isNew) return;
-    this.values[groupId].restore();
+    const cell = this.values[groupId];
+    if (!cell?.isNew) return;
+    cell.restore();
   }
 
   deleteVariable(groupId: GroupId) {
     const cell = this.values[groupId];
+    if (!cell) return;
     if (cell.isNew) {
       cell.value.reset();
     }
@@ -60,7 +62,7 @@ export class ObservableMatrixVariable extends ObservableObject<ObservableMatrixV
   }
 
   restoreVariable(groupId: GroupId) {
-    this.values[groupId].restore();
+    this.values[groupId]?.restore();
   }
 
   search(filterText: string): boolean {
@@ -96,13 +98,15 @@ export class ObservableMatrixValue extends StateObject<ObservableMatrixValue> {
 }
 
 const isSecretVariable = (values: IVariableValue[]): boolean | null => {
-  if (!values.length) return false;
+  let first: boolean | undefined;
 
-  const first = values[0].isSecret;
-
-  for (let i = 1; i < values.length; i++) {
-    if (values[i].isSecret !== first) return null;
+  for (const v of values) {
+    if (first === undefined) {
+      first = v.isSecret;
+    } else if (v.isSecret !== first) {
+      return null;
+    }
   }
 
-  return first;
+  return first ?? false;
 };

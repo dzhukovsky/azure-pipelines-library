@@ -36,6 +36,9 @@ export const mapMatrixChanges = (
 
     for (const groupId of provider.groupIds) {
       const cell = row.values[groupId];
+      if (!cell) {
+        continue;
+      }
       const cellState = cell.state.value;
       const isSecret = secretFlag.value ?? cell.isSecretInitial;
       const isSecretChanged = secretFlag.modified && secretFlag.value !== null;

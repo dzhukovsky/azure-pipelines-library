@@ -46,7 +46,10 @@ export function buildVariableGroupParameters(
 
     const existing = current.variables[c.previousKey ?? c.key];
     variables[c.key] = {
-      value: c.valueChanged ? (c.value ?? '') : existing?.value,
+      // For an untouched value we re-send exactly what the server gave us —
+      // for a secret that is runtime-undefined, which tells AzDO to keep it.
+      // The API types `value` as string but accepts that omission.
+      value: c.valueChanged ? (c.value ?? '') : (existing?.value as string),
       isSecret: c.isSecret,
       isReadOnly: existing?.isReadOnly ?? false,
     };

@@ -83,7 +83,10 @@ const useColumns = (
 ) => {
   const columns = useMemo(() => {
     const onSize = (_event: MouseEvent, index: number, width: number) => {
-      (columns[index].width as ObservableValue<number>).value = width;
+      const column = columns[index];
+      if (column) {
+        (column.width as ObservableValue<number>).value = width;
+      }
     };
 
     const hasFolders = itemProvider.roots.some(

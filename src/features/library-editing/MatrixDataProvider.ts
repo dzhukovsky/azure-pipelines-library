@@ -68,6 +68,6 @@ const mapVariables = (variableGroups: VariableGroup[]) => {
   });
 
   return variableNames.map(
-    (name) => new ObservableMatrixVariable(name, values[name], groupIds),
+    (name) => new ObservableMatrixVariable(name, values[name] ?? {}, groupIds),
   );
 };

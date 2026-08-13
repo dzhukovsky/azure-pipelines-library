@@ -24,6 +24,7 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
     "strictFunctionTypes": false,
+    "noUncheckedIndexedAccess": true,
 
     "paths": {
       "@/*": ["./src/*"]

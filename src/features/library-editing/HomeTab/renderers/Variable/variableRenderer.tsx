@@ -33,6 +33,9 @@ export const variableRenderer: HomeTreeRenderer['groupVariable'] = {
             value={data.value}
             state={state}
             type={isSecret ? 'password' : 'text'}
+            // The error icon already occupies the name cell's prefix slot;
+            // showing it here too would duplicate it across the row.
+            hideErrorIcon
             onChange={(e) => {
               data.value.value = e.target.value;
             }}

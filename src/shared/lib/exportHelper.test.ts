@@ -15,8 +15,6 @@ describe('expandObject', () => {
   });
 
   test('a key of __proto__ does not pollute Object.prototype', () => {
-    // A variable literally named `__proto__.polluted` must not walk into the
-    // global prototype during the nested-object expansion.
     expandObject({ '__proto__.polluted': 'true' });
 
     expect(({} as Record<string, unknown>).polluted).toBeUndefined();

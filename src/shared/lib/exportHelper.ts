@@ -19,8 +19,7 @@ function parseValue(value: string): Primitive {
   return value;
 }
 
-// Prototype-less record so that variable names like `__proto__` become
-// ordinary keys instead of resolving to Object.prototype (prototype pollution).
+// Prototype-less so a `__proto__` variable name can't pollute Object.prototype.
 const emptyRecord = () => Object.create(null) as IExpandableRecord;
 
 export const expandObject = (source: Record<string, string>) => {

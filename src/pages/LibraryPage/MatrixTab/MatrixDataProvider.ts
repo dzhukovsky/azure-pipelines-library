@@ -46,8 +46,7 @@ const mapVariables = (variableGroups: VariableGroup[]) => {
     ),
   ];
 
-  // Prototype-less record so a variable literally named `__proto__` becomes an
-  // ordinary key instead of resolving to Object.prototype (prototype pollution).
+  // Prototype-less so a `__proto__` variable name can't pollute Object.prototype.
   const values: Record<string, Record<GroupId, IVariableValue>> =
     Object.create(null);
 

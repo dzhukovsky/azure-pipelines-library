@@ -8,7 +8,7 @@ import { goToNewVariableGroup } from '@/features/variable-groups/newVariableGrou
  * menu button the Home rows use. Shared by the page header and the empty-state
  * call to action. */
 export const NewLibraryItemButton = () => (
-  <div className="flex-row rhythm-horizontal-8">
+  <div className="flex-row flex-start rhythm-horizontal-8">
     <Button
       primary={true}
       text="New variable group"

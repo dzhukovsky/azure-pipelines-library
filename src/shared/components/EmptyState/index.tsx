@@ -1,7 +1,8 @@
 import './index.scss';
 
+import { Button } from 'azure-devops-ui/Button';
+import { Icon, IconSize } from 'azure-devops-ui/Icon';
 import { css } from 'azure-devops-ui/Util';
-import { ZeroData, ZeroDataActionType } from 'azure-devops-ui/ZeroData';
 
 export type EmptyStateAction = { text: string; onClick: () => void };
 
@@ -30,24 +31,45 @@ export const EmptyState = ({
 }) => (
   <div
     className={css(
-      'empty-state flex-grow flex-column',
+      'empty-state flex-grow flex-column flex-center justify-center',
       fullPage && 'empty-state--full',
     )}
   >
-    <ZeroData
-      className="empty-state-content"
-      imageAltText=""
-      imagePath={imagePath}
-      iconProps={iconName ? { iconName } : undefined}
-      primaryText={primaryText}
-      secondaryText={secondaryText}
-      {...(renderAction
-        ? { renderAction }
-        : action && {
-            actionText: action.text,
-            actionType: ZeroDataActionType.ctaButton,
-            onActionClick: action.onClick,
-          })}
-    />
+    <div className="empty-state-content flex-column flex-center text-center">
+      {imagePath ? (
+        <img
+          className="empty-state-image margin-bottom-16"
+          src={imagePath}
+          alt=""
+          width={120}
+          height={120}
+        />
+      ) : (
+        iconName && (
+          <Icon
+            className="margin-bottom-16"
+            iconName={iconName}
+            size={IconSize.large}
+          />
+        )
+      )}
+      <div className="title-l">{primaryText}</div>
+      {secondaryText && (
+        <div className="secondary-text margin-top-4">{secondaryText}</div>
+      )}
+      {(renderAction || action) && (
+        <div className="margin-top-16">
+          {renderAction
+            ? renderAction()
+            : action && (
+                <Button
+                  primary={true}
+                  text={action.text}
+                  onClick={action.onClick}
+                />
+              )}
+        </div>
+      )}
+    </div>
   </div>
 );

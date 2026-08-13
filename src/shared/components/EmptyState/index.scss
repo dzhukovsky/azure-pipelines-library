@@ -1,40 +1,15 @@
+// Only what the built-in utility classes can't express: a viewport-based
+// min-height so the placeholder centres inside an unbounded scroll parent,
+// and a comfortable text measure. Everything else (spacing, alignment, image
+// size) is done with built-in classes / attributes in the component.
 .empty-state {
-  // Fill the visible tab area (below the page header and tab bar) and hold the
-  // placeholder at its optical centre, the way the Azure DevOps built-in
-  // zero-data screens sit — rather than floating near the top.
-  align-items: center;
-  justify-content: center;
   min-height: calc(100vh - 12rem);
-  padding: 2rem;
 
-  // No header/tab chrome above it, so centre in (almost) the whole surface.
   &.empty-state--full {
     min-height: calc(100vh - 4rem);
   }
 
   .empty-state-content {
-    // Wide enough for the title to stay on one line like the built-in
-    // AzDO zero-data screens; balance is a fallback for narrow viewports.
     max-width: 480px;
-    text-align: center;
-
-    .vss-ZeroDataItem--image {
-      width: 120px;
-      height: 120px;
-      margin-bottom: 16px;
-    }
-
-    .vss-ZeroDataItem--primary {
-      text-wrap: balance;
-    }
-
-    .vss-ZeroDataItem--secondary {
-      margin-top: 4px;
-      text-wrap: balance;
-    }
-
-    .vss-ZeroDataItem--action {
-      margin-top: 28px;
-    }
   }
 }

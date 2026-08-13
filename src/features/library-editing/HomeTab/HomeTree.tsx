@@ -23,6 +23,7 @@ import type {
   ObservableVariableGroup,
 } from '@/features/variable-groups/models';
 import { getProjectUrl } from '@/shared/api/configurations';
+import { logoUrl } from '@/shared/assets/logo';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { createTreeColumns } from '@/shared/components/Tree/createTreeColumns';
 import { getLoadingProvider } from '@/shared/components/Tree/loadingProvider';
@@ -185,7 +186,7 @@ const HomeEmptyState = ({ hasFilter }: { hasFilter: boolean }) =>
     />
   ) : (
     <EmptyState
-      iconName="Library"
+      imagePath={logoUrl}
       primaryText="No variable groups or secure files yet"
       secondaryText="Create a variable group to start managing your library here."
       action={{

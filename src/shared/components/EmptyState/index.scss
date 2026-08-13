@@ -10,5 +10,12 @@
     // width so the text wraps to a comfortable measure.
     max-width: 420px;
     text-align: center;
+
+    // The logo is a small glyph; hold it at a comfortable placeholder size
+    // rather than ZeroData's default full-width illustration scale.
+    .vss-ZeroDataItem--image {
+      width: 96px;
+      height: 96px;
+    }
   }
 }

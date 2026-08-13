@@ -13,6 +13,7 @@ import type {
 } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import type { ObservableMatrixVariable } from '@/features/variable-groups/models';
+import { logoUrl } from '@/shared/assets/logo';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { createActionColumn } from '@/shared/components/Tree/createActionColumn';
 import { createExpandableActionColumn } from '@/shared/components/Tree/createExpandableActionColumn';
@@ -247,7 +248,7 @@ const MatrixEmptyState = ({
     />
   ) : (
     <EmptyState
-      iconName="Library"
+      imagePath={logoUrl}
       primaryText="No variables in this view"
       secondaryText="Add a variable to compare its value across the groups in this view."
       action={{ text: 'Add variable', onClick: onAdd }}

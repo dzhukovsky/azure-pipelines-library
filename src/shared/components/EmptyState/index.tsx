@@ -5,14 +5,17 @@ import { ZeroData, ZeroDataActionType } from 'azure-devops-ui/ZeroData';
 export type EmptyStateAction = { text: string; onClick: () => void };
 
 /** Centered zero-data placeholder for an empty tab, styled like the Azure
- * DevOps built-in empty states. */
+ * DevOps built-in empty states. Pass `imagePath` for an image (e.g. the logo)
+ * or `iconName` for an icon glyph. */
 export const EmptyState = ({
   iconName,
+  imagePath,
   primaryText,
   secondaryText,
   action,
 }: {
-  iconName: string;
+  iconName?: string;
+  imagePath?: string;
   primaryText: string;
   secondaryText?: string;
   action?: EmptyStateAction;
@@ -21,7 +24,8 @@ export const EmptyState = ({
     <ZeroData
       className="empty-state-content"
       imageAltText=""
-      iconProps={{ iconName }}
+      imagePath={imagePath}
+      iconProps={iconName ? { iconName } : undefined}
       primaryText={primaryText}
       secondaryText={secondaryText}
       {...(action && {

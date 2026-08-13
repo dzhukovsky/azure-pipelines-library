@@ -34,7 +34,7 @@ type TabState = {
   provider: MatrixDataProvider;
   groupNames: VariableGroupName[];
   items: ObservableArray<ITreeItem<MatrixTreeItem>>;
-  collapsedFolders: Set<string>;
+  expandedFolders: Set<string>;
 };
 
 // Built synchronously from the query cache — provider, group names and tree
@@ -55,9 +55,9 @@ const createTabState = (
       : data;
 
   const provider = new MatrixDataProvider(visibleGroups);
-  const collapsedFolders = new Set<string>();
+  const expandedFolders = new Set<string>();
   const items = new ObservableArray<ITreeItem<MatrixTreeItem>>(
-    mapTreeItems(provider.variables.value, groupingPatterns, collapsedFolders),
+    mapTreeItems(provider.variables.value, groupingPatterns, expandedFolders),
   );
 
   // Rebuild only when rows are added/removed; the synthetic `modified`
@@ -70,7 +70,7 @@ const createTabState = (
         ...mapTreeItems(
           provider.variables.value,
           groupingPatterns,
-          collapsedFolders,
+          expandedFolders,
         ),
       );
     }
@@ -82,7 +82,7 @@ const createTabState = (
     groupingPatterns,
     provider,
     items,
-    collapsedFolders,
+    expandedFolders,
     groupNames: visibleGroups.map<VariableGroupName>((x) => ({
       id: x.id,
       name: x.name,
@@ -163,9 +163,9 @@ export const MatrixTab = ({
         }
 
         if (expanded) {
-          state.collapsedFolders.delete(data.data.folderPath);
+          state.expandedFolders.add(data.data.folderPath);
         } else {
-          state.collapsedFolders.add(data.data.folderPath);
+          state.expandedFolders.delete(data.data.folderPath);
         }
 
         // The filtered provider's items are copies of `state.items`'s entries,

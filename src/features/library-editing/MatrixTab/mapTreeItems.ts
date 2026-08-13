@@ -16,7 +16,7 @@ const variableItem = (
 
 const folderItem = (
   folder: FolderNode<ObservableMatrixVariable>,
-  collapsedFolders: ReadonlySet<string>,
+  expandedFolders: ReadonlySet<string>,
 ): ITreeItem<MatrixTreeItem> => ({
   data: {
     type: 'folder',
@@ -27,17 +27,17 @@ const folderItem = (
     },
   },
   childItems: [
-    ...folder.folders.map((sub) => folderItem(sub, collapsedFolders)),
+    ...folder.folders.map((sub) => folderItem(sub, expandedFolders)),
     ...folder.items.map(variableItem),
   ],
-  // Expanded by default; only an explicit user collapse survives rebuilds.
-  expanded: !collapsedFolders.has(folder.path),
+  // Collapsed by default; only an explicit user expand survives rebuilds.
+  expanded: expandedFolders.has(folder.path),
 });
 
 export const mapTreeItems = (
   variables: ObservableMatrixVariable[],
   groupingPatterns: readonly string[] | undefined,
-  collapsedFolders: ReadonlySet<string>,
+  expandedFolders: ReadonlySet<string>,
 ): ITreeItem<MatrixTreeItem>[] => {
   const { folders, ungrouped } = groupByPatterns(
     variables,
@@ -46,7 +46,7 @@ export const mapTreeItems = (
   );
 
   return [
-    ...folders.map((folder) => folderItem(folder, collapsedFolders)),
+    ...folders.map((folder) => folderItem(folder, expandedFolders)),
     ...ungrouped.map(variableItem),
   ];
 };

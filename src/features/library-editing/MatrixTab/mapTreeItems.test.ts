@@ -41,7 +41,7 @@ describe('mapTreeItems', () => {
       folderPath: 'billing',
     });
     expect(items[0].childItems).toHaveLength(1);
-    expect(items[0].expanded).toBe(true);
+    expect(items[0].expanded).toBe(false); // collapsed by default
   });
 
   test('a mapped condition builds a subfolder before the parent folder variables', () => {
@@ -59,28 +59,28 @@ describe('mapTreeItems', () => {
       folderPath: 'billing/secrets',
     });
     expect(children[0].childItems).toHaveLength(1);
-    expect(children[0].expanded).toBe(true);
+    expect(children[0].expanded).toBe(false); // collapsed by default
   });
 
-  test('keeps a collapsed folder collapsed across rebuilds', () => {
+  test('keeps an explicitly expanded folder expanded across rebuilds', () => {
     const items = mapTreeItems(
       [variable('_app.billing:Conn')],
       APP,
       new Set(['billing']),
     );
 
-    expect(items[0].expanded).toBe(false);
+    expect(items[0].expanded).toBe(true);
   });
 
-  test('keeps a collapsed nested folder collapsed while its parent stays expanded', () => {
+  test('expands a nested folder while its parent stays collapsed by default', () => {
     const items = mapTreeItems(
       [variable('_app.billing:Conn'), variable('_app.billing.secret:Api')],
       APP_SECRETS,
       new Set(['billing/secrets']),
     );
 
-    expect(items[0].expanded).toBe(true);
-    expect((items[0].childItems ?? [])[0].expanded).toBe(false);
+    expect(items[0].expanded).toBe(false);
+    expect((items[0].childItems ?? [])[0].expanded).toBe(true);
   });
 });
 

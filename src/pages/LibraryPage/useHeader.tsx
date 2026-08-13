@@ -12,6 +12,7 @@ import type { PreviewChangesDialogOptions } from '@/features/preview-changes/com
 import { saveLibraryChanges } from '@/features/save-changes/saveLibraryChanges';
 import { secureFilesQueryKey } from '@/features/secure-files/hooks/useSecureFiles';
 import { variableGroupsQueryKey } from '@/features/variable-groups/hooks/useVariableGroups';
+import { goToNewVariableGroup } from '@/features/variable-groups/newVariableGroup';
 import { getProjectUrl } from '@/shared/api/configurations';
 import { navigateTo } from '@/shared/hooks/useNavigation';
 
@@ -77,11 +78,7 @@ export const useHeader = (
             primary={true}
             buttonProps={{
               text: 'New variable group',
-              onClick: () => {
-                navigateTo(
-                  `${getProjectUrl()}/_library?itemType=VariableGroups&view=VariableGroupView&variableGroupId=0`,
-                );
-              },
+              onClick: goToNewVariableGroup,
             }}
             menuButtonProps={{
               ariaLabel: 'See options',

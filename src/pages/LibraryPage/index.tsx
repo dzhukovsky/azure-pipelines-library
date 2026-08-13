@@ -9,10 +9,16 @@ import { Tab, TabBar } from 'azure-devops-ui/Tabs';
 import { useCallback, useMemo, useState } from 'react';
 import { HistoryDialog } from '@/features/history/components/HistoryDialog';
 import { ManageViewsDialog } from '@/features/matrix-views/components/ManageViewsDialog';
+import { useMatrixViews } from '@/features/matrix-views/hooks/useMatrixViews';
 import {
   PreviewChangesDialog,
   type PreviewChangesDialogOptions,
 } from '@/features/preview-changes/components/PreviewChangesDialog';
+import { useSecureFiles } from '@/features/secure-files/hooks/useSecureFiles';
+import { useVariableGroups } from '@/features/variable-groups/hooks/useVariableGroups';
+import { goToNewVariableGroup } from '@/features/variable-groups/newVariableGroup';
+import { logoUrl } from '@/shared/assets/logo';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { useNavigation } from '@/shared/hooks/useNavigation';
 import { useFilter } from './useFilter';
 import { useHeader } from './useHeader';
@@ -37,6 +43,20 @@ export const LibraryPage = () => {
   const [showComparison, setShowComparison] = useState(false);
 
   const isMatrixTab = (queryParams.tab || 'home').toLowerCase() !== 'home';
+
+  // A brand-new project with nothing to show gets a single full-page zero-data
+  // (no tab bar) instead of an empty Home tab, the way Azure DevOps greets a
+  // first-run surface. Tabs return as soon as there is a group, file or view.
+  const groups = useVariableGroups();
+  const files = useSecureFiles();
+  const views = useMatrixViews();
+  const nothingYet =
+    !groups.isLoading &&
+    !files.isLoading &&
+    !views.isLoading &&
+    !groups.data?.length &&
+    !files.data?.length &&
+    !views.data?.length;
 
   const openManageViews = useCallback(() => setIsManageViewsOpen(true), []);
   const openHistory = useCallback(() => setIsHistoryOpen(true), []);
@@ -83,6 +103,27 @@ export const LibraryPage = () => {
 
   if (isLoading) {
     return <div></div>;
+  }
+
+  if (nothingYet) {
+    return (
+      <Surface background={SurfaceBackground.neutral}>
+        <Page className="height-100vh flex-grow">
+          <Header title="Advanced Library" titleSize={TitleSize.Large} />
+          <div className="page-content page-content-top">
+            <EmptyState
+              imagePath={logoUrl}
+              primaryText="No variable groups or secure files yet"
+              secondaryText="Create a variable group to start managing your library."
+              action={{
+                text: 'New variable group',
+                onClick: goToNewVariableGroup,
+              }}
+            />
+          </div>
+        </Page>
+      </Surface>
+    );
   }
 
   return (

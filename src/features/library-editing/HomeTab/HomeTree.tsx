@@ -22,7 +22,7 @@ import type {
   ObservableVariable,
   ObservableVariableGroup,
 } from '@/features/variable-groups/models';
-import { getProjectUrl } from '@/shared/api/configurations';
+import { goToNewVariableGroup } from '@/features/variable-groups/newVariableGroup';
 import { logoUrl } from '@/shared/assets/logo';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { createTreeColumns } from '@/shared/components/Tree/createTreeColumns';
@@ -32,7 +32,6 @@ import type { TreeRenderer, TypedData } from '@/shared/components/Tree/types';
 import type { FilterFunc } from '@/shared/components/Tree/useFiltering';
 import { useObservableFiltering } from '@/shared/components/Tree/useFiltering';
 import { useRowRenderer } from '@/shared/components/Tree/useRowRenderer';
-import { navigateTo } from '@/shared/hooks/useNavigation';
 import {
   filePropertyRenderer,
   fileRenderer,
@@ -189,12 +188,6 @@ const HomeEmptyState = ({ hasFilter }: { hasFilter: boolean }) =>
       imagePath={logoUrl}
       primaryText="No variable groups or secure files yet"
       secondaryText="Create a variable group to start managing your library."
-      action={{
-        text: 'New variable group',
-        onClick: () =>
-          navigateTo(
-            `${getProjectUrl()}/_library?itemType=VariableGroups&view=VariableGroupView&variableGroupId=0`,
-          ),
-      }}
+      action={{ text: 'New variable group', onClick: goToNewVariableGroup }}
     />
   );

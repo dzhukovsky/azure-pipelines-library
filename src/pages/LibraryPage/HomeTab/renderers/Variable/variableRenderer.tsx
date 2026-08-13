@@ -13,6 +13,7 @@ export const variableRenderer: HomeTreeRenderer['groupVariable'] = {
           <TextFieldCell
             value={data.name}
             state={state}
+            placeholder="Name (required)"
             iconProps={{
               iconName: isSecret
                 ? 'fluent-KeyRegular'

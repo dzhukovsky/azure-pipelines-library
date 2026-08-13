@@ -1,5 +1,3 @@
-import './MatrixTree.scss';
-
 import { Button } from 'azure-devops-ui/Button';
 import { Card } from 'azure-devops-ui/Card';
 import {
@@ -178,7 +176,7 @@ export const MatrixTree = ({
     (!loading && isEmpty && <span>No items found</span>) || (
       <div className="flex-column spacing-8" ref={treeContainerRef}>
         <Card
-          className="flex-grow bolt-card-no-vertical-padding matrix-tree-card"
+          className="flex-grow bolt-card-no-vertical-padding"
           contentProps={{ contentPadding: false }}
         >
           <Tree<MatrixTreeItem>
@@ -191,11 +189,7 @@ export const MatrixTree = ({
                 : filteredItems) as TreeItemProviderProp<MatrixTreeItem>
             }
             showLines={false}
-            // Only the visible rows mount; at hundreds of variables × several
-            // group columns, rendering the whole grid at once was the main
-            // source of slowness. rowHeight seeds the virtualizer's spacing.
-            scrollable={true}
-            rowHeight={36}
+            virtualize={false}
             renderRow={renderRow}
             onToggle={(_, item) => {
               if (item.underlyingItem.childItems?.length) {

@@ -1,8 +1,0 @@
-// Cap the grid's height so the scrollable, virtualized Tree has a bounded
-// viewport and renders only the visible rows. Without a cap the tree grows to
-// fit every row, which defeats virtualization. The offset accounts for the
-// page header, the tab bar and the "Add new variable" button below the grid;
-// tune it if that chrome changes.
-.matrix-tree-card {
-  max-height: calc(100vh - 210px);
-}

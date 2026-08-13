@@ -7,6 +7,11 @@
   min-height: calc(100vh - 12rem);
   padding: 2rem;
 
+  // No header/tab chrome above it, so centre in (almost) the whole surface.
+  &.empty-state--full {
+    min-height: calc(100vh - 4rem);
+  }
+
   .empty-state-content {
     max-width: 380px;
 

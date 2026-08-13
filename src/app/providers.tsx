@@ -3,7 +3,7 @@ import { SurfaceBackground, SurfaceContext } from 'azure-devops-ui/Surface';
 import type { ReactNode } from 'react';
 import { ErrorBoundary } from '@/shared/components/ErrorBoundary';
 
-const queryClient = new QueryClient({
+export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,

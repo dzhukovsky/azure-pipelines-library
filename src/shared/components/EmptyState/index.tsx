@@ -1,26 +1,35 @@
 import './index.scss';
 
+import { css } from 'azure-devops-ui/Util';
 import { ZeroData, ZeroDataActionType } from 'azure-devops-ui/ZeroData';
 
 export type EmptyStateAction = { text: string; onClick: () => void };
 
 /** Centered zero-data placeholder for an empty tab, styled like the Azure
  * DevOps built-in empty states. Pass `imagePath` for an image (e.g. the logo)
- * or `iconName` for an icon glyph. */
+ * or `iconName` for an icon glyph. `fullPage` centers it in the whole surface
+ * (no header/tab chrome above it). */
 export const EmptyState = ({
   iconName,
   imagePath,
   primaryText,
   secondaryText,
   action,
+  fullPage,
 }: {
   iconName?: string;
   imagePath?: string;
   primaryText: string;
   secondaryText?: string;
   action?: EmptyStateAction;
+  fullPage?: boolean;
 }) => (
-  <div className="empty-state flex-grow flex-column">
+  <div
+    className={css(
+      'empty-state flex-grow flex-column',
+      fullPage && 'empty-state--full',
+    )}
+  >
     <ZeroData
       className="empty-state-content"
       imageAltText=""

@@ -8,19 +8,21 @@ import * as SDK from 'azure-devops-extension-sdk';
 
 export const variableGroupsQueryKey = ['variable-groups'];
 
-export const useVariableGroups = () =>
-  useQuery({
-    queryKey: variableGroupsQueryKey,
-    queryFn: async () => {
-      await SDK.ready();
+/** Shared so the app can prefetch it during init (see App.tsx). */
+export const variableGroupsQuery = {
+  queryKey: variableGroupsQueryKey,
+  queryFn: async () => {
+    await SDK.ready();
 
-      const project = SDK.getWebContext().project;
-      const client = getClient(TaskAgentRestClient);
-      const variableGroups = await client.getVariableGroups(project.id);
+    const project = SDK.getWebContext().project;
+    const client = getClient(TaskAgentRestClient);
+    const variableGroups = await client.getVariableGroups(project.id);
 
-      return variableGroups.sort((a, b) => a.name.localeCompare(b.name));
-    },
-  });
+    return variableGroups.sort((a, b) => a.name.localeCompare(b.name));
+  },
+};
+
+export const useVariableGroups = () => useQuery(variableGroupsQuery);
 
 export const getVariableGroupById = async (id: number) => {
   await SDK.ready();

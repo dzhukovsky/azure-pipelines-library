@@ -47,13 +47,16 @@ export const LibraryPage = () => {
   // matrix views only point at groups that no longer exist, so they'd render
   // empty too. Greet this like an Azure DevOps first-run surface: a single
   // full-page zero-data with no tab bar. Tabs return once real data exists.
+  // Both are prefetched during init (App.tsx), so this is decided on the first
+  // render. isSuccess (not just !isLoading) keeps a failed load out of the
+  // zero-data path — that falls through to the tab with its error message.
   const groups = useVariableGroups();
   const files = useSecureFiles();
   const nothingYet =
-    !groups.isLoading &&
-    !files.isLoading &&
-    !groups.data?.length &&
-    !files.data?.length;
+    groups.isSuccess &&
+    files.isSuccess &&
+    groups.data.length === 0 &&
+    files.data.length === 0;
 
   const openManageViews = useCallback(() => setIsManageViewsOpen(true), []);
   const openHistory = useCallback(() => setIsHistoryOpen(true), []);
@@ -106,18 +109,16 @@ export const LibraryPage = () => {
     return (
       <Surface background={SurfaceBackground.neutral}>
         <Page className="height-100vh flex-grow">
-          <Header title="Advanced Library" titleSize={TitleSize.Large} />
-          <div className="page-content page-content-top">
-            <EmptyState
-              imagePath={logoUrl}
-              primaryText="No variable groups or secure files yet"
-              secondaryText="Create a variable group to start managing your library."
-              action={{
-                text: 'New variable group',
-                onClick: goToNewVariableGroup,
-              }}
-            />
-          </div>
+          <EmptyState
+            fullPage
+            imagePath={logoUrl}
+            primaryText="No variable groups or secure files yet"
+            secondaryText="Create a variable group to start managing your library."
+            action={{
+              text: 'New variable group',
+              onClick: goToNewVariableGroup,
+            }}
+          />
         </Page>
       </Surface>
     );

@@ -13,26 +13,28 @@
   }
 
   .empty-state-content {
-    max-width: 380px;
+    // Wide enough for the title to stay on one line like the built-in
+    // AzDO zero-data screens; balance is a fallback for narrow viewports.
+    max-width: 480px;
+    text-align: center;
 
     .vss-ZeroDataItem--image {
       width: 120px;
       height: 120px;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
 
-    // Even line breaks instead of leaving an orphan word on the last line.
     .vss-ZeroDataItem--primary {
       text-wrap: balance;
     }
 
     .vss-ZeroDataItem--secondary {
-      margin-top: 4px;
+      margin-top: 8px;
       text-wrap: balance;
     }
 
     .vss-ZeroDataItem--action {
-      margin-top: 24px;
+      margin-top: 20px;
     }
   }
 }

@@ -113,7 +113,7 @@ export const LibraryPage = () => {
             fullPage
             imagePath={logoUrl}
             primaryText="No variable groups or secure files yet"
-            secondaryText="Create a variable group to start managing your library."
+            secondaryText="Store and share variables and secure files across your pipelines."
             action={{
               text: 'New variable group',
               onClick: goToNewVariableGroup,

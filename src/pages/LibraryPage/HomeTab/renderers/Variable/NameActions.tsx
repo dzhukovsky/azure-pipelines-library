@@ -1,6 +1,6 @@
-import { Button } from 'azure-devops-ui/Button';
 import { Observer } from 'azure-devops-ui/Observer';
 import type { ObservableVariable } from '@/features/variable-groups/models';
+import { SecretToggleButton } from '@/shared/components/SecretVariableType';
 import { useTreeRow } from '@/shared/components/Tree/useTreeRow';
 
 export const NameActions = ({ data }: { data: ObservableVariable }) => {
@@ -17,16 +17,9 @@ export const NameActions = ({ data }: { data: ObservableVariable }) => {
         state.type === 'Deleted' ? (
           <span />
         ) : (
-          <Button
-            subtle
-            iconProps={{ iconName: isSecret ? 'Lock' : 'Unlock' }}
-            tooltipProps={{
-              text: isSecret
-                ? 'Change variable type to plain text'
-                : 'Change variable type to secret',
-            }}
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => {
+          <SecretToggleButton
+            isSecret={isSecret}
+            onToggle={() => {
               data.isSecret.value = !isSecret;
             }}
           />

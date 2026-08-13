@@ -1,5 +1,5 @@
-import { IconSize } from 'azure-devops-ui/Icon';
 import { Observer } from 'azure-devops-ui/Observer';
+import { secretNameIconProps } from '@/shared/components/SecretVariableType';
 import { TextFieldCell } from '@/shared/components/TextFieldCell';
 import type { HomeTreeRenderer } from '../../HomeTree';
 import { NameActions } from './NameActions';
@@ -14,16 +14,7 @@ export const variableRenderer: HomeTreeRenderer['groupVariable'] = {
             value={data.name}
             state={state}
             placeholder="Name (required)"
-            iconProps={{
-              iconName: isSecret
-                ? 'fluent-KeyRegular'
-                : 'fluent-MathFormulaRegular',
-              style: {
-                paddingLeft: 0,
-                marginLeft: 0,
-              },
-              size: IconSize.medium,
-            }}
+            iconProps={secretNameIconProps(isSecret)}
             onChange={(e) => {
               data.name.value = e.target.value;
             }}

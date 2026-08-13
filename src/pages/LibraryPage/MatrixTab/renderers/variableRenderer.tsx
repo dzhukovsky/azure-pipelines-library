@@ -1,6 +1,6 @@
-import { IconSize } from 'azure-devops-ui/Icon';
 import { Observer } from 'azure-devops-ui/Observer';
 import { css } from 'azure-devops-ui/Util';
+import { secretNameIconProps } from '@/shared/components/SecretVariableType';
 import { TextFieldCell } from '@/shared/components/TextFieldCell';
 import type { MatrixTreeRenderer } from '../MatrixTree';
 import { NameActions } from './NameActions';
@@ -15,25 +15,7 @@ export const variableRenderer: MatrixTreeRenderer['variable'] = {
             value={data.name.name}
             state={state}
             placeholder="Name (required)"
-            iconProps={{
-              iconName:
-                isSecret == null
-                  ? 'fluent-WarningColor'
-                  : isSecret
-                    ? 'fluent-KeyRegular'
-                    : 'fluent-MathFormulaRegular',
-              style: {
-                paddingLeft: 0,
-                marginLeft: 0,
-              },
-              size: IconSize.medium,
-              tooltipProps:
-                isSecret == null
-                  ? {
-                      text: 'Variable has mixed secret types',
-                    }
-                  : undefined,
-            }}
+            iconProps={secretNameIconProps(isSecret)}
             onChange={(e) => {
               data.name.name.value = e.target.value;
             }}

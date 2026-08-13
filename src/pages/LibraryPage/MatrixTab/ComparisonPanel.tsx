@@ -4,6 +4,7 @@ import { Icon, IconSize } from 'azure-devops-ui/Icon';
 import { Observer } from 'azure-devops-ui/Observer';
 import { Fragment } from 'react';
 import type { ObservableMatrixVariable } from '@/features/variable-groups/models';
+import { secretIconName } from '@/shared/components/SecretVariableType';
 import type { VariableGroupName } from './MatrixTree';
 
 export type ComparisonPanelProps = {
@@ -22,16 +23,7 @@ export const ComparisonPanel = ({
     <Observer name={variable.name.name} isSecret={variable.name.isSecret}>
       {({ name, isSecret }: { name: string; isSecret: boolean | null }) => (
         <div className="comparison-panel-header flex-row flex-center">
-          <Icon
-            iconName={
-              isSecret == null
-                ? 'fluent-WarningColor'
-                : isSecret
-                  ? 'fluent-KeyRegular'
-                  : 'fluent-MathFormulaRegular'
-            }
-            size={IconSize.medium}
-          />
+          <Icon iconName={secretIconName(isSecret)} size={IconSize.medium} />
           <span className="comparison-panel-name text-ellipsis">{name}</span>
         </div>
       )}

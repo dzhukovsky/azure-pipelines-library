@@ -1,12 +1,42 @@
-# <img src="logo.svg" width="28" alt="Advanced Library logo"> azdo-advanced-library
+# <img src="logo.svg" width="28" alt="Advanced Library logo"> Advanced Library for Azure DevOps
+
+An Azure DevOps extension that adds a power-user **Library** hub to Azure Pipelines: spreadsheet-style inline editing of variable groups, matrix views for comparing environments side by side, a change preview before anything is saved, and a per-project change history.
+
+See [overview.md](overview.md) for the full feature tour (this file doubles as the Marketplace listing).
+
+## Highlights
+
+- **Inline editing** — add, rename, delete and restore variables across all groups on one screen; toggle secrets; per-field New/Modified/Deleted indicators; validation inside the cell.
+- **Matrix views** — custom tabs showing a variable-by-group matrix; spot missing values (`NULL` cells), rename a variable across every group at once, organize variables into folders with grouping patterns, compare a row across groups in a side panel.
+- **Safe saves** — edits are staged locally; the Preview changes dialog shows the full change set; saving is per group and conflict-aware (groups modified outside your session are skipped with a clear error, the rest still save).
+- **Change history** — every save through the extension is recorded per project (who, when, which variables, what kind of change); external changes are surfaced as explicit markers. Values are never stored.
+- **Export** — download a variable group as JSON or YAML with dot-notation names expanded into nested objects.
+- **Secure files** — listed read-only next to variable groups, including their properties.
 
 ## Enabling the extension
 
 The Advanced Library hub is hidden behind a feature toggle that is **off by default**. After installing the extension, a project administrator can turn it on per project: open the **Preview features** panel (avatar menu → "..." → Preview features, or the user settings menu), switch the scope selector to **"for this project"**, and enable **Advanced Library**.
 
-## Editing & History
+## Development
 
-The Home and Matrix tabs support inline editing of variable groups and their variables directly in the grid — add, edit, rename, delete, and toggle secret status per row or cell, with per-field state indicators (new/modified/deleted) as you go. Edits are staged locally; use "Preview changes" to review a diff of every pending change and see validation errors before committing anything. Saving applies only the groups you changed and is extension-managed: each group's history is appended as an entry keyed by project, independent of the native Azure DevOps Library UI. Before saving, each group is checked against its last-known `modifiedOn` timestamp; if it was modified externally in the meantime, that group's save is skipped with a per-group conflict error while unaffected groups still save, and the resulting history shows an interruption marker so the gap is visible later.
+Prerequisites: [Bun](https://bun.sh) ≥ 1.3, Node.js ≥ 21.
+
+```sh
+bun install       # install dependencies
+bun run dev       # dev server on http://localhost:3000
+bun test          # run tests
+bun run lint      # biome lint
+bun run build     # type-check and build to dist/
+```
+
+### Packaging
+
+```sh
+bun run package       # production .vsix (vss-extension.json)
+bun run package:dev   # dev .vsix (advanced-library-dev) whose hub loads http://localhost:3000
+```
+
+The dev package ([vss-extension.dev.json](vss-extension.dev.json) overrides) publishes a separate private extension, `advanced-library-dev`, with an extra "Advanced Library (Dev)" hub pointing at the local dev server — install it in a test organization, run `bun run dev`, and iterate without repackaging.
 
 ## Project Structure
 ```
@@ -78,3 +108,7 @@ src/
 └── vite-env.d.ts
 
 ```
+
+## License
+
+[MIT](LICENSE)

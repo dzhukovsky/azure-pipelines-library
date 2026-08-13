@@ -1,21 +1,33 @@
 .empty-state {
-  // Fill the tab and hold the placeholder in the upper-middle of the area,
-  // the way the Azure DevOps built-in zero-data screens sit.
+  // Fill the visible tab area (below the page header and tab bar) and hold the
+  // placeholder at its optical centre, the way the Azure DevOps built-in
+  // zero-data screens sit — rather than floating near the top.
   align-items: center;
   justify-content: center;
-  min-height: 60vh;
+  min-height: calc(100vh - 12rem);
+  padding: 2rem;
 
   .empty-state-content {
-    // ZeroData already centers its own content; keep it from stretching full
-    // width so the text wraps to a comfortable measure.
-    max-width: 420px;
-    text-align: center;
+    max-width: 380px;
 
-    // The logo is a small glyph; hold it at a comfortable placeholder size
-    // rather than ZeroData's default full-width illustration scale.
     .vss-ZeroDataItem--image {
-      width: 96px;
-      height: 96px;
+      width: 88px;
+      height: 88px;
+      margin-bottom: 12px;
+    }
+
+    // Even line breaks instead of leaving an orphan word on the last line.
+    .vss-ZeroDataItem--primary {
+      text-wrap: balance;
+    }
+
+    .vss-ZeroDataItem--secondary {
+      margin-top: 4px;
+      text-wrap: balance;
+    }
+
+    .vss-ZeroDataItem--action {
+      margin-top: 24px;
     }
   }
 }

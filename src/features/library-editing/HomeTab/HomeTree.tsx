@@ -188,7 +188,7 @@ const HomeEmptyState = ({ hasFilter }: { hasFilter: boolean }) =>
     <EmptyState
       imagePath={logoUrl}
       primaryText="No variable groups or secure files yet"
-      secondaryText="Create a variable group to start managing your library here."
+      secondaryText="Create a variable group to start managing your library."
       action={{
         text: 'New variable group',
         onClick: () =>

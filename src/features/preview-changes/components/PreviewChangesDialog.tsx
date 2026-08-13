@@ -243,6 +243,7 @@ const useColumns = () => {
                   },
                   size: IconSize.medium,
                 }}
+                hideErrorIcon
                 readOnly
               />
             );
@@ -285,6 +286,7 @@ const useColumns = () => {
                 value={groupVariable.value ?? ''}
                 state={groupVariable.state}
                 type={groupVariable.isSecret ? 'password' : 'text'}
+                hideErrorIcon
                 readOnly
               />
             );
@@ -296,6 +298,7 @@ const useColumns = () => {
               <TextFieldCell
                 value={fileProperty.value ?? ''}
                 state={fileProperty.state}
+                hideErrorIcon
                 readOnly
               />
             );

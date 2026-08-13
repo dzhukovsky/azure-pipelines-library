@@ -20,7 +20,7 @@ export const ValueActions = ({
     <Observer state={data.state}>
       {({ state }) => {
         if (!hasMouseOrFocus) {
-          return <StateIcon state={state} />;
+          return <StateIcon state={state} hideError />;
         }
 
         if (state === States.Deleted) {

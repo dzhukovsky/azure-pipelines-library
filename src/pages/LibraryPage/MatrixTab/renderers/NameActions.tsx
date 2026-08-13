@@ -15,7 +15,7 @@ export const NameActions = ({ data }: { data: ObservableMatrixVariable }) => {
     >
       {({ state, isSecret, hasMouseOrFocus }) => {
         if (!hasMouseOrFocus || state === States.Deleted) {
-          return <StateIcon state={state} />;
+          return <StateIcon state={state} hideError />;
         }
 
         return (

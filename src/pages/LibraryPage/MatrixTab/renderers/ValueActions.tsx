@@ -35,7 +35,7 @@ export const ValueActions = ({
     >
       {({ state, isNew, hasMouseOrFocus }) => {
         if (!hasMouseOrFocus) {
-          return <StateIcon state={state} />;
+          return <StateIcon state={state} hideError />;
         }
 
         if (state === States.Deleted) {

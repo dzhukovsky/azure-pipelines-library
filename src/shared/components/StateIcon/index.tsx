@@ -31,8 +31,19 @@ const textColors: Record<State['type'], string> = {
 };
 
 export const StateIcon = memo(
-  ({ state, circle }: { state: State; circle?: boolean }) => {
-    if (state.type === 'Unchanged') {
+  ({
+    state,
+    circle,
+    hideError,
+  }: {
+    state: State;
+    circle?: boolean;
+    /** For cells that already surface the error inline (TextFieldCell renders
+     * it as a prefix icon); the state slot stays empty so the error tooltip
+     * is not lost to the action button that replaces this slot on hover. */
+    hideError?: boolean;
+  }) => {
+    if (state.type === 'Unchanged' || (hideError && state.type === 'Error')) {
       return <span />;
     }
 

@@ -40,4 +40,11 @@ describe('ObservableVariableGroup', () => {
     expect(group.variables.value).not.toContain(added);
     expect(group.modified).toBe(false);
   });
+
+  test('addVariable inserts the new variable at the start of the group', () => {
+    const group = makeGroup();
+    const added = group.addVariable();
+
+    expect(group.variables.value[0]).toBe(added);
+  });
 });

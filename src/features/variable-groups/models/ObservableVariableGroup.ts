@@ -40,7 +40,9 @@ export class ObservableVariableGroup extends StateObject<ObservableVariableGroup
 
   addVariable(): ObservableVariable {
     const variable = new ObservableVariable('', '', false, true);
-    this.variables.push(variable);
+    // At the start of the group, right under the group row — visible without
+    // scrolling past the group's existing variables.
+    this.variables.splice(0, 0, variable);
     return variable;
   }
 

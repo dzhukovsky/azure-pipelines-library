@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'bun:test';
 import type { VariableGroup } from 'azure-devops-extension-api/TaskAgent';
 import { MatrixDataProvider } from '@/pages/LibraryPage/MatrixTab/MatrixDataProvider';
-import { getChangeStatus } from './types';
 import { mapMatrixChanges } from './fromMatrixProvider';
+import { getChangeStatus } from './types';
 
 const makeProvider = () => {
   const groups = [
@@ -54,8 +54,7 @@ describe('mapMatrixChanges', () => {
 
   test('new row with one added cell affects only that group', () => {
     const provider = makeProvider();
-    provider.addNewVariable();
-    const row = provider.variables.value[1];
+    const row = provider.addNewVariable();
     row.name.name.value = 'brand';
     row.addValue(10);
     row.values[10].value.value = 'x';

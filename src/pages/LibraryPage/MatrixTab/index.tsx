@@ -10,13 +10,13 @@ import {
 } from '@/features/library-changes';
 import { useVariableGroups } from '@/features/variable-groups/hooks/useVariableGroups';
 import type { LibraryTabModel } from '../LibraryTabModel';
-import { findTreeItem, mapTreeItems } from './mapTreeItems';
 import { MatrixDataProvider } from './MatrixDataProvider';
 import {
   MatrixTree,
   type MatrixTreeItem,
   type VariableGroupName,
 } from './MatrixTree';
+import { findTreeItem, mapTreeItems } from './mapTreeItems';
 
 export type MatrixTabProps = {
   filter: IFilter;
@@ -66,7 +66,11 @@ const createTabState = (
       items.splice(
         0,
         items.length,
-        ...mapTreeItems(provider.variables.value, groupingPatterns, collapsedFolders),
+        ...mapTreeItems(
+          provider.variables.value,
+          groupingPatterns,
+          collapsedFolders,
+        ),
       );
     }
   });
@@ -151,9 +155,7 @@ export const MatrixTab = ({
       filter={filter}
       loading={isLoading}
       showComparison={showComparison}
-      addNewVariable={() => {
-        state.provider.addNewVariable();
-      }}
+      addNewVariable={() => state.provider.addNewVariable()}
       onToggleItem={(data, expanded) => {
         if (data.type !== 'folder') {
           return;

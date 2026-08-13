@@ -1,6 +1,7 @@
 import { Button } from 'azure-devops-ui/Button';
 import type { ITreeItemEx } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import type { ObservableVariableGroup } from '@/features/variable-groups/models';
+import { selectTreeRowInput } from '@/shared/components/Tree/selectTreeRowInput';
 import { useTreeRow } from '@/shared/components/Tree/useTreeRow';
 import type { HomeTreeItem } from '../../HomeTree';
 
@@ -25,28 +26,13 @@ export const NameActions = (props: {
       onMouseDown={(e) => e.preventDefault()}
       onClick={(e) => {
         data.addVariable();
-        window.requestAnimationFrame(() => selectLastAddedInput(rowIndex));
+        // The reactive rebuild inserts the new row as the group's first
+        // child, so it renders directly under the group row.
+        window.requestAnimationFrame(() =>
+          selectTreeRowInput(document.body, rowIndex + 1),
+        );
         e.stopPropagation();
       }}
     />
   );
 };
-
-// The new row is appended as the group's last child by the reactive rebuild.
-// Walk forward from the group row through its sibling rows (until the next
-// root row) and focus the last empty name input found — that's the new row.
-function selectLastAddedInput(groupRow: number) {
-  const currentRow = document.querySelector(`tr[data-row-index="${groupRow}"]`);
-  let next = currentRow?.nextElementSibling ?? null;
-  let target: HTMLInputElement | null = null;
-
-  while (next && next.tagName.toLowerCase() === 'tr') {
-    const input = next.querySelector('input');
-    if (input && input.value === '') {
-      target = input;
-    }
-    next = next.nextElementSibling;
-  }
-
-  target?.select();
-}

@@ -29,10 +29,11 @@ export class MatrixDataProvider extends ObservableObject<MatrixDataProvider> {
     return this.groups.map((g) => g.id);
   }
 
-  addNewVariable() {
-    this.variables.push(
-      new ObservableMatrixVariable('', {}, this.groupIds, true),
-    );
+  addNewVariable(): ObservableMatrixVariable {
+    const variable = new ObservableMatrixVariable('', {}, this.groupIds, true);
+    // At the end — right next to the Add button below the tree.
+    this.variables.push(variable);
+    return variable;
   }
 }
 

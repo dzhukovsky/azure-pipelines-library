@@ -11,13 +11,14 @@ import type {
   ITreeItem,
   ITreeItemProvider,
 } from 'azure-devops-ui/Utilities/TreeItemProvider';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import type { ObservableMatrixVariable } from '@/features/variable-groups/models';
 import type { FilterFunc } from '@/shared/components/Table/useFiltering';
 import { createActionColumn } from '@/shared/components/Tree/createActionColumn';
 import { createExpandableActionColumn } from '@/shared/components/Tree/createExpandableActionColumn';
 import { getRenderers } from '@/shared/components/Tree/createTreeColumns';
 import { getLoadingProvider } from '@/shared/components/Tree/loadingProvider';
+import { selectTreeRowInput } from '@/shared/components/Tree/selectTreeRowInput';
 import type { TreeRenderer, TypedData } from '@/shared/components/Tree/types';
 import { useObservableFiltering } from '@/shared/components/Tree/useFiltering';
 import type { RowFocusChangeHandler } from '@/shared/components/Tree/useRowRenderer';
@@ -36,7 +37,7 @@ export type MatrixTreeProps = {
   filter: IFilter;
   loading?: boolean;
   showComparison?: boolean;
-  addNewVariable: () => void;
+  addNewVariable: () => ObservableMatrixVariable;
   onToggleItem?: (data: MatrixTreeItem, expanded: boolean) => void;
 };
 
@@ -162,9 +163,10 @@ export const MatrixTree = ({
   );
 
   const renderRow = useRowRenderer(columns, onRowFocusChange);
+  const treeContainerRef = useRef<HTMLDivElement>(null);
   return (
     (!loading && isEmpty && <span>No items found</span>) || (
-      <div className="flex-column spacing-8">
+      <div className="flex-column spacing-8" ref={treeContainerRef}>
         <Card
           className="flex-grow bolt-card-no-vertical-padding"
           contentProps={{ contentPadding: false }}
@@ -187,16 +189,26 @@ export const MatrixTree = ({
           />
         </Card>
         {showComparison && focusedVariable && (
-          <ComparisonPanel
-            variable={focusedVariable}
-            groupNames={groupNames}
-          />
+          <ComparisonPanel variable={focusedVariable} groupNames={groupNames} />
         )}
         <div className="flex-row margin-vertical-16">
           <Button
             iconProps={{ iconName: 'Add' }}
             text="Add new variable"
-            onClick={addNewVariable}
+            onClick={() => {
+              const variable = addNewVariable();
+              // Once React has flushed the rebuilt rows, find the new
+              // variable's row by identity — its position depends on grouping
+              // — and put the caret into its name field.
+              window.requestAnimationFrame(() => {
+                const rowIndex = filteredItems.value.findIndex(
+                  (row) =>
+                    row.underlyingItem.data.type === 'variable' &&
+                    row.underlyingItem.data.data === variable,
+                );
+                selectTreeRowInput(treeContainerRef.current, rowIndex);
+              });
+            }}
           />
         </div>
       </div>

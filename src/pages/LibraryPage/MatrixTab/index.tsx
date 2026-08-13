@@ -9,6 +9,7 @@ import {
   validateMatrixProvider,
 } from '@/features/library-changes';
 import { useVariableGroups } from '@/features/variable-groups/hooks/useVariableGroups';
+import { ErrorMessage } from '@/shared/components/ErrorMessage';
 import type { LibraryTabModel } from '../LibraryTabModel';
 import { MatrixDataProvider } from './MatrixDataProvider';
 import {
@@ -145,7 +146,7 @@ export const MatrixTab = ({
   }, [state.provider]);
 
   if (error) {
-    return <div>Error: {(error as Error).message}</div>;
+    return <ErrorMessage error={error} onRetry={() => groups.refetch()} />;
   }
 
   return (

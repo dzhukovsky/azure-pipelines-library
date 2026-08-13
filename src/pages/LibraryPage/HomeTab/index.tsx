@@ -17,6 +17,7 @@ import type { ObservableSecureFile } from '@/features/secure-files/models';
 import { useVariableGroups } from '@/features/variable-groups/hooks/useVariableGroups';
 import { mapVariableGroups } from '@/features/variable-groups/mapVariableGroups';
 import type { ObservableVariableGroup } from '@/features/variable-groups/models';
+import { ErrorMessage } from '@/shared/components/ErrorMessage';
 import type { LibraryTabModel } from '../LibraryTabModel';
 import { HomeTabModel } from './HomeTabModel';
 import { HomeTree, type HomeTreeItem } from './HomeTree';
@@ -128,7 +129,15 @@ export const HomeTab = ({
   }, [context.model]);
 
   if (error) {
-    return <div>Error: {(error as Error).message}</div>;
+    return (
+      <ErrorMessage
+        error={error}
+        onRetry={() => {
+          groups.refetch();
+          files.refetch();
+        }}
+      />
+    );
   }
 
   return (

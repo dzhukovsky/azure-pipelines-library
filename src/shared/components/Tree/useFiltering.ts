@@ -127,9 +127,15 @@ export function useObservableFiltering<T>(
   useEffect(() => {
     const onChange = () => {
       const filtered = filterItems(items.value, filter, filterFunc);
-      filteredItems.splice(undefined, filteredItems.roots, [
+      // spliceBatch replaces all roots in a single notification; the plain
+      // splice removes each existing root one by one, and every removal
+      // notifies the tree into a full synchronous re-render — with hundreds of
+      // rows that turned each filter keystroke into seconds of layout work.
+      filteredItems.spliceBatch([
         {
-          items: filtered,
+          parentItem: undefined,
+          itemsToRemove: filteredItems.roots,
+          itemsToAdd: [{ items: filtered }],
         },
       ]);
       setState((prev) => ({ ...prev, isEmpty: filtered.length === 0 }));

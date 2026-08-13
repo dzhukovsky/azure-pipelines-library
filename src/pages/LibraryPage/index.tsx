@@ -113,7 +113,7 @@ export const LibraryPage = () => {
             fullPage
             imagePath={logoUrl}
             primaryText="No variable groups or secure files yet"
-            secondaryText="Store and share variables and secure files across your pipelines."
+            secondaryText="Store and share variables and secure files across your pipelines. Advanced Library lets you edit every group inline, compare them side by side across environments, and review your changes before saving."
             action={{
               text: 'New variable group',
               onClick: goToNewVariableGroup,

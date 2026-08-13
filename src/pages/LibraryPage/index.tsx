@@ -113,7 +113,7 @@ export const LibraryPage = () => {
             fullPage
             imagePath={logoUrl}
             primaryText="No variable groups or secure files yet"
-            secondaryText="Store and share variables and secure files across your pipelines — and edit every group in one place."
+            secondaryText="Store and share variables and secure files across your pipelines, then edit and compare them in one place."
             action={{
               text: 'New variable group',
               onClick: goToNewVariableGroup,

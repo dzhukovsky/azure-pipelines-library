@@ -6,7 +6,7 @@ import type {
   ObservableMatrixValue,
   ObservableMatrixVariable,
 } from '@/features/variable-groups/models';
-import { StateIcon, States } from '@/shared/components/StateIcon';
+import { StateIcon } from '@/shared/components/StateIcon';
 import { useTreeCell } from '@/shared/components/Tree/useTreeCell';
 import { useTreeRow } from '@/shared/components/Tree/useTreeRow';
 
@@ -38,7 +38,7 @@ export const ValueActions = ({
           return <StateIcon state={state} hideError />;
         }
 
-        if (state === States.Deleted) {
+        if (state.type === 'Deleted') {
           return (
             <Button
               subtle
@@ -53,7 +53,7 @@ export const ValueActions = ({
           );
         }
 
-        if (state === States.Unchanged && isNew) {
+        if (state.type === 'Unchanged' && isNew) {
           return (
             <Button
               subtle

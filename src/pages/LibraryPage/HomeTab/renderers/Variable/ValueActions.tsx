@@ -2,7 +2,7 @@ import { Button } from 'azure-devops-ui/Button';
 import { Observer } from 'azure-devops-ui/Observer';
 import type { ITreeItemEx } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import type { ObservableVariable } from '@/features/variable-groups/models';
-import { StateIcon, States } from '@/shared/components/StateIcon';
+import { StateIcon } from '@/shared/components/StateIcon';
 import { useTreeRow } from '@/shared/components/Tree/useTreeRow';
 import type { HomeTreeItem } from '../../HomeTree';
 
@@ -23,7 +23,7 @@ export const ValueActions = ({
           return <StateIcon state={state} hideError />;
         }
 
-        if (state === States.Deleted) {
+        if (state.type === 'Deleted') {
           return (
             <Button
               subtle

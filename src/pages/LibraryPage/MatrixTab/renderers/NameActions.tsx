@@ -1,7 +1,7 @@
 import { Button } from 'azure-devops-ui/Button';
 import { Observer } from 'azure-devops-ui/Observer';
 import type { ObservableMatrixVariable } from '@/features/variable-groups/models';
-import { StateIcon, States } from '@/shared/components/StateIcon';
+import { StateIcon } from '@/shared/components/StateIcon';
 import { useTreeRow } from '@/shared/components/Tree/useTreeRow';
 
 export const NameActions = ({ data }: { data: ObservableMatrixVariable }) => {
@@ -14,7 +14,7 @@ export const NameActions = ({ data }: { data: ObservableMatrixVariable }) => {
       hasMouseOrFocus={hasMouse || hasFocus}
     >
       {({ state, isSecret, hasMouseOrFocus }) => {
-        if (!hasMouseOrFocus || state === States.Deleted) {
+        if (!hasMouseOrFocus || state.type === 'Deleted') {
           return <StateIcon state={state} hideError />;
         }
 

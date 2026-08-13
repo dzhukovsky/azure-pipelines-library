@@ -1,4 +1,4 @@
-# azdo-advanced-library
+# <img src="logo.svg" width="28" alt="Advanced Library logo"> azdo-advanced-library
 
 ## Editing & History
 

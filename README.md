@@ -39,75 +39,13 @@ bun run package:dev   # dev .vsix (advanced-library-dev) whose hub loads http://
 The dev package ([vss-extension.dev.json](vss-extension.dev.json) overrides) publishes a separate private extension, `advanced-library-dev`, with an extra "Advanced Library (Dev)" hub pointing at the local dev server — install it in a test organization, run `bun run dev`, and iterate without repackaging.
 
 ## Project Structure
-```
-src/
-├── app/                                    # 🚀 Application entry point
-│   ├── App.tsx
-│   ├── main.tsx
-│   └── providers.tsx
-│
-├── features/                               # 🧩 Isolated features
-│   ├── preview-changes/
-│   │   ├── components/
-│   │   │   ├── PreviewChangesDialog.scss
-│   │   │   └── PreviewChangesDialog.tsx
-│   │   └── mappings.ts
-│   │
-│   ├── secure-files/
-│   │   ├── hooks/
-│   │   │   └── useSecureFiles.ts
-│   │   └── models/
-│   │       ├── index.ts
-│   │       ├── ObservableSecureFile.ts
-│   │       └── ObservableSecureFileProperty.ts
-│   │
-│   └── variable-groups/
-│       ├── hooks/
-│       │   └── useVariableGroups.ts
-│       └── models/
-│           ├── index.ts
-│           ├── ObservableVariable.ts
-│           └── ObservableVariableGroup.ts
-│
-├── pages/                                  # 📄 Pages
-│   ├── HistoryPage/
-│   ├── LibraryPage/
-│   │   ├── HomeTab/
-│   │   │   ├── HomeTabModel.ts
-│   │   │   └── index.tsx
-│   │   ├── MatrixTab/
-│   │   └── index.tsx
-│   └── SettingsPage/
-│
-├── shared/                                 # 🔧 Shared code
-│   ├── api/
-│   │   ├── clients/
-│   │   ├── configurations.ts
-│   │   └── settingsService.ts
-│   │
-│   ├── components/
-│   │   ├── Table/
-│   │   ├── TextFieldCell/
-│   │   └── Tree/
-│   │
-│   ├── hooks/
-│   │   ├── useNavigation.ts
-│   │   └── useObservable.ts
-│   │
-│   ├── lib/
-│   │   ├── exportHelper.ts
-│   │   └── observable/
-│   │       ├── index.ts
-│   │       ├── ObservableObject.ts
-│   │       ├── ObservableObjectArray.ts
-│   │       ├── ObservableObjectValue.ts
-│   │       └── StateObject.ts
-│   │
-│   └── styles/
-│
-└── vite-env.d.ts
 
-```
+The code under `src/` follows a feature-oriented layout:
+
+- **`app/`** — application entry point, providers and top-level routing.
+- **`features/`** — self-contained features (variable groups, matrix views, library changes, preview changes, save, history, secure files), each owning its own models, hooks, API access and components.
+- **`pages/`** — the hub's pages and tabs (Library with Home/Matrix tabs, History, Settings).
+- **`shared/`** — cross-cutting code: the observable model primitives, reusable tree/table/cell components, Azure DevOps API clients, hooks and styles.
 
 ## License
 

@@ -28,9 +28,21 @@ export type GroupSaveResult =
 
 export type SaveOutcome = { results: GroupSaveResult[]; ok: boolean };
 
+/** The Azure DevOps calls the save flow depends on; injectable for testing. */
+export type SaveLibraryClient = {
+  getVariableGroupById: typeof getVariableGroupById;
+  updateVariableGroupById: typeof updateVariableGroupById;
+};
+
+const defaultClient: SaveLibraryClient = {
+  getVariableGroupById,
+  updateVariableGroupById,
+};
+
 /** Sequentially saves every changed group; never throws — errors land in results. */
 export const saveLibraryChanges = async (
   changes: LibraryChanges,
+  client: SaveLibraryClient = defaultClient,
 ): Promise<SaveOutcome> => {
   const results: GroupSaveResult[] = [];
 
@@ -38,9 +50,12 @@ export const saveLibraryChanges = async (
     try {
       // Fetch fresh: the list endpoint omits variableGroupProjectReferences,
       // and this is also the concurrency-check input.
-      const current = await getVariableGroupById(change.groupId);
+      const current = await client.getVariableGroupById(change.groupId);
       const parameters = buildVariableGroupParameters(current, change);
-      const updated = await updateVariableGroupById(change.groupId, parameters);
+      const updated = await client.updateVariableGroupById(
+        change.groupId,
+        parameters,
+      );
       const modifiedByBefore = current.modifiedBy ?? current.createdBy;
       results.push({
         groupId: change.groupId,

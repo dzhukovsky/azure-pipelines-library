@@ -7,6 +7,12 @@ import type { HistoryEntry } from '../models';
 
 export const MAX_HISTORY_ENTRIES = 500;
 
+/** Newest-first merge, pruning the tail so the stored document stays small. */
+export const mergeHistoryEntries = (
+  existing: HistoryEntry[],
+  added: HistoryEntry[],
+): HistoryEntry[] => [...added, ...existing].slice(0, MAX_HISTORY_ENTRIES);
+
 const getDataManager = async () => {
   await SDK.ready();
 
@@ -58,8 +64,7 @@ export const appendHistoryEntries = async (
     return existing;
   }
 
-  // Newest first; prune the tail so the document stays small (keys only).
-  const merged = [...added, ...existing].slice(0, MAX_HISTORY_ENTRIES);
+  const merged = mergeHistoryEntries(existing, added);
 
   return dataManager.setValue(getHistoryKey(), merged);
 };

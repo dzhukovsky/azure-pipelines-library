@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import { States } from '@/shared/components/StateIcon';
-import { StateObject } from './StateObject';
 import type { ObservableObjectValue } from './ObservableObjectValue';
+import { StateObject } from './StateObject';
 
 class TestItem extends StateObject<TestItem> {
   readonly name: ObservableObjectValue<string>;
@@ -56,13 +56,13 @@ describe('StateObject', () => {
     expect(item.state.value).toEqual(States.Unchanged);
     expect(item.modified).toBe(false);
 
-    item.restore();            // "Add" pressed
+    item.restore(); // "Add" pressed
     expect(item.state.value).toEqual(States.New);
     expect(item.modified).toBe(true);
 
     item.name.value = 'x';
     item.name.reset();
-    item.delete();             // delete the not-yet-saved cell
+    item.delete(); // delete the not-yet-saved cell
     expect(item.state.value).toEqual(States.Unchanged);
     expect(item.modified).toBe(false); // <- no phantom New
   });

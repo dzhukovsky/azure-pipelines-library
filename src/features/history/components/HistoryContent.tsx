@@ -250,7 +250,8 @@ const useColumns = (resolveGroup: GroupResolver) => {
                   // over yet is still the group's latest, so read it off there.
                   actor={
                     external.actor ??
-                    resolveGroup(external.groupId, external.groupName).modifiedBy
+                    resolveGroup(external.groupId, external.groupName)
+                      .modifiedBy
                   }
                   date={
                     external.detectedAt

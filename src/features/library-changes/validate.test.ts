@@ -17,10 +17,7 @@ import {
 } from './validate';
 
 const makeModel = (variables: ObservableVariable[]) =>
-  new HomeTabModel(
-    [new ObservableVariableGroup(1, 'g', variables, false)],
-    [],
-  );
+  new HomeTabModel([new ObservableVariableGroup(1, 'g', variables, false)], []);
 
 describe('validateHomeModel', () => {
   test('empty name on a present variable is an error', () => {
@@ -194,8 +191,16 @@ describe('validateMatrixProvider', () => {
 
   test('duplicate row names (case-insensitive, trimmed) are errors on both; clears on rename', () => {
     const provider = makeProvider([
-      { id: 10, name: 'dev', variables: { Same: { value: '1', isSecret: false } } },
-      { id: 20, name: 'prod', variables: { 'same ': { value: '2', isSecret: false } } },
+      {
+        id: 10,
+        name: 'dev',
+        variables: { Same: { value: '1', isSecret: false } },
+      },
+      {
+        id: 20,
+        name: 'prod',
+        variables: { 'same ': { value: '2', isSecret: false } },
+      },
     ]);
 
     expect(validateMatrixProvider(provider)).toBe(false);
@@ -212,8 +217,16 @@ describe('validateMatrixProvider', () => {
 
   test('secret to plain without re-entering the value is an error on the untouched cell only', () => {
     const provider = makeProvider([
-      { id: 10, name: 'dev', variables: { secret: { value: 'shh', isSecret: true } } },
-      { id: 20, name: 'prod', variables: { secret: { value: 'shh2', isSecret: true } } },
+      {
+        id: 10,
+        name: 'dev',
+        variables: { secret: { value: 'shh', isSecret: true } },
+      },
+      {
+        id: 20,
+        name: 'prod',
+        variables: { secret: { value: 'shh2', isSecret: true } },
+      },
     ]);
     const row = provider.variables.value[0];
     expect(row.name.isSecret.value).toBe(true);
@@ -242,8 +255,16 @@ describe('validateMatrixProvider', () => {
 
   test('mixed-secret row (initialValue null) flipped to plain errors only the originally-secret cells', () => {
     const provider = makeProvider([
-      { id: 10, name: 'dev', variables: { mixed: { value: 'a', isSecret: true } } },
-      { id: 20, name: 'prod', variables: { mixed: { value: 'b', isSecret: false } } },
+      {
+        id: 10,
+        name: 'dev',
+        variables: { mixed: { value: 'a', isSecret: true } },
+      },
+      {
+        id: 20,
+        name: 'prod',
+        variables: { mixed: { value: 'b', isSecret: false } },
+      },
     ]);
     const row = provider.variables.value[0];
     expect(row.name.isSecret.value).toBeNull(); // mixed secret flags -> null
@@ -262,8 +283,16 @@ describe('validateMatrixProvider', () => {
 
   test('renaming a row with an untouched present secret cell is an error on that cell only', () => {
     const provider = makeProvider([
-      { id: 10, name: 'dev', variables: { secret: { value: 'shh', isSecret: true } } },
-      { id: 20, name: 'prod', variables: { secret: { value: 'shh2', isSecret: false } } },
+      {
+        id: 10,
+        name: 'dev',
+        variables: { secret: { value: 'shh', isSecret: true } },
+      },
+      {
+        id: 20,
+        name: 'prod',
+        variables: { secret: { value: 'shh2', isSecret: false } },
+      },
     ]);
     const row = provider.variables.value[0];
     expect(row.name.isSecret.value).toBeNull(); // mixed secret flags -> null
@@ -282,7 +311,11 @@ describe('validateMatrixProvider', () => {
 
   test('a row deleted from every group does not block re-adding the same name', () => {
     const provider = makeProvider([
-      { id: 10, name: 'dev', variables: { gone: { value: '1', isSecret: false } } },
+      {
+        id: 10,
+        name: 'dev',
+        variables: { gone: { value: '1', isSecret: false } },
+      },
     ]);
     const row = provider.variables.value[0];
     row.deleteVariable(10); // only cell deleted -> row.modified true, no present cells
@@ -369,7 +402,11 @@ describe('hasErrors integration (mapMatrixChanges)', () => {
 
   test('a valid edit does not trip hasErrors', () => {
     const provider = makeProvider([
-      { id: 10, name: 'dev', variables: { shared: { value: '1', isSecret: false } } },
+      {
+        id: 10,
+        name: 'dev',
+        variables: { shared: { value: '1', isSecret: false } },
+      },
     ]);
     provider.variables.value[0].values[10].value.value = 'new';
 

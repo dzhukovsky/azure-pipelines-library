@@ -18,7 +18,9 @@ export const clearHomeModelErrors = (model: HomeTabModel): void => {
 
 /** Clears every row-name and cell error on the provider. See
  * clearHomeModelErrors for why this is exported separately from validation. */
-export const clearMatrixProviderErrors = (provider: MatrixDataProvider): void => {
+export const clearMatrixProviderErrors = (
+  provider: MatrixDataProvider,
+): void => {
   provider.variables.value.forEach((row) => {
     row.name.error.value = undefined;
     Object.values(row.values).forEach((cell) => {

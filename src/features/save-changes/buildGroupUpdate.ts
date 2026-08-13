@@ -9,7 +9,9 @@ export class GroupConflictError extends Error {
   readonly groupName: string;
 
   constructor(groupId: number, groupName: string) {
-    super(`Variable group "${groupName}" was modified by someone else since it was loaded.`);
+    super(
+      `Variable group "${groupName}" was modified by someone else since it was loaded.`,
+    );
     this.name = 'GroupConflictError';
     this.groupId = groupId;
     this.groupName = groupName;
@@ -24,7 +26,8 @@ export function buildVariableGroupParameters(
   if (
     change.modifiedOnSnapshot &&
     current.modifiedOn &&
-    new Date(change.modifiedOnSnapshot).getTime() !== new Date(current.modifiedOn).getTime()
+    new Date(change.modifiedOnSnapshot).getTime() !==
+      new Date(current.modifiedOn).getTime()
   ) {
     throw new GroupConflictError(change.groupId, change.name);
   }

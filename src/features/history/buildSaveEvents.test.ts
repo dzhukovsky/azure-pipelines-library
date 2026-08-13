@@ -64,8 +64,18 @@ describe('buildSaveEvents', () => {
 
   test('adjacent markers keep distinct keys', () => {
     const items = buildSaveEvents([
-      { kind: 'external', groupId: 1, groupName: 'dev', detectedAt: '2026-02-02T00:00:00Z' },
-      { kind: 'external', groupId: 2, groupName: 'prod', detectedAt: '2026-02-01T00:00:00Z' },
+      {
+        kind: 'external',
+        groupId: 1,
+        groupName: 'dev',
+        detectedAt: '2026-02-02T00:00:00Z',
+      },
+      {
+        kind: 'external',
+        groupId: 2,
+        groupName: 'prod',
+        detectedAt: '2026-02-01T00:00:00Z',
+      },
       { kind: 'external', groupId: 2, groupName: 'prod' },
       { kind: 'external', groupId: 2, groupName: 'prod' },
       asItem(entry({ id: 'a' })),

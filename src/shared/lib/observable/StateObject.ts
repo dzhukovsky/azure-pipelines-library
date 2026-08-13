@@ -63,7 +63,5 @@ export function getArrayChanges<T extends StateObject<T>>(
 ) {
   // Deleted items now stay in the array (present=false), so a single scan
   // over the current items covers additions, edits and deletions.
-  return items.value.filter(
-    (item) => item.state.value.type !== 'Unchanged',
-  );
+  return items.value.filter((item) => item.state.value.type !== 'Unchanged');
 }

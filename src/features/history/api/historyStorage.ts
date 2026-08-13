@@ -25,7 +25,9 @@ const getHistoryKey = () => `library-history-${SDK.getWebContext().project.id}`;
 
 type DataManager = Awaited<ReturnType<typeof getDataManager>>;
 
-const readEntries = async (dataManager: DataManager): Promise<HistoryEntry[]> => {
+const readEntries = async (
+  dataManager: DataManager,
+): Promise<HistoryEntry[]> => {
   const entries = await dataManager.getValue<HistoryEntry[]>(getHistoryKey(), {
     defaultValue: [],
   });

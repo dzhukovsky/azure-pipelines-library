@@ -1,4 +1,8 @@
-import { entryModifiedOn, type HistoryEntry, type TimelineItem } from './models';
+import {
+  entryModifiedOn,
+  type HistoryEntry,
+  type TimelineItem,
+} from './models';
 
 const sameInstant = (a?: string, b?: string) =>
   !!a && !!b && new Date(a).getTime() === new Date(b).getTime();

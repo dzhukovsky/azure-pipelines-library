@@ -38,8 +38,7 @@ export const mapMatrixChanges = (
       const cell = row.values[groupId];
       const cellState = cell.state.value;
       const isSecret = secretFlag.value ?? cell.isSecretInitial;
-      const isSecretChanged =
-        secretFlag.modified && secretFlag.value !== null;
+      const isSecretChanged = secretFlag.modified && secretFlag.value !== null;
 
       const cellChanged =
         cellState.type !== 'Unchanged' || // Deleted / New / Modified / Error

@@ -1,8 +1,8 @@
 // src/features/save-changes/buildGroupUpdate.test.ts
 import { describe, expect, test } from 'bun:test';
 import type { VariableGroup } from 'azure-devops-extension-api/TaskAgent';
-import { States } from '@/shared/components/StateIcon';
 import type { GroupChange } from '@/features/library-changes';
+import { States } from '@/shared/components/StateIcon';
 import {
   buildVariableGroupParameters,
   GroupConflictError,
@@ -21,7 +21,7 @@ const currentGroup = () =>
     variableGroupProjectReferences: [{ name: 'group' }],
     variables: {
       keep: { value: 'kept', isSecret: false },
-      secret: { isSecret: true },            // value undefined — never returned
+      secret: { isSecret: true }, // value undefined — never returned
       old: { value: '1', isSecret: false },
       gone: { value: 'x', isSecret: false },
     },
@@ -41,9 +41,29 @@ describe('buildVariableGroupParameters', () => {
     const params = buildVariableGroupParameters(
       currentGroup(),
       baseChange([
-        { key: 'gone', valueChanged: false, isSecret: false, isSecretChanged: false, state: States.Deleted },
-        { key: 'renamed', previousKey: 'old', valueChanged: false, isSecret: false, isSecretChanged: false, state: States.Modified },
-        { key: 'fresh', value: 'v', valueChanged: true, isSecret: false, isSecretChanged: false, state: States.New },
+        {
+          key: 'gone',
+          valueChanged: false,
+          isSecret: false,
+          isSecretChanged: false,
+          state: States.Deleted,
+        },
+        {
+          key: 'renamed',
+          previousKey: 'old',
+          valueChanged: false,
+          isSecret: false,
+          isSecretChanged: false,
+          state: States.Modified,
+        },
+        {
+          key: 'fresh',
+          value: 'v',
+          valueChanged: true,
+          isSecret: false,
+          isSecretChanged: false,
+          state: States.New,
+        },
       ]),
     );
 
@@ -59,7 +79,13 @@ describe('buildVariableGroupParameters', () => {
     const params = buildVariableGroupParameters(
       currentGroup(),
       baseChange([
-        { key: 'secret', valueChanged: false, isSecret: true, isSecretChanged: false, state: States.Modified },
+        {
+          key: 'secret',
+          valueChanged: false,
+          isSecret: true,
+          isSecretChanged: false,
+          state: States.Modified,
+        },
       ]),
     );
     expect(params.variables.secret).toEqual({
@@ -71,7 +97,14 @@ describe('buildVariableGroupParameters', () => {
     const edited = buildVariableGroupParameters(
       currentGroup(),
       baseChange([
-        { key: 'secret', value: 'new', valueChanged: true, isSecret: true, isSecretChanged: false, state: States.Modified },
+        {
+          key: 'secret',
+          value: 'new',
+          valueChanged: true,
+          isSecret: true,
+          isSecretChanged: false,
+          state: States.Modified,
+        },
       ]),
     );
     expect(edited.variables.secret).toEqual({
@@ -85,7 +118,14 @@ describe('buildVariableGroupParameters', () => {
     const params = buildVariableGroupParameters(
       currentGroup(),
       baseChange([
-        { key: 'newName', previousKey: 'old', valueChanged: false, isSecret: false, isSecretChanged: false, state: States.Deleted },
+        {
+          key: 'newName',
+          previousKey: 'old',
+          valueChanged: false,
+          isSecret: false,
+          isSecretChanged: false,
+          state: States.Deleted,
+        },
       ]),
     );
     expect(params.variables.old).toBeUndefined();

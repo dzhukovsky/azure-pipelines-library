@@ -66,7 +66,9 @@ export const ComparisonPanel = ({
                 }
 
                 if (isSecret ?? cell.isSecretInitial) {
-                  return <span className="comparison-panel-secret">******</span>;
+                  return (
+                    <span className="comparison-panel-secret">******</span>
+                  );
                 }
 
                 return (

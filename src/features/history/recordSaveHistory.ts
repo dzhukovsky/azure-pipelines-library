@@ -10,7 +10,8 @@ import {
   type HistoryEntry,
 } from './models';
 
-const toIso = (date?: Date) => (date ? new Date(date).toISOString() : undefined);
+const toIso = (date?: Date) =>
+  date ? new Date(date).toISOString() : undefined;
 
 /**
  * Pure: a save outcome and the history so far turn into the entries to record,

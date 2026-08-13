@@ -50,7 +50,10 @@ const parseEntries = (content: string): PatternEntry[] =>
     }
 
     const condition = entry.slice(0, separator).trim();
-    return { condition: condition || '*', alias: entry.slice(separator + 1).trim() };
+    return {
+      condition: condition || '*',
+      alias: entry.slice(separator + 1).trim(),
+    };
   });
 
 const parse = (pattern: string): CompiledPattern => {

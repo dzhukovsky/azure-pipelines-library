@@ -1,10 +1,16 @@
 import type { VariableGroup } from 'azure-devops-extension-api/TaskAgent';
-import type { LibraryChanges, VariableChange } from '@/features/library-changes';
+import type {
+  LibraryChanges,
+  VariableChange,
+} from '@/features/library-changes';
 import {
   getVariableGroupById,
   updateVariableGroupById,
 } from '@/features/variable-groups/hooks/useVariableGroups';
-import { buildVariableGroupParameters, GroupConflictError } from './buildGroupUpdate';
+import {
+  buildVariableGroupParameters,
+  GroupConflictError,
+} from './buildGroupUpdate';
 
 export type GroupSaveResult =
   | {

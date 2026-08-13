@@ -158,7 +158,10 @@ export const ManageViewsDialog = ({ onDismiss }: IManageViewsDialogProps) => {
 const patternExamples: [string, string][] = [
   ['_app.{}:*', 'folder named by the captured text'],
   ['_app.{}.{secret:Secrets}:*', 'nested "Secrets" folder for .secret keys'],
-  ['{UserInterface}.*', 'same as {UserInterface:UserInterface} — the segment must equal it'],
+  [
+    '{UserInterface}.*',
+    'same as {UserInterface:UserInterface} — the segment must equal it',
+  ],
   ['{*:Secrets}', 'any text, fixed folder name'],
   ['{secret:Secrets,qwe:Qwe Items}', 'condition:alias list, first match wins'],
   ['{*qwer*ww*:Secrets}', 'conditions may use * wildcards'],
@@ -201,7 +204,12 @@ type ViewSectionProps = {
   onRemove: (view: MatrixView) => void;
 };
 
-const ViewSection = ({ view, groups, onChange, onRemove }: ViewSectionProps) => {
+const ViewSection = ({
+  view,
+  groups,
+  onChange,
+  onRemove,
+}: ViewSectionProps) => {
   const [searchText, setSearchText] = useState('');
 
   const selectedTags = view.groupIds.flatMap((groupId) => {

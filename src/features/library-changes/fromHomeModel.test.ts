@@ -4,8 +4,8 @@ import {
   ObservableVariableGroup,
 } from '@/features/variable-groups/models';
 import { HomeTabModel } from '@/pages/LibraryPage/HomeTab/HomeTabModel';
-import { getChangeStatus } from './types';
 import { mapHomeChanges } from './fromHomeModel';
+import { getChangeStatus } from './types';
 
 const makeModel = () => {
   const group = new ObservableVariableGroup(
@@ -13,7 +13,12 @@ const makeModel = () => {
     'group',
     [
       new ObservableVariable('plain', '1', false, false),
-      new ObservableVariable('secret', undefined as unknown as string, true, false),
+      new ObservableVariable(
+        'secret',
+        undefined as unknown as string,
+        true,
+        false,
+      ),
       new ObservableVariable('gone', 'x', false, false),
     ],
     false,
@@ -28,10 +33,10 @@ describe('mapHomeChanges', () => {
     const { model, group } = makeModel();
     const [plain, secret, gone] = group.variables.value;
 
-    plain.name.value = 'renamed';           // rename, value untouched
-    secret.isSecret.value = false;          // secret -> plain, value untouched
-    gone.delete();                          // deletion
-    const added = group.addVariable();      // addition
+    plain.name.value = 'renamed'; // rename, value untouched
+    secret.isSecret.value = false; // secret -> plain, value untouched
+    gone.delete(); // deletion
+    const added = group.addVariable(); // addition
     added.name.value = 'fresh';
     added.value.value = 'v';
 

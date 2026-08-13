@@ -11,19 +11,31 @@ const variable = (name: string) =>
 
 describe('mapTreeItems', () => {
   test('without grouping patterns builds the flat list unchanged', () => {
-    const items = mapTreeItems([variable('a'), variable('b')], undefined, new Set());
+    const items = mapTreeItems(
+      [variable('a'), variable('b')],
+      undefined,
+      new Set(),
+    );
 
     expect(items.map((x) => x.data.type)).toEqual(['variable', 'variable']);
   });
 
   test('builds folders first, ungrouped variables after', () => {
     const items = mapTreeItems(
-      [variable('GlobalTimeout'), variable('_app.billing:Conn'), variable('_app.orders:Url')],
+      [
+        variable('GlobalTimeout'),
+        variable('_app.billing:Conn'),
+        variable('_app.orders:Url'),
+      ],
       APP,
       new Set(),
     );
 
-    expect(items.map((x) => x.data.type)).toEqual(['folder', 'folder', 'variable']);
+    expect(items.map((x) => x.data.type)).toEqual([
+      'folder',
+      'folder',
+      'variable',
+    ]);
     expect(items[0].data.data).toMatchObject({
       folderName: 'billing',
       folderPath: 'billing',

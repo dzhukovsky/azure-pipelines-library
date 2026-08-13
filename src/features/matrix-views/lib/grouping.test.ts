@@ -21,7 +21,12 @@ describe('groupByPatterns', () => {
         folders: [],
         items: ['_app.billing:Conn'],
       },
-      { name: 'orders', path: 'orders', folders: [], items: ['_app.orders:Url'] },
+      {
+        name: 'orders',
+        path: 'orders',
+        folders: [],
+        items: ['_app.orders:Url'],
+      },
     ]);
     expect(result.ungrouped).toEqual(['GlobalTimeout']);
   });
@@ -51,21 +56,18 @@ describe('groupByPatterns', () => {
   });
 
   test('with the generic pattern first, it claims secret keys too', () => {
-    const result = groupByPatterns(
-      ['_app.billing.secret:Api'],
-      identity,
-      [APP, APP_SECRETS],
-    );
+    const result = groupByPatterns(['_app.billing.secret:Api'], identity, [
+      APP,
+      APP_SECRETS,
+    ]);
 
     expect(result.folders.map((f) => f.name)).toEqual(['billing.secret']);
   });
 
   test('a brace condition that fails makes the whole pattern fail', () => {
-    const result = groupByPatterns(
-      ['_app.billing.public:Api'],
-      identity,
-      [APP_SECRETS],
-    );
+    const result = groupByPatterns(['_app.billing.public:Api'], identity, [
+      APP_SECRETS,
+    ]);
 
     expect(result.folders).toEqual([]);
     expect(result.ungrouped).toEqual(['_app.billing.public:Api']);
@@ -90,11 +92,9 @@ describe('groupByPatterns', () => {
   });
 
   test('{*:Alias} is the explicit catch-all with a fixed folder name', () => {
-    const result = groupByPatterns(
-      ['_app.billing:X'],
-      identity,
-      ['_app.{*:Apps}:*'],
-    );
+    const result = groupByPatterns(['_app.billing:X'], identity, [
+      '_app.{*:Apps}:*',
+    ]);
 
     expect(result.folders.map((f) => f.name)).toEqual(['Apps']);
   });
@@ -131,11 +131,9 @@ describe('groupByPatterns', () => {
   });
 
   test('an empty alias keeps the captured text as the folder name', () => {
-    const result = groupByPatterns(
-      ['_app.billing.Secret:A'],
-      identity,
-      ['_app.{}.{secret:}:*'],
-    );
+    const result = groupByPatterns(['_app.billing.Secret:A'], identity, [
+      '_app.{}.{secret:}:*',
+    ]);
 
     expect(result.folders[0].folders.map((f) => f.name)).toEqual(['Secret']);
   });

@@ -14,6 +14,16 @@ export abstract class StateObject<T> extends ObservableObject<T> {
     return this._state;
   }
 
+  // Deleting a never-saved item is a no-op, so it must not read as a pending
+  // change: this keeps `modified` in agreement with an Unchanged state (a new
+  // item that is no longer present computes to Unchanged, see computeState).
+  protected override computeModified(): boolean {
+    if (this.isNew && !this.present.value) {
+      return false;
+    }
+    return super.computeModified();
+  }
+
   constructor(isNew: boolean, initiallyPresent = true) {
     super();
     this.isNew = isNew;

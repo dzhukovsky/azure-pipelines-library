@@ -32,6 +32,16 @@ describe('StateObject', () => {
     expect(item.state.value).toEqual(States.New);
   });
 
+  test('deleting a present new item reads Unchanged and not modified', () => {
+    const item = new TestItem('a', true); // new, initially present
+    item.delete();
+
+    // Removing a never-saved item is a no-op: modified must agree with the
+    // Unchanged state rather than reporting a phantom pending change.
+    expect(item.state.value).toEqual(States.Unchanged);
+    expect(item.modified).toBe(false);
+  });
+
   test('deleting an existing item flips modified and derives Deleted', () => {
     const item = new TestItem('a', false);
     item.delete();

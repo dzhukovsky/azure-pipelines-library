@@ -67,8 +67,14 @@ export abstract class ObservableObject<TSelf> extends Observable<
   }
 
   private recalculateModified(): void {
-    this.modified =
+    this.modified = this.computeModified();
+  }
+
+  /** Whether any tracked property is dirty; overridable to refine the rule. */
+  protected computeModified(): boolean {
+    return (
       this._valueProps.some((x) => x.modified) ||
-      this._arrayProps.some((x) => x.modified);
+      this._arrayProps.some((x) => x.modified)
+    );
   }
 }

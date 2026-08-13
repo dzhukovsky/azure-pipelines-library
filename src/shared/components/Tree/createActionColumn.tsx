@@ -54,6 +54,20 @@ export function createActionColumn<T>({
   };
 }
 
+type ActionCellProps<T> = {
+  rowIndex: number;
+  columnIndex: number;
+  item: ITreeItemEx<T>;
+  column: ITreeColumn<T>;
+  ariaLabel?: string;
+  ariaRowIndex?: number;
+  role?: string;
+  renderCell: RenderHandler<T>;
+  renderActions: RenderHandler<T>;
+};
+
+// memo() erases the generic call signature; the cast restores it so callers
+// keep their element type instead of collapsing to `unknown`.
 const ActionCell = memo(
   <T,>({
     rowIndex,
@@ -65,17 +79,7 @@ const ActionCell = memo(
     ariaLabel,
     ariaRowIndex,
     role,
-  }: {
-    rowIndex: number;
-    columnIndex: number;
-    item: ITreeItemEx<T>;
-    column: ITreeColumn<T>;
-    ariaLabel?: string;
-    ariaRowIndex?: number;
-    role?: string;
-    renderCell: RenderHandler<T>;
-    renderActions: RenderHandler<T>;
-  }) => {
+  }: ActionCellProps<T>) => {
     const data = ObservableLike.getValue(item.underlyingItem.data);
     const options: RenderOptions<T> = {
       rowIndex: rowIndex,
@@ -111,4 +115,4 @@ const ActionCell = memo(
       </TableCell>
     );
   },
-);
+) as <T>(props: ActionCellProps<T>) => React.ReactElement;

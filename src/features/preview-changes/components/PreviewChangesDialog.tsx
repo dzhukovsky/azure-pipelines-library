@@ -26,6 +26,7 @@ import { StateIcon } from '@/shared/components/StateIcon';
 import { TextFieldCell } from '@/shared/components/TextFieldCell';
 import { createActionColumn } from '@/shared/components/Tree/createActionColumn';
 import { createExpandableActionColumn } from '@/shared/components/Tree/createExpandableActionColumn';
+import type { TreeItemProviderProp } from '@/shared/components/Tree/treeProps';
 import { type LibraryItem, mapTreeItems } from '../mappings';
 
 export type PreviewChangesDialogOptions = {
@@ -202,7 +203,11 @@ const PreviewChangesDialogContent = ({
 
 const useColumns = () => {
   const columns = useMemo(() => {
-    const onSize = (_event: MouseEvent, index: number, width: number) => {
+    const onSize = (
+      _event: MouseEvent | KeyboardEvent,
+      index: number,
+      width: number,
+    ) => {
       const column = columns[index];
       if (column) {
         (column.width as ObservableValue<number>).value = width;
@@ -341,7 +346,7 @@ const PreviewChangesTree = ({
       className="text-field-table-wrap"
       columns={columns}
       scrollable={true}
-      itemProvider={itemProvider}
+      itemProvider={itemProvider as TreeItemProviderProp<LibraryItem>}
       showLines={false}
       virtualize={false}
       onToggle={(_, item) => {

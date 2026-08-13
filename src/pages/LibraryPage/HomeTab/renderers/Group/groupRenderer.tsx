@@ -7,8 +7,8 @@ import { ValueActions } from './ValueActions';
 export const groupRenderer: HomeTreeRenderer['group'] = {
   name: {
     renderCell: ({ data }) => <GroupNameCell data={data} />,
-    renderActions: ({ data, treeItem, rowIndex }) => (
-      <NameActions data={data} treeItem={treeItem} rowIndex={rowIndex} />
+    renderActions: ({ data, rowIndex }) => (
+      <NameActions data={data} rowIndex={rowIndex} />
     ),
   },
   value: {

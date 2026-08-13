@@ -2,7 +2,12 @@ import type { ITreeColumn } from 'azure-devops-ui/TreeEx';
 import type { ITreeItemProvider } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import { createActionColumn, type RenderHandler } from './createActionColumn';
 import { createExpandableActionColumn } from './createExpandableActionColumn';
-import { getRenderer, type TreeRenderer, type TypedData } from './types';
+import {
+  getRenderer,
+  type RenderHandlerOptions,
+  type TreeRenderer,
+  type TypedData,
+} from './types';
 
 export type ColumnOptions<TColumns extends string, TData> = Record<
   TColumns,
@@ -68,30 +73,34 @@ export function getRenderers<
 } {
   return {
     renderCell: (options) => {
-      const renderer = getRenderer(renderers, options.data.type);
-      return (
-        renderer[rendererName]?.renderCell({
-          rowIndex: options.rowIndex,
-          treeItem: options.treeItem,
-          data: options.data.data,
-          provider: itemProvider,
-          columnId: columnId ?? rendererName,
-          columnName: columnName ?? rendererName,
-        }) ?? null
+      const renderer = getRenderer<TData, TColumns, TTreeRenderer>(
+        renderers,
+        options.data.type,
       );
+      const cellOptions: RenderHandlerOptions<TData> = {
+        rowIndex: options.rowIndex,
+        treeItem: options.treeItem,
+        data: options.data.data,
+        provider: itemProvider,
+        columnId: columnId ?? rendererName,
+        columnName: columnName ?? rendererName,
+      };
+      return renderer[rendererName]?.renderCell(cellOptions) ?? null;
     },
     renderActions: (options) => {
-      const renderer = getRenderer(renderers, options.data.type);
-      return (
-        renderer[rendererName]?.renderActions({
-          rowIndex: options.rowIndex,
-          treeItem: options.treeItem,
-          data: options.data.data,
-          provider: itemProvider,
-          columnId: columnId ?? rendererName,
-          columnName: columnName ?? rendererName,
-        }) ?? null
+      const renderer = getRenderer<TData, TColumns, TTreeRenderer>(
+        renderers,
+        options.data.type,
       );
+      const cellOptions: RenderHandlerOptions<TData> = {
+        rowIndex: options.rowIndex,
+        treeItem: options.treeItem,
+        data: options.data.data,
+        provider: itemProvider,
+        columnId: columnId ?? rendererName,
+        columnName: columnName ?? rendererName,
+      };
+      return renderer[rendererName]?.renderActions(cellOptions) ?? null;
     },
   };
 }

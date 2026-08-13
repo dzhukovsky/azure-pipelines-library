@@ -40,5 +40,7 @@ export function getRenderer<
   TColumns extends string,
   TTreeRenderer extends TreeRenderer<TColumns, TData>,
 >(renderers: TTreeRenderer, type: TData['type']): RowRenderer<TColumns, TData> {
-  return renderers[type];
+  // The mapped renderer narrows data per `type`; the union-typed return is the
+  // deliberate widening back for the caller.
+  return renderers[type] as unknown as RowRenderer<TColumns, TData>;
 }

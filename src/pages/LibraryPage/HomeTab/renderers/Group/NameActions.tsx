@@ -1,13 +1,10 @@
 import { Button } from 'azure-devops-ui/Button';
-import type { ITreeItemEx } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import type { ObservableVariableGroup } from '@/features/variable-groups/models';
 import { selectTreeRowInput } from '@/shared/components/Tree/selectTreeRowInput';
 import { useTreeRow } from '@/shared/components/Tree/useTreeRow';
-import type { HomeTreeItem } from '../../HomeTree';
 
 export const NameActions = (props: {
   data: ObservableVariableGroup;
-  treeItem: ITreeItemEx<HomeTreeItem>;
   rowIndex: number;
 }) => {
   const { data, rowIndex } = props;

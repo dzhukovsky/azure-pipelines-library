@@ -45,7 +45,8 @@ export abstract class ObservableObject<TSelf> extends Observable<
   ): ObservableObjectValue<TValue> {
     const property = new ObservableObjectValue<TValue>(initialValue, comparer);
 
-    this._valueProps.push(property);
+    // Erase the value type: _valueProps is only ever read for `.modified`.
+    this._valueProps.push(property as ObservableObjectValue<unknown>);
     property.subscribe(() => this.recalculateModified());
 
     return property;
@@ -56,7 +57,10 @@ export abstract class ObservableObject<TSelf> extends Observable<
   ): ObservableObjectArray<TItem> {
     const property = new ObservableObjectArray<TItem>(initialValue);
 
-    this._arrayProps.push(property);
+    // Erase the item type: _arrayProps is only ever read for `.modified`.
+    this._arrayProps.push(
+      property as unknown as ObservableObjectArray<ObservableObject<unknown>>,
+    );
     property.subscribe(() => this.recalculateModified());
 
     return property;

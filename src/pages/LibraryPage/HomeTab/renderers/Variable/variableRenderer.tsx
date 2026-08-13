@@ -1,7 +1,8 @@
 import { Observer } from 'azure-devops-ui/Observer';
+import type { ITreeItemEx } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import { secretNameIconProps } from '@/shared/components/SecretVariableType';
 import { TextFieldCell } from '@/shared/components/TextFieldCell';
-import type { HomeTreeRenderer } from '../../HomeTree';
+import type { HomeTreeItem, HomeTreeRenderer } from '../../HomeTree';
 import { NameActions } from './NameActions';
 import { ValueActions } from './ValueActions';
 
@@ -40,7 +41,10 @@ export const variableRenderer: HomeTreeRenderer['groupVariable'] = {
       </Observer>
     ),
     renderActions: ({ data, treeItem }) => (
-      <ValueActions data={data} treeItem={treeItem} />
+      <ValueActions
+        data={data}
+        treeItem={treeItem as ITreeItemEx<HomeTreeItem>}
+      />
     ),
   },
 };

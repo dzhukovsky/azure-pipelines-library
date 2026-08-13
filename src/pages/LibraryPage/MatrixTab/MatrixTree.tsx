@@ -18,6 +18,7 @@ import { createExpandableActionColumn } from '@/shared/components/Tree/createExp
 import { getRenderers } from '@/shared/components/Tree/createTreeColumns';
 import { getLoadingProvider } from '@/shared/components/Tree/loadingProvider';
 import { selectTreeRowInput } from '@/shared/components/Tree/selectTreeRowInput';
+import type { TreeItemProviderProp } from '@/shared/components/Tree/treeProps';
 import type { TreeRenderer, TypedData } from '@/shared/components/Tree/types';
 import type { FilterFunc } from '@/shared/components/Tree/useFiltering';
 import { useObservableFiltering } from '@/shared/components/Tree/useFiltering';
@@ -82,7 +83,11 @@ const useColumns = (
   itemProvider: ITreeItemProvider<MatrixTreeItem>,
 ) => {
   const columns = useMemo(() => {
-    const onSize = (_event: MouseEvent, index: number, width: number) => {
+    const onSize = (
+      _event: MouseEvent | KeyboardEvent,
+      index: number,
+      width: number,
+    ) => {
       const column = columns[index];
       if (column) {
         (column.width as ObservableValue<number>).value = width;
@@ -178,7 +183,11 @@ export const MatrixTree = ({
             id={'variables-tree'}
             className="text-field-table-wrap"
             columns={columns}
-            itemProvider={loading ? getLoadingProvider() : filteredItems}
+            itemProvider={
+              (loading
+                ? getLoadingProvider()
+                : filteredItems) as TreeItemProviderProp<MatrixTreeItem>
+            }
             showLines={false}
             virtualize={false}
             renderRow={renderRow}

@@ -33,6 +33,7 @@ import { getProjectUrl } from '@/shared/api/configurations';
 import { StateIcon, States } from '@/shared/components/StateIcon';
 import { createActionColumn } from '@/shared/components/Tree/createActionColumn';
 import { createExpandableActionColumn } from '@/shared/components/Tree/createExpandableActionColumn';
+import type { TreeItemProviderProp } from '@/shared/components/Tree/treeProps';
 import {
   buildSaveEvents,
   type ExternalItem,
@@ -226,7 +227,11 @@ const spanDetailRows = (
 
 const useColumns = (resolveGroup: GroupResolver) => {
   const columns = useMemo(() => {
-    const onSize = (_event: MouseEvent, index: number, width: number) => {
+    const onSize = (
+      _event: MouseEvent | KeyboardEvent,
+      index: number,
+      width: number,
+    ) => {
       const column = columns[index];
       if (column) {
         (column.width as ObservableValue<number>).value = width;
@@ -417,7 +422,7 @@ const HistoryTree = ({
       className="history-tree text-field-table-wrap"
       columns={columns}
       scrollable={true}
-      itemProvider={itemProvider}
+      itemProvider={itemProvider as TreeItemProviderProp<HistoryTreeItem>}
       showLines={false}
       virtualize={false}
       onToggle={(_, item) => {

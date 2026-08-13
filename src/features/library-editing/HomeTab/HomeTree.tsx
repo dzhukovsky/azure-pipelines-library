@@ -187,7 +187,7 @@ const HomeEmptyState = ({ hasFilter }: { hasFilter: boolean }) =>
     <EmptyState
       imagePath={logoUrl}
       primaryText="No variable groups or secure files yet"
-      secondaryText="Store and share variables and secure files across your pipelines, then edit and compare them in one place."
+      secondaryText="Store and share variables and secure files across your pipelines, edit and compare them in one place."
       action={{ text: 'New variable group', onClick: goToNewVariableGroup }}
     />
   );

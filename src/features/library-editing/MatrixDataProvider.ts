@@ -47,8 +47,9 @@ const mapVariables = (variableGroups: VariableGroup[]) => {
   ];
 
   // Prototype-less so a `__proto__` variable name can't pollute Object.prototype.
-  const values: Record<string, Record<GroupId, IVariableValue>> =
-    Object.create(null);
+  const values: Record<string, Record<GroupId, IVariableValue>> = Object.create(
+    null,
+  );
 
   variableGroups.forEach((vg) => {
     variableNames.forEach((name) => {

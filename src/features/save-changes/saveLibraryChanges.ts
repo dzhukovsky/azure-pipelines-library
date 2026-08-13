@@ -2,7 +2,7 @@ import type { VariableGroup } from 'azure-devops-extension-api/TaskAgent';
 import type {
   LibraryChanges,
   VariableChange,
-} from '@/features/library-changes';
+} from '@/features/library-editing';
 import {
   getVariableGroupById,
   updateVariableGroupById,

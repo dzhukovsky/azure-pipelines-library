@@ -4,7 +4,7 @@ import type {
   GroupChange,
   LibraryChanges,
   VariableChange,
-} from '@/features/library-changes';
+} from '@/features/library-editing';
 
 export type LibraryItem = {
   group?: GroupChange;

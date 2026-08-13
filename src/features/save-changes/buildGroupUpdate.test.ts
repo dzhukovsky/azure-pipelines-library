@@ -1,7 +1,7 @@
 // src/features/save-changes/buildGroupUpdate.test.ts
 import { describe, expect, test } from 'bun:test';
 import type { VariableGroup } from 'azure-devops-extension-api/TaskAgent';
-import type { GroupChange } from '@/features/library-changes';
+import type { GroupChange } from '@/features/library-editing';
 import { States } from '@/shared/components/StateIcon';
 import {
   buildVariableGroupParameters,

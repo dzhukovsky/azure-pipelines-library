@@ -2,7 +2,7 @@ import type {
   VariableGroup,
   VariableGroupParameters,
 } from 'azure-devops-extension-api/TaskAgent';
-import type { GroupChange } from '@/features/library-changes';
+import type { GroupChange } from '@/features/library-editing';
 
 export class GroupConflictError extends Error {
   readonly groupId: number;

@@ -1,5 +1,5 @@
-import type { LibraryChanges } from '@/features/library-changes';
 import type { ObservableObject } from '@/shared/lib/observable';
+import type { LibraryChanges } from './types';
 
 /**
  * The editing surface a tab exposes to the page header: what to watch for

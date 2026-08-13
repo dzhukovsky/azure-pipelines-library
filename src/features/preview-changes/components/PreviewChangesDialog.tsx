@@ -17,7 +17,7 @@ import {
   TreeItemProvider,
 } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import { useMemo, useState } from 'react';
-import { hasErrors, type LibraryChanges } from '@/features/library-changes';
+import { hasErrors, type LibraryChanges } from '@/features/library-editing';
 import type {
   GroupSaveResult,
   SaveOutcome,

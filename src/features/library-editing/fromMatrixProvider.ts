@@ -1,5 +1,5 @@
-import type { MatrixDataProvider } from '@/features/library-editing';
 import { States } from '@/shared/components/StateIcon';
+import type { MatrixDataProvider } from './MatrixDataProvider';
 import type { GroupChange, LibraryChanges, VariableChange } from './types';
 
 export const mapMatrixChanges = (

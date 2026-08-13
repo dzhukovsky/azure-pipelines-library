@@ -5,10 +5,10 @@ import type { ITreeItem } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import { useEffect, useState } from 'react';
 import {
   clearMatrixProviderErrors,
+  MatrixDataProvider,
   mapMatrixChanges,
   validateMatrixProvider,
-} from '@/features/library-changes';
-import { MatrixDataProvider } from '@/features/library-editing';
+} from '@/features/library-editing';
 import { useVariableGroups } from '@/features/variable-groups/hooks/useVariableGroups';
 import { ErrorMessage } from '@/shared/components/ErrorMessage';
 import type { LibraryTabModel } from '../LibraryTabModel';

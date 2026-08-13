@@ -1,6 +1,6 @@
 import type { QueryClient } from '@tanstack/react-query';
 import * as SDK from 'azure-devops-extension-sdk';
-import { getChangeStatus } from '@/features/library-changes';
+import { getChangeStatus } from '@/features/library-editing';
 import type { SaveOutcome } from '@/features/save-changes/saveLibraryChanges';
 import { appendHistoryEntries } from './api/historyStorage';
 import { historyQueryKey } from './hooks/useHistory';

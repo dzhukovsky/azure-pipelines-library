@@ -8,10 +8,10 @@ import type { ITreeItem } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import { useEffect, useState } from 'react';
 import {
   clearHomeModelErrors,
+  HomeTabModel,
   mapHomeChanges,
   validateHomeModel,
-} from '@/features/library-changes';
-import { HomeTabModel } from '@/features/library-editing';
+} from '@/features/library-editing';
 import { useSecureFiles } from '@/features/secure-files/hooks/useSecureFiles';
 import { mapSecureFiles } from '@/features/secure-files/mapSecureFiles';
 import type { ObservableSecureFile } from '@/features/secure-files/models';

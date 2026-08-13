@@ -1,10 +1,10 @@
 import type { IFilter } from 'azure-devops-ui/Utilities/Filter';
 import { useEffect, useMemo } from 'react';
+import type { LibraryTabModel } from '@/features/library-editing';
+import { HomeTab } from '@/features/library-editing/HomeTab';
+import { MatrixTab } from '@/features/library-editing/MatrixTab';
 import { useMatrixViews } from '@/features/matrix-views/hooks/useMatrixViews';
 import type { QueryParamsSetter } from '@/shared/hooks/useNavigation';
-import { HomeTab } from './HomeTab';
-import type { LibraryTabModel } from './LibraryTabModel';
-import { MatrixTab } from './MatrixTab';
 
 export const useTabs = (
   tab: string,

@@ -7,13 +7,13 @@ import { InlineKeywordFilterBarItem } from 'azure-devops-ui/TextFilterBarItem';
 import type { IFilter } from 'azure-devops-ui/Utilities/Filter';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { recordSaveHistory } from '@/features/history/recordSaveHistory';
+import type { LibraryTabModel } from '@/features/library-editing';
 import type { PreviewChangesDialogOptions } from '@/features/preview-changes/components/PreviewChangesDialog';
 import { saveLibraryChanges } from '@/features/save-changes/saveLibraryChanges';
 import { secureFilesQueryKey } from '@/features/secure-files/hooks/useSecureFiles';
 import { variableGroupsQueryKey } from '@/features/variable-groups/hooks/useVariableGroups';
 import { getProjectUrl } from '@/shared/api/configurations';
 import { navigateTo } from '@/shared/hooks/useNavigation';
-import type { LibraryTabModel } from './LibraryTabModel';
 
 export const useHeader = (
   filter: IFilter,

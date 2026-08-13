@@ -1,4 +1,4 @@
-import type { HistoryChangeStatus } from '@/features/library-changes';
+import type { HistoryChangeStatus } from '@/features/library-editing';
 
 export type HistoryActor = { id: string; displayName: string };
 

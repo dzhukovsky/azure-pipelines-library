@@ -1,9 +1,9 @@
-import type { HomeTabModel } from '@/features/library-editing';
 import type {
   ObservableVariable,
   ObservableVariableGroup,
 } from '@/features/variable-groups/models';
 import { getArrayChanges } from '@/shared/lib/observable';
+import type { HomeTabModel } from './HomeTabModel';
 import type { GroupChange, LibraryChanges, VariableChange } from './types';
 
 const mapVariable = (v: ObservableVariable): VariableChange => ({

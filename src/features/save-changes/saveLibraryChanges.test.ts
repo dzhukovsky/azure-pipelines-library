@@ -1,6 +1,6 @@
 import { describe, expect, mock, test } from 'bun:test';
 import type { VariableGroup } from 'azure-devops-extension-api/TaskAgent';
-import type { GroupChange, LibraryChanges } from '@/features/library-changes';
+import type { GroupChange, LibraryChanges } from '@/features/library-editing';
 import { GroupConflictError } from './buildGroupUpdate';
 import {
   saveLibraryChanges,

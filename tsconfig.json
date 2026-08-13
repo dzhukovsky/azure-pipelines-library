@@ -15,10 +15,7 @@
     // Keep in sync with tsconfig.app.json's "paths" and vite.config.ts's
     // resolve.alias.
     "paths": {
-      "@/*": ["./src/*"],
-      "azure-devops-extension-api/Common/RestClientBase": [
-        "./node_modules/azure-devops-extension-api/Common/RestClientBase"
-      ]
+      "@/*": ["./src/*"]
     }
   }
 }

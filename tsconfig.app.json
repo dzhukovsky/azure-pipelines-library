@@ -26,12 +26,7 @@
     "strictFunctionTypes": false,
 
     "paths": {
-      "@/*": ["./src/*"],
-      // RestClientBase is not listed in the package's "exports" map (upstream omission),
-      // so the deep import must bypass it; keep in sync with resolve.alias in vite.config.ts
-      "azure-devops-extension-api/Common/RestClientBase": [
-        "./node_modules/azure-devops-extension-api/Common/RestClientBase"
-      ]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src"],

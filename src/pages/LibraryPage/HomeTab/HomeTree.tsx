@@ -22,10 +22,10 @@ import type {
   ObservableVariable,
   ObservableVariableGroup,
 } from '@/features/variable-groups/models';
-import type { FilterFunc } from '@/shared/components/Table/useFiltering';
 import { createTreeColumns } from '@/shared/components/Tree/createTreeColumns';
 import { getLoadingProvider } from '@/shared/components/Tree/loadingProvider';
 import type { TreeRenderer, TypedData } from '@/shared/components/Tree/types';
+import type { FilterFunc } from '@/shared/components/Tree/useFiltering';
 import { useObservableFiltering } from '@/shared/components/Tree/useFiltering';
 import { useRowRenderer } from '@/shared/components/Tree/useRowRenderer';
 import {

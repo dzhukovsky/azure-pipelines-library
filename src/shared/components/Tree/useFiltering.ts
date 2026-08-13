@@ -8,7 +8,8 @@ import {
   TreeItemProvider,
 } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { FilterFunc } from '../Table/useFiltering';
+
+export type FilterFunc<T> = (item: T, text: string) => boolean;
 
 function filterItems<T>(
   items: ITreeItem<T>[],
@@ -85,6 +86,12 @@ export function useFiltering<T>(
 
   return { filteredItems, isEmpty: state.isEmpty };
 }
+
+export const useFilterSubscription = (filter: IFilter, onChange: () => void) =>
+  useEffect(() => {
+    filter.subscribe(onChange, FILTER_CHANGE_EVENT);
+    return () => filter.unsubscribe(onChange, FILTER_CHANGE_EVENT);
+  }, [filter, onChange]);
 
 export function useObservableFiltering<T>(
   items: IReadonlyObservableArray<ITreeItem<T>>,

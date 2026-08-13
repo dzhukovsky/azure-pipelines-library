@@ -6,7 +6,7 @@ import type { ITreeColumn, TreeRowRenderer } from 'azure-devops-ui/TreeEx';
 import { css, getSafeIdWithSymbolConversion } from 'azure-devops-ui/Util';
 import type { ITreeItemEx } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import { useCallback, useEffect } from 'react';
-import { SpacerColumn } from '../Table/SpacerColumn';
+import { SpacerColumn } from './SpacerColumn';
 import { TreeRowContext } from './useTreeRow';
 
 export type RowFocusChangeHandler<T> = (

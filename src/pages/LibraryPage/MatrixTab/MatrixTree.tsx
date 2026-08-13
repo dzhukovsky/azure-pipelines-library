@@ -13,13 +13,13 @@ import type {
 } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import type { ObservableMatrixVariable } from '@/features/variable-groups/models';
-import type { FilterFunc } from '@/shared/components/Table/useFiltering';
 import { createActionColumn } from '@/shared/components/Tree/createActionColumn';
 import { createExpandableActionColumn } from '@/shared/components/Tree/createExpandableActionColumn';
 import { getRenderers } from '@/shared/components/Tree/createTreeColumns';
 import { getLoadingProvider } from '@/shared/components/Tree/loadingProvider';
 import { selectTreeRowInput } from '@/shared/components/Tree/selectTreeRowInput';
 import type { TreeRenderer, TypedData } from '@/shared/components/Tree/types';
+import type { FilterFunc } from '@/shared/components/Tree/useFiltering';
 import { useObservableFiltering } from '@/shared/components/Tree/useFiltering';
 import type { RowFocusChangeHandler } from '@/shared/components/Tree/useRowRenderer';
 import { useRowRenderer } from '@/shared/components/Tree/useRowRenderer';

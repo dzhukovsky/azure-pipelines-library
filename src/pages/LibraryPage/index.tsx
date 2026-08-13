@@ -23,7 +23,7 @@ import {
 } from '@/features/preview-changes/components/PreviewChangesDialog';
 import { saveLibraryChanges } from '@/features/save-changes/saveLibraryChanges';
 import { getProjectUrl } from '@/shared/api/configurations';
-import { useFilterSubscription } from '@/shared/components/Table/useFiltering';
+import { useFilterSubscription } from '@/shared/components/Tree/useFiltering';
 import {
   navigateTo,
   type QueryParamsSetter,

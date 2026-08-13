@@ -13,6 +13,7 @@ import type {
 } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import type { ObservableMatrixVariable } from '@/features/variable-groups/models';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { createActionColumn } from '@/shared/components/Tree/createActionColumn';
 import { createExpandableActionColumn } from '@/shared/components/Tree/createExpandableActionColumn';
 import { getRenderers } from '@/shared/components/Tree/createTreeColumns';
@@ -172,8 +173,11 @@ export const MatrixTree = ({
 
   const renderRow = useRowRenderer(columns, onRowFocusChange);
   const treeContainerRef = useRef<HTMLDivElement>(null);
+  const hasFilter = !!filter.getFilterItemValue<string>('keyword');
   return (
-    (!loading && isEmpty && <span>No items found</span>) || (
+    (!loading && isEmpty && (
+      <MatrixEmptyState hasFilter={hasFilter} onAdd={addNewVariable} />
+    )) || (
       <div className="flex-column spacing-8" ref={treeContainerRef}>
         <Card
           className="flex-grow bolt-card-no-vertical-padding"
@@ -227,3 +231,25 @@ export const MatrixTree = ({
     )
   );
 };
+
+const MatrixEmptyState = ({
+  hasFilter,
+  onAdd,
+}: {
+  hasFilter: boolean;
+  onAdd: () => void;
+}) =>
+  hasFilter ? (
+    <EmptyState
+      iconName="Search"
+      primaryText="No matching variables"
+      secondaryText="No variables in this view match your filter."
+    />
+  ) : (
+    <EmptyState
+      iconName="Library"
+      primaryText="No variables in this view"
+      secondaryText="Add a variable to compare its value across the groups in this view."
+      action={{ text: 'Add variable', onClick: onAdd }}
+    />
+  );

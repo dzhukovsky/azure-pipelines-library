@@ -1,0 +1,14 @@
+.empty-state {
+  // Fill the tab and hold the placeholder in the upper-middle of the area,
+  // the way the Azure DevOps built-in zero-data screens sit.
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+
+  .empty-state-content {
+    // ZeroData already centers its own content; keep it from stretching full
+    // width so the text wraps to a comfortable measure.
+    max-width: 420px;
+    text-align: center;
+  }
+}

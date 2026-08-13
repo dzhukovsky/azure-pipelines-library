@@ -22,6 +22,8 @@ import type {
   ObservableVariable,
   ObservableVariableGroup,
 } from '@/features/variable-groups/models';
+import { getProjectUrl } from '@/shared/api/configurations';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { createTreeColumns } from '@/shared/components/Tree/createTreeColumns';
 import { getLoadingProvider } from '@/shared/components/Tree/loadingProvider';
 import type { TreeItemProviderProp } from '@/shared/components/Tree/treeProps';
@@ -29,6 +31,7 @@ import type { TreeRenderer, TypedData } from '@/shared/components/Tree/types';
 import type { FilterFunc } from '@/shared/components/Tree/useFiltering';
 import { useObservableFiltering } from '@/shared/components/Tree/useFiltering';
 import { useRowRenderer } from '@/shared/components/Tree/useRowRenderer';
+import { navigateTo } from '@/shared/hooks/useNavigation';
 import {
   filePropertyRenderer,
   fileRenderer,
@@ -139,8 +142,9 @@ export const HomeTree = ({
   const { columns } = useColumns(filteredItems);
 
   const renderRow = useRowRenderer(columns);
+  const hasFilter = !!filter.getFilterItemValue<string>('keyword');
   return (
-    (!loading && isEmpty && <span>No items found</span>) || (
+    (!loading && isEmpty && <HomeEmptyState hasFilter={hasFilter} />) || (
       <Card
         className="flex-grow bolt-card-no-vertical-padding"
         contentProps={{ contentPadding: false }}
@@ -171,3 +175,25 @@ export const HomeTree = ({
     )
   );
 };
+
+const HomeEmptyState = ({ hasFilter }: { hasFilter: boolean }) =>
+  hasFilter ? (
+    <EmptyState
+      iconName="Search"
+      primaryText="No matching items"
+      secondaryText="No variable groups, variables or secure files match your filter."
+    />
+  ) : (
+    <EmptyState
+      iconName="Library"
+      primaryText="No variable groups or secure files yet"
+      secondaryText="Create a variable group to start managing your library here."
+      action={{
+        text: 'New variable group',
+        onClick: () =>
+          navigateTo(
+            `${getProjectUrl()}/_library?itemType=VariableGroups&view=VariableGroupView&variableGroupId=0`,
+          ),
+      }}
+    />
+  );

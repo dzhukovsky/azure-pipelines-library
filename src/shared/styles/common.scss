@@ -6,6 +6,33 @@
     left: 0;
 }
 
+// The neutral-100 palette endpoint is black on light themes and white on dark
+// ones, so a translucent thumb of it follows the host theme on any background.
+$scrollbar-thumb: rgba(var(--palette-neutral-100), 0.3);
+
+// scrollbar-color inherits, so one declaration covers the page scroller, the
+// table containers and the dialog bodies alike. The extension's iframe keeps
+// the default light color-scheme, which otherwise leaves scrollbars light on
+// dark themes.
+:root {
+    scrollbar-color: $scrollbar-thumb transparent;
+}
+
+// azure-devops-ui's .custom-scrollbar (dropdown callouts, menus) hardcodes a
+// transparent-black thumb that all but disappears on dark themes; restate the
+// themed color at higher specificity so it wins regardless of import order.
+:root .custom-scrollbar {
+    scrollbar-color: $scrollbar-thumb transparent;
+
+    &.scroll-auto-hide {
+        scrollbar-color: transparent transparent;
+
+        &:hover {
+            scrollbar-color: $scrollbar-thumb transparent;
+        }
+    }
+}
+
 .height-100vh {
     height: 100vh;
 }

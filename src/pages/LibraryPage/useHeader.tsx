@@ -210,9 +210,6 @@ export const useHeader = (
           filter={filter}
           filterItemKey="keyword"
           isTextItem={false}
-          // The input stays instant; the filter (tree re-filter + URL sync)
-          // updates at most this often instead of on every keystroke.
-          throttleWait={300}
         />
       </div>
     ),

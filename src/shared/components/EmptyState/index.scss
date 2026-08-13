@@ -12,4 +12,9 @@
   .empty-state-content {
     max-width: 480px;
   }
+
+  // Narrower than the one-line title so the subtitle wraps into a tidier block.
+  .empty-state-secondary {
+    max-width: 340px;
+  }
 }

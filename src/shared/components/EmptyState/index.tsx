@@ -55,7 +55,9 @@ export const EmptyState = ({
       )}
       <div className="title-l">{primaryText}</div>
       {secondaryText && (
-        <div className="secondary-text margin-top-4">{secondaryText}</div>
+        <div className="empty-state-secondary secondary-text margin-top-8">
+          {secondaryText}
+        </div>
       )}
       {(renderAction || action) && (
         <div className="margin-top-16">

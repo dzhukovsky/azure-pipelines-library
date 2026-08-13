@@ -49,7 +49,9 @@ export const validateHomeModel = (model: HomeTabModel): boolean => {
     valid &&= !group.error.value;
   }
 
-  for (const group of model.variableGroups.value) {
+  // Only present groups: a group being deleted must not have its variables
+  // block the save with stale name errors.
+  for (const group of groups) {
     const variables = group.variables.value;
 
     const present = variables.filter((v) => v.present.value);

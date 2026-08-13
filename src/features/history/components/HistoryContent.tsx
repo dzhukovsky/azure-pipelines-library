@@ -25,7 +25,10 @@ import {
 import type { IIdentityDetailsProvider } from 'azure-devops-ui/VssPersona';
 import { VssPersona } from 'azure-devops-ui/VssPersona';
 import { Fragment, useEffect, useMemo } from 'react';
-import { useVariableGroups } from '@/features/variable-groups/hooks/useVariableGroups';
+import {
+  useVariableGroups,
+  variableGroupsQueryKey,
+} from '@/features/variable-groups/hooks/useVariableGroups';
 import { getProjectUrl } from '@/shared/api/configurations';
 import { StateIcon, States } from '@/shared/components/StateIcon';
 import { createActionColumn } from '@/shared/components/Tree/createActionColumn';
@@ -434,7 +437,7 @@ export const HistoryContent = () => {
   // biome-ignore lint/correctness/useExhaustiveDependencies: mount-only refresh, not tied to queryClient identity
   useEffect(() => {
     queryClient.invalidateQueries({ queryKey: historyQueryKey });
-    queryClient.invalidateQueries({ queryKey: ['variable-groups'] });
+    queryClient.invalidateQueries({ queryKey: variableGroupsQueryKey });
   }, []);
 
   const resolveGroup = useMemo<GroupResolver>(() => {

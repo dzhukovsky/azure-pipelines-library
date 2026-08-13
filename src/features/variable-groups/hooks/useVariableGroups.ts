@@ -6,9 +6,11 @@ import {
 } from 'azure-devops-extension-api/TaskAgent';
 import * as SDK from 'azure-devops-extension-sdk';
 
+export const variableGroupsQueryKey = ['variable-groups'];
+
 export const useVariableGroups = () =>
   useQuery({
-    queryKey: ['variable-groups'],
+    queryKey: variableGroupsQueryKey,
     queryFn: async () => {
       await SDK.ready();
 

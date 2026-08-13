@@ -22,6 +22,8 @@ import {
   type PreviewChangesDialogOptions,
 } from '@/features/preview-changes/components/PreviewChangesDialog';
 import { saveLibraryChanges } from '@/features/save-changes/saveLibraryChanges';
+import { secureFilesQueryKey } from '@/features/secure-files/hooks/useSecureFiles';
+import { variableGroupsQueryKey } from '@/features/variable-groups/hooks/useVariableGroups';
 import { getProjectUrl } from '@/shared/api/configurations';
 import { useFilterSubscription } from '@/shared/components/Tree/useFiltering';
 import {
@@ -290,8 +292,8 @@ const useHeader = (
 
   const discardChanges = useCallback(() => {
     previewDialogOptions.value = undefined;
-    queryClient.invalidateQueries({ queryKey: ['variable-groups'] });
-    queryClient.invalidateQueries({ queryKey: ['secure-files'] });
+    queryClient.invalidateQueries({ queryKey: variableGroupsQueryKey });
+    queryClient.invalidateQueries({ queryKey: secureFilesQueryKey });
     // Remounting the tab container rebuilds every model from the fetched data;
     // the fresh registration resets hasChanges on its own.
     setTabContainerKey((prevId) => prevId + 1);

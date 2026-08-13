@@ -44,6 +44,26 @@ describe('validateHomeModel', () => {
     expect(a.state.value.type).toBe('Unchanged'); // errors cleared on revalidate
   });
 
+  test('a variable in a group being deleted does not block the save', () => {
+    const doomed = new ObservableVariable('', 'x', false, false); // empty name
+    const deletedGroup = new ObservableVariableGroup(
+      1,
+      'old',
+      [doomed],
+      false,
+    );
+    deletedGroup.delete();
+    const keptGroup = new ObservableVariableGroup(
+      2,
+      'kept',
+      [new ObservableVariable('ok', 'v', false, false)],
+      false,
+    );
+    const model = new HomeTabModel([deletedGroup, keptGroup], []);
+
+    expect(validateHomeModel(model)).toBe(true);
+  });
+
   test('duplicate names surface via hasErrors(mapHomeChanges(...))', () => {
     const a = new ObservableVariable('dup', '1', false, false);
     const b = new ObservableVariable('dup', '2', false, false);

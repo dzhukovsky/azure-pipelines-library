@@ -3,9 +3,11 @@ import { getClient } from 'azure-devops-extension-api';
 import { TaskAgentRestClient } from 'azure-devops-extension-api/TaskAgent';
 import * as SDK from 'azure-devops-extension-sdk';
 
+export const secureFilesQueryKey = ['secure-files'];
+
 export const useSecureFiles = () =>
   useQuery({
-    queryKey: ['secure-files'],
+    queryKey: secureFilesQueryKey,
     queryFn: async () => {
       await SDK.ready();
 

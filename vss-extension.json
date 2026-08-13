@@ -43,6 +43,23 @@
   },
   "contributions": [
     {
+      "id": "feature",
+      "type": "ms.vss-web.feature",
+      "description": "Enables the Advanced Library hub in Pipelines.",
+      "targets": [
+        "ms.vss-web.managed-features"
+      ],
+      "properties": {
+        "name": "Advanced Library",
+        "userConfigurable": false,
+        "hostConfigurable": true,
+        "hostScopes": [
+          "project"
+        ],
+        "defaultState": false
+      }
+    },
+    {
       "id": "hub",
       "type": "ms.vss-web.hub",
       "targets": [
@@ -52,7 +69,15 @@
         "name": "Advanced Library",
         "uri": "index.html",
         "iconName": "Library"
-      }
+      },
+      "constraints": [
+        {
+          "name": "Feature",
+          "properties": {
+            "featureId": "dzhukovsky.advanced-library.feature"
+          }
+        }
+      ]
     }
   ],
   "files": [

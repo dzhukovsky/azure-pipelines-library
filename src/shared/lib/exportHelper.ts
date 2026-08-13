@@ -19,8 +19,15 @@ function parseValue(value: string): Primitive {
   return value;
 }
 
+// Prototype-less record so that variable names like `__proto__` become
+// ordinary keys instead of resolving to Object.prototype (prototype pollution).
+const emptyRecord = () => Object.create(null) as IExpandableRecord;
+
 export const expandObject = (source: Record<string, string>) => {
-  const conflicts: Record<string, string> = {};
+  const conflicts: Record<string, string> = emptyRecord() as Record<
+    string,
+    string
+  >;
 
   const result = Object.entries(source)
     .sort(([a], [b]) => a.localeCompare(b))
@@ -40,7 +47,7 @@ export const expandObject = (source: Record<string, string>) => {
           }
 
           if (!cursor[part] || typeof cursor[part] !== 'object') {
-            cursor[part] = {};
+            cursor[part] = emptyRecord();
           }
 
           cursor = cursor[part];
@@ -48,7 +55,7 @@ export const expandObject = (source: Record<string, string>) => {
       });
 
       return acc;
-    }, {});
+    }, emptyRecord());
 
   if (Object.keys(conflicts).length > 0) {
     Object.assign(result, {

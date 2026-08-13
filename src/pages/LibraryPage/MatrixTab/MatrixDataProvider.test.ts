@@ -20,4 +20,14 @@ describe('MatrixDataProvider', () => {
     expect(provider.variables.value[1]).toBe(added);
     expect(provider.variables.value).toHaveLength(2);
   });
+
+  test('a variable named __proto__ does not pollute Object.prototype', () => {
+    const group = JSON.parse(
+      '{"id":10,"name":"dev","variables":{"__proto__":{"value":"x","isSecret":false}}}',
+    );
+
+    new MatrixDataProvider([group] as unknown as VariableGroup[]);
+
+    expect(({} as Record<string, unknown>)['10']).toBeUndefined();
+  });
 });

@@ -46,7 +46,10 @@ const mapVariables = (variableGroups: VariableGroup[]) => {
     ),
   ];
 
-  const values: Record<string, Record<GroupId, IVariableValue>> = {};
+  // Prototype-less record so a variable literally named `__proto__` becomes an
+  // ordinary key instead of resolving to Object.prototype (prototype pollution).
+  const values: Record<string, Record<GroupId, IVariableValue>> =
+    Object.create(null);
 
   variableGroups.forEach((vg) => {
     variableNames.forEach((name) => {

@@ -47,6 +47,12 @@ export const getHistoryEntries = async (): Promise<HistoryEntry[]> => {
   return readEntries(dataManager);
 };
 
+/** Wipes this project's recorded history. */
+export const clearHistoryEntries = async (): Promise<void> => {
+  const dataManager = await getDataManager();
+  await dataManager.setValue<HistoryEntry[]>(getHistoryKey(), []);
+};
+
 /**
  * Reads the history, hands it to `addEntries` newest-first, and writes the
  * returned entries back in front of it. Callers that need to look at what is

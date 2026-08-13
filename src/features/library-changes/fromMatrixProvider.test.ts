@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 import type { VariableGroup } from 'azure-devops-extension-api/TaskAgent';
-import { MatrixDataProvider } from '@/pages/LibraryPage/MatrixTab/MatrixDataProvider';
+import { MatrixDataProvider } from '@/features/library-editing';
 import { mapMatrixChanges } from './fromMatrixProvider';
 import { getChangeStatus } from './types';
 

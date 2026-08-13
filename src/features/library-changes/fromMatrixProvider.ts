@@ -1,4 +1,4 @@
-import type { MatrixDataProvider } from '@/pages/LibraryPage/MatrixTab/MatrixDataProvider';
+import type { MatrixDataProvider } from '@/features/library-editing';
 import { States } from '@/shared/components/StateIcon';
 import type { GroupChange, LibraryChanges, VariableChange } from './types';
 

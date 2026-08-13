@@ -1,5 +1,7 @@
-import type { HomeTabModel } from '@/pages/LibraryPage/HomeTab/HomeTabModel';
-import type { MatrixDataProvider } from '@/pages/LibraryPage/MatrixTab/MatrixDataProvider';
+import type {
+  HomeTabModel,
+  MatrixDataProvider,
+} from '@/features/library-editing';
 import type { LibraryChanges } from './types';
 
 const normalize = (name: string) => name.trim().toLocaleLowerCase();

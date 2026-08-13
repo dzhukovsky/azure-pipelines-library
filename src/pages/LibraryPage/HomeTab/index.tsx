@@ -11,6 +11,7 @@ import {
   mapHomeChanges,
   validateHomeModel,
 } from '@/features/library-changes';
+import { HomeTabModel } from '@/features/library-editing';
 import { useSecureFiles } from '@/features/secure-files/hooks/useSecureFiles';
 import { mapSecureFiles } from '@/features/secure-files/mapSecureFiles';
 import type { ObservableSecureFile } from '@/features/secure-files/models';
@@ -19,7 +20,6 @@ import { mapVariableGroups } from '@/features/variable-groups/mapVariableGroups'
 import type { ObservableVariableGroup } from '@/features/variable-groups/models';
 import { ErrorMessage } from '@/shared/components/ErrorMessage';
 import type { LibraryTabModel } from '../LibraryTabModel';
-import { HomeTabModel } from './HomeTabModel';
 import { HomeTree, type HomeTreeItem } from './HomeTree';
 
 type ExpandableItem = ObservableVariableGroup | ObservableSecureFile;

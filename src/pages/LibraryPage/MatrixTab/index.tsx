@@ -8,10 +8,10 @@ import {
   mapMatrixChanges,
   validateMatrixProvider,
 } from '@/features/library-changes';
+import { MatrixDataProvider } from '@/features/library-editing';
 import { useVariableGroups } from '@/features/variable-groups/hooks/useVariableGroups';
 import { ErrorMessage } from '@/shared/components/ErrorMessage';
 import type { LibraryTabModel } from '../LibraryTabModel';
-import { MatrixDataProvider } from './MatrixDataProvider';
 import {
   MatrixTree,
   type MatrixTreeItem,

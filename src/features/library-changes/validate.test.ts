@@ -1,11 +1,10 @@
 import { describe, expect, test } from 'bun:test';
 import type { VariableGroup } from 'azure-devops-extension-api/TaskAgent';
+import { HomeTabModel, MatrixDataProvider } from '@/features/library-editing';
 import {
   ObservableVariable,
   ObservableVariableGroup,
 } from '@/features/variable-groups/models';
-import { HomeTabModel } from '@/pages/LibraryPage/HomeTab/HomeTabModel';
-import { MatrixDataProvider } from '@/pages/LibraryPage/MatrixTab/MatrixDataProvider';
 import { mapHomeChanges } from './fromHomeModel';
 import { mapMatrixChanges } from './fromMatrixProvider';
 import {
@@ -46,12 +45,7 @@ describe('validateHomeModel', () => {
 
   test('a variable in a group being deleted does not block the save', () => {
     const doomed = new ObservableVariable('', 'x', false, false); // empty name
-    const deletedGroup = new ObservableVariableGroup(
-      1,
-      'old',
-      [doomed],
-      false,
-    );
+    const deletedGroup = new ObservableVariableGroup(1, 'old', [doomed], false);
     deletedGroup.delete();
     const keptGroup = new ObservableVariableGroup(
       2,

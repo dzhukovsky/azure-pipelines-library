@@ -1,8 +1,8 @@
+import type { HomeTabModel } from '@/features/library-editing';
 import type {
   ObservableVariable,
   ObservableVariableGroup,
 } from '@/features/variable-groups/models';
-import type { HomeTabModel } from '@/pages/LibraryPage/HomeTab/HomeTabModel';
 import { getArrayChanges } from '@/shared/lib/observable';
 import type { GroupChange, LibraryChanges, VariableChange } from './types';
 

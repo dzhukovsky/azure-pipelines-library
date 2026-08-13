@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'bun:test';
+import { HomeTabModel } from '@/features/library-editing';
 import {
   ObservableVariable,
   ObservableVariableGroup,
 } from '@/features/variable-groups/models';
-import { HomeTabModel } from '@/pages/LibraryPage/HomeTab/HomeTabModel';
 import { mapHomeChanges } from './fromHomeModel';
 import { getChangeStatus } from './types';
 

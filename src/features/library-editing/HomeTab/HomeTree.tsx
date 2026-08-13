@@ -14,6 +14,7 @@ import type {
   ITreeItemProvider,
 } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import { useCallback, useMemo } from 'react';
+import { NewLibraryItemButton } from '@/features/library-editing/NewLibraryItemButton';
 import type {
   ObservableSecureFile,
   ObservableSecureFileProperty,
@@ -22,7 +23,6 @@ import type {
   ObservableVariable,
   ObservableVariableGroup,
 } from '@/features/variable-groups/models';
-import { goToNewVariableGroup } from '@/features/variable-groups/newVariableGroup';
 import { logoUrl } from '@/shared/assets/logo';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { createTreeColumns } from '@/shared/components/Tree/createTreeColumns';
@@ -188,6 +188,6 @@ const HomeEmptyState = ({ hasFilter }: { hasFilter: boolean }) =>
       imagePath={logoUrl}
       primaryText="No variable groups or secure files yet"
       secondaryText="Store and share variables and secure files across your pipelines, edit and compare them in one place."
-      action={{ text: 'New variable group', onClick: goToNewVariableGroup }}
+      renderAction={() => <NewLibraryItemButton />}
     />
   );

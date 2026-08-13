@@ -8,6 +8,7 @@ import { Surface, SurfaceBackground } from 'azure-devops-ui/Surface';
 import { Tab, TabBar } from 'azure-devops-ui/Tabs';
 import { useCallback, useMemo, useState } from 'react';
 import { HistoryDialog } from '@/features/history/components/HistoryDialog';
+import { NewLibraryItemButton } from '@/features/library-editing/NewLibraryItemButton';
 import { ManageViewsDialog } from '@/features/matrix-views/components/ManageViewsDialog';
 import {
   PreviewChangesDialog,
@@ -15,7 +16,6 @@ import {
 } from '@/features/preview-changes/components/PreviewChangesDialog';
 import { useSecureFiles } from '@/features/secure-files/hooks/useSecureFiles';
 import { useVariableGroups } from '@/features/variable-groups/hooks/useVariableGroups';
-import { goToNewVariableGroup } from '@/features/variable-groups/newVariableGroup';
 import { logoUrl } from '@/shared/assets/logo';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { useNavigation } from '@/shared/hooks/useNavigation';
@@ -114,10 +114,7 @@ export const LibraryPage = () => {
             imagePath={logoUrl}
             primaryText="No variable groups or secure files yet"
             secondaryText="Store and share variables and secure files across your pipelines, edit and compare them in one place."
-            action={{
-              text: 'New variable group',
-              onClick: goToNewVariableGroup,
-            }}
+            renderAction={() => <NewLibraryItemButton />}
           />
         </Page>
       </Surface>

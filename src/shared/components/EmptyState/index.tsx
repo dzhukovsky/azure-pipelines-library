@@ -15,13 +15,17 @@ export const EmptyState = ({
   primaryText,
   secondaryText,
   action,
+  renderAction,
   fullPage,
 }: {
   iconName?: string;
   imagePath?: string;
   primaryText: string;
   secondaryText?: string;
+  /** A simple primary button. Ignored when `renderAction` is set. */
   action?: EmptyStateAction;
+  /** A custom action element (e.g. a split button) rendered in place of `action`. */
+  renderAction?: () => JSX.Element;
   fullPage?: boolean;
 }) => (
   <div
@@ -37,11 +41,13 @@ export const EmptyState = ({
       iconProps={iconName ? { iconName } : undefined}
       primaryText={primaryText}
       secondaryText={secondaryText}
-      {...(action && {
-        actionText: action.text,
-        actionType: ZeroDataActionType.ctaButton,
-        onActionClick: action.onClick,
-      })}
+      {...(renderAction
+        ? { renderAction }
+        : action && {
+            actionText: action.text,
+            actionType: ZeroDataActionType.ctaButton,
+            onActionClick: action.onClick,
+          })}
     />
   </div>
 );

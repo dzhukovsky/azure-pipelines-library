@@ -2,19 +2,16 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Button } from 'azure-devops-ui/Button';
 import type { ObservableValue } from 'azure-devops-ui/Core/Observable';
 import type { IHeaderCommandBarItem } from 'azure-devops-ui/HeaderCommandBar';
-import { SplitButton } from 'azure-devops-ui/SplitButton';
 import { InlineKeywordFilterBarItem } from 'azure-devops-ui/TextFilterBarItem';
 import type { IFilter } from 'azure-devops-ui/Utilities/Filter';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { recordSaveHistory } from '@/features/history/recordSaveHistory';
 import type { LibraryTabModel } from '@/features/library-editing';
+import { NewLibraryItemButton } from '@/features/library-editing/NewLibraryItemButton';
 import type { PreviewChangesDialogOptions } from '@/features/preview-changes/components/PreviewChangesDialog';
 import { saveLibraryChanges } from '@/features/save-changes/saveLibraryChanges';
 import { secureFilesQueryKey } from '@/features/secure-files/hooks/useSecureFiles';
 import { variableGroupsQueryKey } from '@/features/variable-groups/hooks/useVariableGroups';
-import { goToNewVariableGroup } from '@/features/variable-groups/newVariableGroup';
-import { getProjectUrl } from '@/shared/api/configurations';
-import { navigateTo } from '@/shared/hooks/useNavigation';
 
 export const useHeader = (
   filter: IFilter,
@@ -72,35 +69,7 @@ export const useHeader = (
       {
         id: 'new-variable-group',
         important: true,
-        renderButton: ({ id }) => (
-          <SplitButton
-            key={id}
-            primary={true}
-            buttonProps={{
-              text: 'New variable group',
-              onClick: goToNewVariableGroup,
-            }}
-            menuButtonProps={{
-              ariaLabel: 'See options',
-              contextualMenuProps: {
-                menuProps: {
-                  id: '2',
-                  items: [
-                    {
-                      id: 'new-secure-file',
-                      text: 'New secure file',
-                      onActivate: () => {
-                        navigateTo(
-                          `${getProjectUrl()}/_library?itemType=SecureFiles`,
-                        );
-                      },
-                    },
-                  ],
-                },
-              },
-            }}
-          />
-        ),
+        renderButton: ({ id }) => <NewLibraryItemButton key={id} />,
       },
       {
         id: 'history',

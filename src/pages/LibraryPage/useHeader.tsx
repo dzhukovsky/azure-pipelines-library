@@ -28,6 +28,8 @@ export const useHeader = (
     setShowComparison: (value: boolean) => void;
     hideEqualValues: boolean;
     setHideEqualValues: (value: boolean) => void;
+    allFoldersExpanded: boolean;
+    setAllFoldersExpanded: (value: boolean) => void;
   },
 ) => {
   const queryClient = useQueryClient();
@@ -151,48 +153,66 @@ export const useHeader = (
       // button itself loses to `.bolt-button { margin: 0 }` on specificity.
       <div className="flex-row flex-center rhythm-horizontal-8">
         {matrixToggles && (
-          <Button
-            subtle
-            // The icon font has one weight, so the button's 600 would make the
-            // browser fake a bolder glyph.
-            iconProps={{
-              iconName: 'DiffInline',
-              className: 'font-weight-normal',
-            }}
-            ariaLabel="Differences only"
-            ariaPressed={matrixToggles.hideEqualValues}
-            className="comparison-toggle"
-            tooltipProps={{
-              text: matrixToggles.hideEqualValues
-                ? 'Show all rows'
-                : 'Show only rows that differ',
-            }}
-            onClick={() =>
-              matrixToggles.setHideEqualValues(!matrixToggles.hideEqualValues)
-            }
-          />
-        )}
-        {matrixToggles && (
-          <Button
-            subtle
-            iconProps={{
-              iconName: 'DiffSideBySide',
-              className: 'font-weight-normal',
-            }}
-            // The name stays put while aria-pressed carries the state — a
-            // toggle that renames itself reads as two different controls.
-            ariaLabel="Row comparison"
-            ariaPressed={matrixToggles.showComparison}
-            className="comparison-toggle"
-            tooltipProps={{
-              text: matrixToggles.showComparison
-                ? 'Hide row comparison'
-                : 'Show row comparison',
-            }}
-            onClick={() =>
-              matrixToggles.setShowComparison(!matrixToggles.showComparison)
-            }
-          />
+          <div className="flex-row">
+            <Button
+              subtle
+              iconProps={{
+                iconName: matrixToggles.allFoldersExpanded
+                  ? 'ChevronFold10'
+                  : 'ChevronUnfold10',
+                className: 'font-weight-normal',
+              }}
+              ariaLabel="Expand all folders"
+              ariaPressed={matrixToggles.allFoldersExpanded}
+              className="comparison-toggle"
+              tooltipProps={{
+                text: matrixToggles.allFoldersExpanded
+                  ? 'Collapse all folders'
+                  : 'Expand all folders',
+              }}
+              onClick={() => {
+                const expanded = !matrixToggles.allFoldersExpanded;
+                matrixToggles.setAllFoldersExpanded(expanded);
+                activeModel?.setAllExpanded?.(expanded);
+              }}
+            />
+            <Button
+              subtle
+              iconProps={{
+                iconName: 'DiffInline',
+                className: 'font-weight-normal',
+              }}
+              ariaLabel="Differences only"
+              ariaPressed={matrixToggles.hideEqualValues}
+              className="comparison-toggle"
+              tooltipProps={{
+                text: matrixToggles.hideEqualValues
+                  ? 'Show all rows'
+                  : 'Show only rows that differ',
+              }}
+              onClick={() =>
+                matrixToggles.setHideEqualValues(!matrixToggles.hideEqualValues)
+              }
+            />
+            <Button
+              subtle
+              iconProps={{
+                iconName: 'DiffSideBySide',
+                className: 'font-weight-normal',
+              }}
+              ariaLabel="Row comparison"
+              ariaPressed={matrixToggles.showComparison}
+              className="comparison-toggle"
+              tooltipProps={{
+                text: matrixToggles.showComparison
+                  ? 'Hide row comparison'
+                  : 'Show row comparison',
+              }}
+              onClick={() =>
+                matrixToggles.setShowComparison(!matrixToggles.showComparison)
+              }
+            />
+          </div>
         )}
         <InlineKeywordFilterBarItem
           filter={filter}
@@ -201,7 +221,7 @@ export const useHeader = (
         />
       </div>
     ),
-    [filter, matrixToggles],
+    [filter, matrixToggles, activeModel],
   );
 
   return {

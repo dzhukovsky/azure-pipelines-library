@@ -41,8 +41,18 @@ export const LibraryPage = () => {
   const [pendingTab, setPendingTab] = useState<string>();
   const [showComparison, setShowComparison] = useState(false);
   const [hideEqualValues, setHideEqualValues] = useState(false);
+  const [allFoldersExpanded, setAllFoldersExpanded] = useState(false);
 
   const isMatrixTab = (queryParams.tab || 'home').toLowerCase() !== 'home';
+
+  // Switching tabs or reloading the container mounts a matrix whose folders
+  // start collapsed, so the toggle must stop claiming they are expanded.
+  const foldersScope = `${queryParams.tab}|${tabContainerKey}`;
+  const [expandedScope, setExpandedScope] = useState(foldersScope);
+  if (expandedScope !== foldersScope) {
+    setExpandedScope(foldersScope);
+    setAllFoldersExpanded(false);
+  }
 
   // With no variable groups and no secure files there is nothing to show — any
   // matrix views only point at groups that no longer exist, so they'd render
@@ -81,6 +91,8 @@ export const LibraryPage = () => {
           setShowComparison,
           hideEqualValues,
           setHideEqualValues,
+          allFoldersExpanded,
+          setAllFoldersExpanded,
         }
       : undefined,
   );

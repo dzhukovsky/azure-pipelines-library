@@ -51,6 +51,17 @@ export const mapTreeItems = (
   ];
 };
 
+/** Every folder path in the tree, parents before their children — the set the
+ * expand/collapse all action writes into `expandedFolders`. */
+export const collectFolderPaths = (
+  items: readonly ITreeItem<MatrixTreeItem>[],
+): string[] =>
+  items.flatMap((item) =>
+    item.data.type === 'folder'
+      ? [item.data.data.folderPath, ...collectFolderPaths(item.childItems ?? [])]
+      : [],
+  );
+
 export const findTreeItem = (
   items: readonly ITreeItem<MatrixTreeItem>[],
   data: MatrixTreeItem,

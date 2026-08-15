@@ -17,7 +17,11 @@ import {
   type MatrixTreeItem,
   type VariableGroupName,
 } from './MatrixTree';
-import { findTreeItem, mapTreeItems } from './mapTreeItems';
+import {
+  collectFolderPaths,
+  findTreeItem,
+  mapTreeItems,
+} from './mapTreeItems';
 
 export type MatrixTabProps = {
   filter: IFilter;
@@ -128,10 +132,35 @@ export const MatrixTab = ({
       observable: state.provider,
       validate: () => validateMatrixProvider(state.provider),
       getChanges: () => mapMatrixChanges(state.provider),
+      setAllExpanded: (expanded) => {
+        const paths = collectFolderPaths(state.items.value);
+        if (!paths.length) {
+          return;
+        }
+
+        state.expandedFolders.clear();
+        if (expanded) {
+          for (const path of paths) {
+            state.expandedFolders.add(path);
+          }
+        }
+
+        // Same rebuild the add/remove path uses. It recreates the rows and so
+        // drops input focus — acceptable for an explicit, whole-tree action.
+        state.items.splice(
+          0,
+          state.items.length,
+          ...mapTreeItems(
+            state.provider.variables.value,
+            state.groupingPatterns,
+            state.expandedFolders,
+          ),
+        );
+      },
     });
 
     return () => onTabContextChange(undefined);
-  }, [state.provider, onTabContextChange]);
+  }, [state, onTabContextChange]);
 
   // Validation errors are only set from the Preview button; nothing else
   // clears them. Once the user reverts the edit that caused an error

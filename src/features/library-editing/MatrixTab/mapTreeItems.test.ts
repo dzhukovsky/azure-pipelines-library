@@ -1,6 +1,10 @@
 import { describe, expect, test } from 'bun:test';
 import { ObservableMatrixVariable } from '@/features/variable-groups/models';
-import { findTreeItem, mapTreeItems } from './mapTreeItems';
+import {
+  collectFolderPaths,
+  findTreeItem,
+  mapTreeItems,
+} from './mapTreeItems';
 
 const GROUPS = [10];
 const APP = ['_app.{}:*'];
@@ -81,6 +85,33 @@ describe('mapTreeItems', () => {
 
     expect(items[0].expanded).toBe(false);
     expect((items[0].childItems ?? [])[0].expanded).toBe(true);
+  });
+});
+
+describe('collectFolderPaths', () => {
+  test('collects every folder path, nested ones included', () => {
+    const items = mapTreeItems(
+      [
+        variable('_app.billing:Conn'),
+        variable('_app.billing.secret:Api'),
+        variable('_app.orders:Url'),
+        variable('GlobalTimeout'),
+      ],
+      APP_SECRETS,
+      new Set(),
+    );
+
+    expect(collectFolderPaths(items)).toEqual([
+      'billing',
+      'billing/secrets',
+      'orders',
+    ]);
+  });
+
+  test('is empty for a tree without folders', () => {
+    const items = mapTreeItems([variable('a'), variable('b')], undefined, new Set());
+
+    expect(collectFolderPaths(items)).toEqual([]);
   });
 });
 

@@ -15,4 +15,7 @@ export type LibraryTabModel = {
   /** Writes Error states onto the model objects; returns true when valid. */
   validate: () => boolean;
   getChanges: () => LibraryChanges;
+  /** Expands or collapses every folder at once. Only tabs that group their
+   * rows into folders (matrix views) offer it. */
+  setAllExpanded?: (expanded: boolean) => void;
 };

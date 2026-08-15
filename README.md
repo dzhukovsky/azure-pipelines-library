@@ -2,6 +2,8 @@
 
 An Azure DevOps extension that adds a power-user **Library** hub to Azure Pipelines: spreadsheet-style inline editing of variable groups, matrix views for comparing environments side by side, a change preview before anything is saved, and a per-project change history.
 
+![Home tab with variable groups expanded for inline editing](images/home-overview.png)
+
 See [overview.md](overview.md) for the full feature tour (this file doubles as the Marketplace listing).
 
 ## Highlights

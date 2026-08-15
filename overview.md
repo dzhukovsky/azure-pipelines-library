@@ -35,6 +35,10 @@ Build custom tabs that show a variable-by-group matrix: one row per variable nam
 
 ![Row comparison panel](images/row-comparison.png)
 
+Matrix tabs are yours to define: pick the groups a tab covers and how variable names collapse into folders.
+
+![Manage views dialog defining matrix tabs and grouping patterns](images/manage-views.png)
+
 ### Preview changes before saving
 
 Nothing is written until you say so. The **Preview changes** dialog shows the complete staged change set — added, modified, deleted and renamed items per group — with validation errors highlighted.

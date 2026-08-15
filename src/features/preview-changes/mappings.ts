@@ -1,10 +1,21 @@
 import type { ITreeItem } from 'azure-devops-ui/Utilities/TreeItemProvider';
-import type {
-  FileChange,
-  GroupChange,
-  LibraryChanges,
-  VariableChange,
+import {
+  type FileChange,
+  type GroupChange,
+  getChangeStatus,
+  type LibraryChanges,
+  type VariableChange,
 } from '@/features/library-editing';
+
+/**
+ * A renamed variable reads as "previous → current", the same shape group
+ * renames use in this dialog and both groups and variables use in the history.
+ * Deriving it from getChangeStatus keeps the rename test in one place.
+ */
+export const variableDisplayName = (change: VariableChange) =>
+  getChangeStatus(change) === 'renamed'
+    ? `${change.previousKey} → ${change.key}`
+    : change.key;
 
 export type LibraryItem = {
   group?: GroupChange;

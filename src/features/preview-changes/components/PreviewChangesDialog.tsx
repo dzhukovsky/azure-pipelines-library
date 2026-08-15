@@ -27,7 +27,11 @@ import { TextFieldCell } from '@/shared/components/TextFieldCell';
 import { createActionColumn } from '@/shared/components/Tree/createActionColumn';
 import { createExpandableActionColumn } from '@/shared/components/Tree/createExpandableActionColumn';
 import type { TreeItemProviderProp } from '@/shared/components/Tree/treeProps';
-import { type LibraryItem, mapTreeItems } from '../mappings';
+import {
+  type LibraryItem,
+  mapTreeItems,
+  variableDisplayName,
+} from '../mappings';
 
 export type PreviewChangesDialogOptions = {
   changes: LibraryChanges;
@@ -239,7 +243,7 @@ const useColumns = () => {
           if (groupVariable) {
             return (
               <TextFieldCell
-                value={groupVariable.key}
+                value={variableDisplayName(groupVariable)}
                 state={groupVariable.state}
                 iconProps={{
                   iconName: groupVariable.isSecret

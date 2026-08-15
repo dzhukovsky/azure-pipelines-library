@@ -63,8 +63,7 @@ Secure files and their properties are listed alongside variable groups, read-onl
 ## Getting started
 
 1. Install the extension in your organization.
-2. The hub is **off by default**. A project administrator enables it per project: open the **Preview features** panel (profile menu), switch the scope selector to **"for this project"**, and turn on **Advanced Library**.
-3. Open **Pipelines → Advanced Library** in that project.
+2. Open **Pipelines → Advanced Library** in any project.
 
 ## Data, privacy and permissions
 

@@ -13,10 +13,6 @@ See [overview.md](overview.md) for the full feature tour (this file doubles as t
 - **Export** — download a variable group as JSON or YAML with dot-notation names expanded into nested objects.
 - **Secure files** — listed read-only next to variable groups, including their properties.
 
-## Enabling the extension
-
-The Advanced Library hub is hidden behind a feature toggle that is **off by default**. After installing the extension, a project administrator can turn it on per project: open the **Preview features** panel (avatar menu → "..." → Preview features, or the user settings menu), switch the scope selector to **"for this project"**, and enable **Advanced Library**.
-
 ## Development
 
 Prerequisites: [Bun](https://bun.sh) ≥ 1.3, Node.js ≥ 21.

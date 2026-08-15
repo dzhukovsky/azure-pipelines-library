@@ -40,6 +40,7 @@ export const LibraryPage = () => {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [pendingTab, setPendingTab] = useState<string>();
   const [showComparison, setShowComparison] = useState(false);
+  const [hideEqualValues, setHideEqualValues] = useState(false);
 
   const isMatrixTab = (queryParams.tab || 'home').toLowerCase() !== 'home';
 
@@ -74,7 +75,14 @@ export const LibraryPage = () => {
     previewDialogOptions,
     openManageViews,
     openHistory,
-    isMatrixTab ? { showComparison, setShowComparison } : undefined,
+    isMatrixTab
+      ? {
+          showComparison,
+          setShowComparison,
+          hideEqualValues,
+          setHideEqualValues,
+        }
+      : undefined,
   );
   const { currentTab, tabs } = useTabs(
     queryParams.tab,
@@ -82,6 +90,7 @@ export const LibraryPage = () => {
     filter,
     registerTabModel,
     showComparison,
+    hideEqualValues,
   );
 
   const onSelectedTabChanged = useCallback(

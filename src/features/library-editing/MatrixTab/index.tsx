@@ -24,6 +24,7 @@ export type MatrixTabProps = {
   groupIds?: number[];
   groupingPatterns?: string[];
   showComparison?: boolean;
+  hideEqualValues?: boolean;
   onTabContextChange: (model: LibraryTabModel | undefined) => void;
 };
 
@@ -95,6 +96,7 @@ export const MatrixTab = ({
   groupIds,
   groupingPatterns,
   showComparison,
+  hideEqualValues,
   onTabContextChange,
 }: MatrixTabProps) => {
   const groups = useVariableGroups();
@@ -156,6 +158,7 @@ export const MatrixTab = ({
       filter={filter}
       loading={isLoading}
       showComparison={showComparison}
+      hideEqualValues={hideEqualValues}
       addNewVariable={() => state.provider.addNewVariable()}
       onToggleItem={(data, expanded) => {
         if (data.type !== 'folder') {

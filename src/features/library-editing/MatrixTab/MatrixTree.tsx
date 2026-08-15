@@ -27,6 +27,7 @@ import { useObservableFiltering } from '@/shared/components/Tree/useFiltering';
 import type { RowFocusChangeHandler } from '@/shared/components/Tree/useRowRenderer';
 import { useRowRenderer } from '@/shared/components/Tree/useRowRenderer';
 import { ComparisonPanel } from './ComparisonPanel';
+import { hasEqualValues } from './hasEqualValues';
 import { folderRenderer, variableRenderer } from './renderers';
 
 export type VariableGroupName = {
@@ -40,6 +41,7 @@ export type MatrixTreeProps = {
   filter: IFilter;
   loading?: boolean;
   showComparison?: boolean;
+  hideEqualValues?: boolean;
   addNewVariable: () => ObservableMatrixVariable;
   onToggleItem?: (data: MatrixTreeItem, expanded: boolean) => void;
 };
@@ -67,18 +69,35 @@ const renderers: MatrixTreeRenderer = {
   variable: variableRenderer,
 };
 
-const filterFunc: FilterFunc<MatrixTreeItem> = (item, filterText) => {
-  if (!filterText || !item) {
-    return true;
-  }
+const createFilterFunc =
+  (
+    hideEqualValues: boolean,
+    groupIds: readonly number[],
+  ): FilterFunc<MatrixTreeItem> =>
+  (item, filterText) => {
+    if (!item) {
+      return true;
+    }
 
-  switch (item.type) {
-    case 'folder':
-      return item.data.folderName?.toLocaleLowerCase().includes(filterText);
-    case 'variable':
-      return item.data.search(filterText);
-  }
-};
+    switch (item.type) {
+      case 'folder':
+        return (
+          (!filterText ||
+            item.data.folderName?.toLocaleLowerCase().includes(filterText)) &&
+          // A folder with no surviving children is only kept by its own name;
+          // while hiding equal rows it must still hold something to show.
+          (!hideEqualValues ||
+            item.data.variables.some(
+              (variable) => !hasEqualValues(variable, groupIds),
+            ))
+        );
+      case 'variable':
+        return (
+          (!filterText || item.data.search(filterText)) &&
+          (!hideEqualValues || !hasEqualValues(item.data, groupIds))
+        );
+    }
+  };
 
 const useColumns = (
   groupNames: VariableGroupName[],
@@ -143,9 +162,22 @@ export const MatrixTree = ({
   filter,
   loading,
   showComparison,
+  hideEqualValues,
   addNewVariable,
   onToggleItem,
 }: MatrixTreeProps) => {
+  // A new identity re-runs the filter, which is how flipping the toggle takes
+  // effect. Value edits deliberately do not: rows must not vanish from under
+  // the caret mid-edit.
+  const filterFunc = useMemo(
+    () =>
+      createFilterFunc(
+        !!hideEqualValues,
+        groupNames.map((group) => group.id),
+      ),
+    [hideEqualValues, groupNames],
+  );
+
   const { filteredItems, isEmpty } = useObservableFiltering(
     items,
     filter,
@@ -177,7 +209,11 @@ export const MatrixTree = ({
   const hasFilter = !!filter.getFilterItemValue<string>('keyword');
   return (
     (!loading && isEmpty && (
-      <MatrixEmptyState hasFilter={hasFilter} onAdd={addNewVariable} />
+      <MatrixEmptyState
+        hasFilter={hasFilter}
+        hideEqualValues={!!hideEqualValues}
+        onAdd={addNewVariable}
+      />
     )) || (
       <div className="flex-column spacing-8" ref={treeContainerRef}>
         <Card
@@ -235,12 +271,20 @@ export const MatrixTree = ({
 
 const MatrixEmptyState = ({
   hasFilter,
+  hideEqualValues,
   onAdd,
 }: {
   hasFilter: boolean;
+  hideEqualValues: boolean;
   onAdd: () => void;
 }) =>
-  hasFilter ? (
+  hideEqualValues && !hasFilter ? (
+    <EmptyState
+      iconName="DiffInline"
+      primaryText="No differences"
+      secondaryText="Every variable in this view holds the same value in every group."
+    />
+  ) : hasFilter ? (
     <EmptyState
       iconName="Search"
       primaryText="No matching variables"

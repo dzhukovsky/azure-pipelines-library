@@ -12,6 +12,7 @@ export const useTabs = (
   filter: IFilter,
   onTabContextChange: (model: LibraryTabModel | undefined) => void,
   showComparison: boolean,
+  hideEqualValues: boolean,
 ) => {
   tab = tab?.toLowerCase() || 'home';
 
@@ -44,6 +45,7 @@ export const useTabs = (
             groupIds={view.groupIds}
             groupingPatterns={view.groupingPatterns}
             showComparison={showComparison}
+            hideEqualValues={hideEqualValues}
             onTabContextChange={onTabContextChange}
           />
         ),
@@ -51,7 +53,7 @@ export const useTabs = (
     }
 
     return result;
-  }, [filter, onTabContextChange, views, showComparison]);
+  }, [filter, onTabContextChange, views, showComparison, hideEqualValues]);
 
   const currentTab = tabs[tab];
 

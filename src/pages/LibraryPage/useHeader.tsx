@@ -21,9 +21,13 @@ export const useHeader = (
   >,
   onManageViews: () => void,
   onHistory: () => void,
-  comparisonToggle?: {
+  // Present only while a matrix tab is on screen — the Home tab has no columns
+  // to compare.
+  matrixToggles?: {
     showComparison: boolean;
     setShowComparison: (value: boolean) => void;
+    hideEqualValues: boolean;
+    setHideEqualValues: (value: boolean) => void;
   },
 ) => {
   const queryClient = useQueryClient();
@@ -146,11 +150,31 @@ export const useHeader = (
       // rhythm-horizontal-8 spaces the children apart: a margin utility on the
       // button itself loses to `.bolt-button { margin: 0 }` on specificity.
       <div className="flex-row flex-center rhythm-horizontal-8">
-        {comparisonToggle && (
+        {matrixToggles && (
           <Button
             subtle
             // The icon font has one weight, so the button's 600 would make the
             // browser fake a bolder glyph.
+            iconProps={{
+              iconName: 'DiffInline',
+              className: 'font-weight-normal',
+            }}
+            ariaLabel="Differences only"
+            ariaPressed={matrixToggles.hideEqualValues}
+            className="comparison-toggle"
+            tooltipProps={{
+              text: matrixToggles.hideEqualValues
+                ? 'Show all rows'
+                : 'Show only rows that differ',
+            }}
+            onClick={() =>
+              matrixToggles.setHideEqualValues(!matrixToggles.hideEqualValues)
+            }
+          />
+        )}
+        {matrixToggles && (
+          <Button
+            subtle
             iconProps={{
               iconName: 'DiffSideBySide',
               className: 'font-weight-normal',
@@ -158,17 +182,15 @@ export const useHeader = (
             // The name stays put while aria-pressed carries the state — a
             // toggle that renames itself reads as two different controls.
             ariaLabel="Row comparison"
-            ariaPressed={comparisonToggle.showComparison}
+            ariaPressed={matrixToggles.showComparison}
             className="comparison-toggle"
             tooltipProps={{
-              text: comparisonToggle.showComparison
+              text: matrixToggles.showComparison
                 ? 'Hide row comparison'
                 : 'Show row comparison',
             }}
             onClick={() =>
-              comparisonToggle.setShowComparison(
-                !comparisonToggle.showComparison,
-              )
+              matrixToggles.setShowComparison(!matrixToggles.showComparison)
             }
           />
         )}
@@ -179,7 +201,7 @@ export const useHeader = (
         />
       </div>
     ),
-    [filter, comparisonToggle],
+    [filter, matrixToggles],
   );
 
   return {

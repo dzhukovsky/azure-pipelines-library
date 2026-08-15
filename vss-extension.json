@@ -3,7 +3,7 @@
   "id": "advanced-library",
   "name": "Advanced Library",
   "manifestVersion": 1,
-  "version": "1.0.8",
+  "version": "1.0.9",
   "publisher": "dzhukovsky",
   "public": false,
   "author": "Dmitry Zhukovsky",
@@ -63,6 +63,29 @@
     "color": "#232323",
     "theme": "dark"
   },
+  "screenshots": [
+    {
+      "path": "images/home-overview.png"
+    },
+    {
+      "path": "images/inline-editing.png"
+    },
+    {
+      "path": "images/matrix-view.png"
+    },
+    {
+      "path": "images/row-comparison.png"
+    },
+    {
+      "path": "images/manage-views.png"
+    },
+    {
+      "path": "images/preview-changes.png"
+    },
+    {
+      "path": "images/history.png"
+    }
+  ],
   "contributions": [
     {
       "id": "hub",

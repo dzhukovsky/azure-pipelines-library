@@ -1,0 +1,51 @@
+.comparison-panel {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    min-width: 280px;
+    max-width: min(640px, calc(100vw - 48px));
+    padding: 12px 16px;
+    border-radius: 12px;
+    // The card underneath is neutral-0 and its focused row neutral-2, so the
+    // panel needs a step further to read as a separate surface.
+    background: rgba(var(--palette-neutral-8), 1);
+    border: 1px solid rgba(var(--palette-neutral-20), 1);
+    box-shadow: 0 6.4px 14.4px 0 var(--callout-shadow-color),
+        0 1.2px 3.6px 0 var(--callout-shadow-secondary-color);
+    // Purely indicative: clicks pass through to the table underneath.
+    pointer-events: none;
+}
+
+.comparison-panel-header {
+    margin-bottom: 8px;
+}
+
+// Only the title is bold: the icon font has a single weight, so a bold row
+// would leave the browser faking a thicker glyph than the table's.
+.comparison-panel-name {
+    margin-left: 6px;
+    font-weight: 600;
+}
+
+.comparison-panel-grid {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 16px;
+    row-gap: 4px;
+}
+
+.comparison-panel-group {
+    max-width: 240px;
+    color: var(--text-secondary-color);
+}
+
+.comparison-panel-null {
+    font-style: italic;
+    color: var(--status-info-foreground);
+}
+
+.comparison-panel-secret {
+    color: var(--text-secondary-color);
+}

@@ -3,11 +3,11 @@
   "id": "advanced-library",
   "name": "Advanced Library",
   "manifestVersion": 1,
-  "version": "1.0.4",
+  "version": "1.0.11",
   "publisher": "dzhukovsky",
-  "public": false,
+  "public": true,
   "author": "Dmitry Zhukovsky",
-  "description": "Azure DevOps Extension",
+  "description": "Power-user Library hub for Azure Pipelines: inline editing of variable groups, matrix views to compare environments, change preview before saving, and per-project change history.",
   "targets": [
     {
       "id": "Microsoft.VisualStudio.Services"
@@ -27,20 +27,61 @@
     "Azure Pipelines"
   ],
   "tags": [
+    "library",
+    "variables",
+    "variable groups",
+    "secure files",
+    "environments",
+    "configuration",
+    "release",
+    "devops"
+  ],
+  "galleryFlags": [
     "Preview"
   ],
   "content": {
     "details": {
-      "path": "README.md"
+      "path": "overview.md"
     },
     "license": {
       "path": "LICENSE"
+    }
+  },
+  "links": {
+    "getstarted": {
+      "uri": "https://github.com/dzhukovsky/azdo-advanced-library#readme"
+    },
+    "support": {
+      "uri": "https://github.com/dzhukovsky/azdo-advanced-library/issues"
     }
   },
   "repository": {
     "type": "git",
     "uri": "https://github.com/dzhukovsky/azdo-advanced-library"
   },
+  "screenshots": [
+    {
+      "path": "images/home-overview.png"
+    },
+    {
+      "path": "images/inline-editing.png"
+    },
+    {
+      "path": "images/matrix-view.png"
+    },
+    {
+      "path": "images/row-comparison.png"
+    },
+    {
+      "path": "images/manage-views.png"
+    },
+    {
+      "path": "images/preview-changes.png"
+    },
+    {
+      "path": "images/history.png"
+    }
+  ],
   "contributions": [
     {
       "id": "hub",
@@ -59,6 +100,10 @@
     {
       "path": "dist",
       "packagePath": "/",
+      "addressable": true
+    },
+    {
+      "path": "images",
       "addressable": true
     }
   ]

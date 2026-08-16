@@ -3,16 +3,20 @@ import { getClient } from 'azure-devops-extension-api';
 import { TaskAgentRestClient } from 'azure-devops-extension-api/TaskAgent';
 import * as SDK from 'azure-devops-extension-sdk';
 
-export const useSecureFiles = () =>
-  useQuery({
-    queryKey: ['secure-files'],
-    queryFn: async () => {
-      await SDK.ready();
+export const secureFilesQueryKey = ['secure-files'];
 
-      const project = SDK.getWebContext().project;
-      const client = getClient(TaskAgentRestClient);
-      const secureFiles = await client.getSecureFiles(project.id);
+/** Shared so the app can prefetch it during init (see App.tsx). */
+export const secureFilesQuery = {
+  queryKey: secureFilesQueryKey,
+  queryFn: async () => {
+    await SDK.ready();
 
-      return secureFiles.sort((a, b) => a.name.localeCompare(b.name));
-    },
-  });
+    const project = SDK.getWebContext().project;
+    const client = getClient(TaskAgentRestClient);
+    const secureFiles = await client.getSecureFiles(project.id);
+
+    return secureFiles.sort((a, b) => a.name.localeCompare(b.name));
+  },
+};
+
+export const useSecureFiles = () => useQuery(secureFilesQuery);

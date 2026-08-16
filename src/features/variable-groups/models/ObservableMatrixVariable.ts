@@ -1,4 +1,3 @@
-import { States } from '@/shared/components/StateIcon';
 import {
   ObservableObject,
   type ObservableObjectValue,
@@ -21,11 +20,12 @@ export class ObservableMatrixVariable extends ObservableObject<ObservableMatrixV
     name: string,
     values: Record<GroupId, IVariableValue>,
     groupIds: Readonly<GroupId[]>,
+    isNew = false,
   ) {
     super();
     const isSecret = isSecretVariable(Object.values(values));
     this.name = this.addProperty(
-      new ObservableMatrixName(name, isSecret, false),
+      new ObservableMatrixName(name, isSecret, isNew),
     );
 
     this.values = groupIds.reduce(
@@ -44,23 +44,25 @@ export class ObservableMatrixVariable extends ObservableObject<ObservableMatrixV
     );
   }
 
+  addValue(groupId: GroupId) {
+    // Only for cells that never existed on the server; restoring a deleted
+    // existing cell is restoreVariable's job.
+    const cell = this.values[groupId];
+    if (!cell?.isNew) return;
+    cell.restore();
+  }
+
   deleteVariable(groupId: GroupId) {
-    const variable = this.values[groupId];
-
-    if (variable.isNew) {
-      variable.value.reset();
-      variable.state.reset();
-      return;
+    const cell = this.values[groupId];
+    if (!cell) return;
+    if (cell.isNew) {
+      cell.value.reset();
     }
-
-    variable.state.value = States.Deleted;
+    cell.delete();
   }
 
   restoreVariable(groupId: GroupId) {
-    const variable = this.values[groupId];
-    variable.state.value = variable.modified
-      ? States.Modified
-      : States.Unchanged;
+    this.values[groupId]?.restore();
   }
 
   search(filterText: string): boolean {
@@ -78,7 +80,7 @@ export class ObservableMatrixName extends StateObject<ObservableMatrixName> {
   readonly isSecret: ObservableObjectValue<boolean | null>;
 
   constructor(name: string, isSecret: boolean | null, isNew: boolean) {
-    super(isNew, States.Unchanged);
+    super(isNew);
     this.name = this.addValueProperty(name);
     this.isSecret = this.addValueProperty(isSecret);
   }
@@ -89,20 +91,22 @@ export class ObservableMatrixValue extends StateObject<ObservableMatrixValue> {
   readonly value: ObservableObjectValue<string>;
 
   constructor(value: string, isSecret: boolean, isNew: boolean) {
-    super(isNew, States.Unchanged);
+    super(isNew, !isNew); // a cell that doesn't exist on the server starts non-present (NULL)
     this.isSecretInitial = isSecret;
     this.value = this.addValueProperty(value);
   }
 }
 
 const isSecretVariable = (values: IVariableValue[]): boolean | null => {
-  if (!values.length) return false;
+  let first: boolean | undefined;
 
-  const first = values[0].isSecret;
-
-  for (let i = 1; i < values.length; i++) {
-    if (values[i].isSecret !== first) return null;
+  for (const v of values) {
+    if (first === undefined) {
+      first = v.isSecret;
+    } else if (v.isSecret !== first) {
+      return null;
+    }
   }
 
-  return first;
+  return first ?? false;
 };

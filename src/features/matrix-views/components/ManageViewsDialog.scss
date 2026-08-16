@@ -1,0 +1,40 @@
+.manage-views-dialog {
+    overflow: hidden;
+    min-width: 40vw;
+    max-width: 60vw;
+    max-height: 80vh;
+}
+
+.manage-views-dialog-content {
+    overflow-y: auto;
+    min-height: 120px;
+}
+
+.manage-views-dialog-section {
+    padding-bottom: 8px;
+}
+
+.manage-views-dialog-section+.manage-views-dialog-section {
+    border-top: 1px solid rgb(var(--palette-neutral-8));
+    padding-top: 12px;
+}
+
+// The default bolt-textfield resting border is --text-secondary-color — a
+// text color, far more contrasty than the TagPicker's neutral-20 next to it.
+// Align both on the softer one. :where() keeps specificity at zero so the
+// library's own focused/error border rules still win.
+.manage-views-dialog :where(.bolt-textfield) {
+    border-color: rgba(var(--palette-neutral-20), 1);
+}
+
+.manage-views-dialog-grouping-key textarea {
+    font-family: Consolas, "Courier New", monospace;
+}
+
+.manage-views-dialog-pattern-help {
+    max-width: 400px;
+
+    code {
+        font-family: Consolas, "Courier New", monospace;
+    }
+}

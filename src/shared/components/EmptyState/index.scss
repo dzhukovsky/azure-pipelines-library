@@ -1,0 +1,20 @@
+// Only what the built-in utility classes can't express: a viewport-based
+// min-height so the placeholder centres inside an unbounded scroll parent,
+// and a comfortable text measure. Everything else (spacing, alignment, image
+// size) is done with built-in classes / attributes in the component.
+.empty-state {
+  min-height: calc(100vh - 12rem);
+
+  &.empty-state--full {
+    min-height: calc(100vh - 4rem);
+  }
+
+  .empty-state-content {
+    max-width: 480px;
+  }
+
+  // Narrower than the one-line title so the subtitle wraps into a tidier block.
+  .empty-state-secondary {
+    max-width: 340px;
+  }
+}

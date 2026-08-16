@@ -43,6 +43,9 @@ export class ObservableObjectArray<
   private set modified(value: boolean) {
     if (this._modified !== value) {
       this._modified = value;
+      // ObservableArray actions are a fixed set, so a dirty-flag flip reuses
+      // 'change' and carries no addedItems/removedItems. Subscribers that only
+      // care about membership must gate on those, not on the action alone.
       this.notify({ index: 0 }, 'change');
     }
   }

@@ -1,28 +1,27 @@
-import { Button } from 'azure-devops-ui/Button';
+import './index.scss';
+
 import { ObservableValue } from 'azure-devops-ui/Core/Observable';
+import { Dialog } from 'azure-devops-ui/Dialog';
 import { Header, TitleSize } from 'azure-devops-ui/Header';
-import type { IHeaderCommandBarItem } from 'azure-devops-ui/HeaderCommandBar';
 import { Page } from 'azure-devops-ui/Page';
-import { SplitButton } from 'azure-devops-ui/SplitButton';
 import { Surface, SurfaceBackground } from 'azure-devops-ui/Surface';
 import { Tab, TabBar } from 'azure-devops-ui/Tabs';
-import { InlineKeywordFilterBarItem } from 'azure-devops-ui/TextFilterBarItem';
-import { Filter, type IFilter } from 'azure-devops-ui/Utilities/Filter';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { HistoryDialog } from '@/features/history/components/HistoryDialog';
+import { NewLibraryItemButton } from '@/features/library-editing/NewLibraryItemButton';
+import { ManageViewsDialog } from '@/features/matrix-views/components/ManageViewsDialog';
 import {
   PreviewChangesDialog,
   type PreviewChangesDialogOptions,
 } from '@/features/preview-changes/components/PreviewChangesDialog';
-import { getProjectUrl } from '@/shared/api/configurations';
-import { useFilterSubscription } from '@/shared/components/Table/useFiltering';
-import {
-  navigateTo,
-  type QueryParamsSetter,
-  useNavigation,
-} from '@/shared/hooks/useNavigation';
-import { HomeTab } from './HomeTab';
-import type { HomeTabModel } from './HomeTab/HomeTabModel';
-import { MatrixTab } from './MatrixTab';
+import { useSecureFiles } from '@/features/secure-files/hooks/useSecureFiles';
+import { useVariableGroups } from '@/features/variable-groups/hooks/useVariableGroups';
+import { logoUrl } from '@/shared/assets/logo';
+import { EmptyState } from '@/shared/components/EmptyState';
+import { useNavigation } from '@/shared/hooks/useNavigation';
+import { useFilter } from './useFilter';
+import { useHeader } from './useHeader';
+import { useTabs } from './useTabs';
 
 export const LibraryPage = () => {
   const { queryParams, isLoading, setQueryParams } = useNavigation({
@@ -37,19 +36,110 @@ export const LibraryPage = () => {
   );
 
   const [tabContainerKey, setTabContainerKey] = useState<number>(0);
+  const [isManageViewsOpen, setIsManageViewsOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [pendingTab, setPendingTab] = useState<string>();
+  const [showComparison, setShowComparison] = useState(false);
+  const [hideEqualValues, setHideEqualValues] = useState(false);
+  const [allFoldersExpanded, setAllFoldersExpanded] = useState(false);
+
+  const isMatrixTab = (queryParams.tab || 'home').toLowerCase() !== 'home';
+
+  // Switching tabs or reloading the container mounts a matrix whose folders
+  // start collapsed, so the toggle must stop claiming they are expanded.
+  const foldersScope = `${queryParams.tab}|${tabContainerKey}`;
+  const [expandedScope, setExpandedScope] = useState(foldersScope);
+  if (expandedScope !== foldersScope) {
+    setExpandedScope(foldersScope);
+    setAllFoldersExpanded(false);
+  }
+
+  // With no variable groups and no secure files there is nothing to show — any
+  // matrix views only point at groups that no longer exist, so they'd render
+  // empty too. Greet this like an Azure DevOps first-run surface: a single
+  // full-page zero-data with no tab bar. Tabs return once real data exists.
+  // Both are prefetched during init (App.tsx), so this is decided on the first
+  // render. isSuccess (not just !isLoading) keeps a failed load out of the
+  // zero-data path — that falls through to the tab with its error message.
+  const groups = useVariableGroups();
+  const files = useSecureFiles();
+  const nothingYet =
+    groups.isSuccess &&
+    files.isSuccess &&
+    groups.data.length === 0 &&
+    files.data.length === 0;
+
+  const openManageViews = useCallback(() => setIsManageViewsOpen(true), []);
+  const openHistory = useCallback(() => setIsHistoryOpen(true), []);
 
   const filter = useFilter(queryParams.filter, setQueryParams);
-  const { headerCommands, renderTabBarCommands, onTabContextChange } =
-    useHeader(filter, setTabContainerKey, previewDialogOptions);
+  const {
+    headerCommands,
+    renderTabBarCommands,
+    registerTabModel,
+    hasChanges,
+    discardChanges,
+  } = useHeader(
+    filter,
+    setTabContainerKey,
+    previewDialogOptions,
+    openManageViews,
+    openHistory,
+    isMatrixTab
+      ? {
+          showComparison,
+          setShowComparison,
+          hideEqualValues,
+          setHideEqualValues,
+          allFoldersExpanded,
+          setAllFoldersExpanded,
+        }
+      : undefined,
+  );
   const { currentTab, tabs } = useTabs(
     queryParams.tab,
     setQueryParams,
     filter,
-    onTabContextChange,
+    registerTabModel,
+    showComparison,
+    hideEqualValues,
+  );
+
+  const onSelectedTabChanged = useCallback(
+    (tab: string) => {
+      if (tab === queryParams.tab) {
+        return;
+      }
+
+      if (hasChanges) {
+        // Leaving the tab unmounts its model, so confirm before losing edits.
+        setPendingTab(tab);
+        return;
+      }
+
+      setQueryParams({ tab });
+    },
+    [hasChanges, queryParams.tab, setQueryParams],
   );
 
   if (isLoading) {
     return <div></div>;
+  }
+
+  if (nothingYet) {
+    return (
+      <Surface background={SurfaceBackground.neutral}>
+        <Page className="height-100vh flex-grow">
+          <EmptyState
+            fullPage
+            imagePath={logoUrl}
+            primaryText="No variable groups or secure files yet"
+            secondaryText="Store and share variables and secure files across your pipelines, edit and compare them in one place."
+            renderAction={() => <NewLibraryItemButton />}
+          />
+        </Page>
+      </Surface>
+    );
   }
 
   return (
@@ -63,7 +153,7 @@ export const LibraryPage = () => {
           />
           <TabBar
             selectedTabId={queryParams.tab}
-            onSelectedTabChanged={(tab) => setQueryParams({ tab })}
+            onSelectedTabChanged={onSelectedTabChanged}
             renderAdditionalContent={renderTabBarCommands}
             disableSticky={false}
           >
@@ -77,200 +167,33 @@ export const LibraryPage = () => {
         </Page>
       </Surface>
       <PreviewChangesDialog options={previewDialogOptions} />
+      {isManageViewsOpen && (
+        <ManageViewsDialog onDismiss={() => setIsManageViewsOpen(false)} />
+      )}
+      {isHistoryOpen && (
+        <HistoryDialog onDismiss={() => setIsHistoryOpen(false)} />
+      )}
+      {pendingTab !== undefined && (
+        <Dialog
+          titleProps={{ text: 'Discard changes?' }}
+          onDismiss={() => setPendingTab(undefined)}
+          footerButtonProps={[
+            { text: 'Cancel', onClick: () => setPendingTab(undefined) },
+            {
+              text: 'Discard and switch',
+              danger: true,
+              onClick: () => {
+                const tab = pendingTab;
+                setPendingTab(undefined);
+                discardChanges();
+                setQueryParams({ tab });
+              },
+            },
+          ]}
+        >
+          You have unsaved changes. Switching tabs will discard them.
+        </Dialog>
+      )}
     </>
   );
-};
-
-const useFilter = (
-  defaultValue: string,
-  setQueryParams: QueryParamsSetter<{ filter: string }>,
-) => {
-  const filter = useMemo(
-    () => new Filter({ defaultState: { keyword: { value: defaultValue } } }),
-    [defaultValue],
-  );
-
-  useEffect(() => {
-    if (filter.getFilterItemValue('keyword') !== defaultValue) {
-      filter.setFilterItemState('keyword', { value: defaultValue });
-    }
-  }, [defaultValue, filter]);
-
-  const onFilterChange = useCallback(() => {
-    setQueryParams(
-      { filter: filter.getFilterItemValue('keyword') ?? '' },
-      false,
-    );
-  }, [filter, setQueryParams]);
-
-  useFilterSubscription(filter, onFilterChange);
-
-  return filter;
-};
-
-const useTabs = (
-  tab: string,
-  setQueryParams: QueryParamsSetter<{ tab: string }>,
-  filter: IFilter,
-  onTabContextChange: (tab: HomeTabModel) => void,
-) => {
-  tab = tab?.toLowerCase() || 'home';
-
-  const tabs = useMemo<
-    Record<string, { name: string; render: () => React.ReactNode }>
-  >(
-    () => ({
-      home: {
-        name: 'Home',
-        render: () => (
-          <HomeTab filter={filter} onTabContextChange={onTabContextChange} />
-        ),
-      },
-      matrix: {
-        name: 'Matrix',
-        render: () => <MatrixTab filter={filter} />,
-      },
-    }),
-    [filter, onTabContextChange],
-  );
-
-  const currentTab = tabs[tab];
-  if (!currentTab) {
-    setQueryParams({ tab: '' });
-  }
-
-  return {
-    currentTab,
-    tabs: Object.entries(tabs).map(([id, tab]) => ({ id, ...tab })),
-  };
-};
-
-const useHeader = (
-  filter: IFilter,
-  setTabContainerKey: (updater: (prevId: number) => number) => void,
-  previewDialogOptions: ObservableValue<
-    PreviewChangesDialogOptions | undefined
-  >,
-) => {
-  const noChangesCommands: IHeaderCommandBarItem[] = useMemo(
-    () => [
-      {
-        id: 'new-variable-group',
-        important: true,
-        renderButton: ({ id }) => (
-          <SplitButton
-            key={id}
-            primary={true}
-            buttonProps={{
-              text: 'New variable group',
-              onClick: () => {
-                navigateTo(
-                  `${getProjectUrl()}/_library?itemType=VariableGroups&view=VariableGroupView&variableGroupId=0`,
-                );
-              },
-            }}
-            menuButtonProps={{
-              ariaLabel: 'See options',
-              contextualMenuProps: {
-                menuProps: {
-                  id: '2',
-                  items: [
-                    {
-                      id: 'new-secure-file',
-                      text: 'New secure file',
-                      onActivate: () => {
-                        navigateTo(
-                          `${getProjectUrl()}/_library?itemType=SecureFiles`,
-                        );
-                      },
-                    },
-                  ],
-                },
-              },
-            }}
-          />
-        ),
-      },
-      {
-        id: 'history',
-        text: 'History',
-        onActivate: () => {
-          alert('History');
-        },
-        important: false,
-      },
-      {
-        id: 'manage-views',
-        text: 'Manage views',
-        onActivate: () => {
-          alert('Manage views');
-        },
-        important: false,
-      },
-    ],
-    [],
-  );
-
-  const [headerCommands, setHeaderCommands] =
-    useState<IHeaderCommandBarItem[]>(noChangesCommands);
-
-  const discardChanges = useCallback(() => {
-    setTabContainerKey((prevId) => prevId + 1);
-    previewDialogOptions.value = undefined;
-    setHeaderCommands(noChangesCommands);
-  }, [previewDialogOptions, setTabContainerKey, noChangesCommands]);
-
-  const getHasChangesCommands = useCallback(
-    (model: HomeTabModel): IHeaderCommandBarItem[] => [
-      {
-        id: 'preview-changes',
-        important: true,
-        renderButton: ({ id }) => (
-          <Button
-            key={id}
-            primary={true}
-            text="Preview changes"
-            onClick={() => {
-              previewDialogOptions.value = {
-                variableGroups: model.variableGroups,
-                secureFiles: model.secureFiles,
-              };
-            }}
-          />
-        ),
-      },
-      {
-        id: 'discard-changes',
-        text: 'Discard changes',
-        onActivate: discardChanges,
-        important: false,
-      },
-    ],
-    [previewDialogOptions, discardChanges],
-  );
-
-  const onTabContextChange = useCallback(
-    (model: HomeTabModel) =>
-      setHeaderCommands(
-        model.modified ? getHasChangesCommands(model) : noChangesCommands,
-      ),
-    [noChangesCommands, getHasChangesCommands],
-  );
-
-  const renderTabBarCommands = useCallback(
-    () => (
-      <InlineKeywordFilterBarItem
-        filter={filter}
-        filterItemKey="keyword"
-        isTextItem={false}
-      />
-    ),
-    [filter],
-  );
-
-  return {
-    headerCommands,
-    renderTabBarCommands,
-    onTabContextChange,
-  };
 };

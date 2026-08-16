@@ -7,5 +7,15 @@
     {
       "path": "./tsconfig.node.json"
     }
-  ]
+  ],
+  "compilerOptions": {
+    // Bun resolves module aliases from the tsconfig.json it finds at the
+    // project root (it does not follow "references"), so the "@/*" alias
+    // used by tests must be duplicated here to keep `bun test` working.
+    // Keep in sync with tsconfig.app.json's "paths" and vite.config.ts's
+    // resolve.alias.
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
 }

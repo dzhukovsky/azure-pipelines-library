@@ -1,0 +1,40 @@
+.history-tree {
+    // Header labels sit 0.6875rem in (bolt-table-header-cell-content's own
+    // padding). The first column's cell content starts behind the expand
+    // chevron, which lands on the same offset; the other columns render
+    // flush against the cell edge, so their values started ~10px left of
+    // the header above them. Pad them to the header's offset. The compact
+    // cells are the table's edge spacers and must stay at zero.
+    .bolt-table-cell:not(.bolt-tree-cell):not(.bolt-table-cell-compact) {
+        padding-left: 0.6875rem;
+    }
+
+    // Clicking PillGroup's "show more" switches the group to wrap mode,
+    // which puts margin-bottom: 8px on every pill to space wrapped lines
+    // apart. That margin is the only vertical gap the group has, so the
+    // last line ends flush against the row's bottom edge while the first
+    // line starts flush against its top. Pair it with an equal top gap:
+    // the block then sits centered with 8px of breathing room on both
+    // sides, and the spacing between wrapped lines stays as designed.
+    .bolt-pill-group.overflow-wrap > .bolt-pill-group-inner {
+        align-items: center;
+        padding-top: 8px;
+    }
+
+    // The "show more" affordance is a Button nested in a Pill, so it
+    // inherits the button's own padding and line height and ends up taller
+    // than the plain text pills beside it. Strip both back so it matches
+    // the pills it sits among.
+    .bolt-pill .bolt-pill-button.bolt-button {
+        line-height: 1;
+        padding: 0;
+    }
+
+    // The same icon reads level against a text field, whose input centres its
+    // own text, and a pixel high against a plain label, which does not — so
+    // the correction belongs to the label, not to the glyph everything else
+    // shares.
+    .history-warning-icon {
+        transform: translateY(1px);
+    }
+}

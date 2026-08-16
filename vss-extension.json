@@ -3,7 +3,7 @@
   "id": "advanced-library",
   "name": "Advanced Library",
   "manifestVersion": 1,
-  "version": "1.0.9",
+  "version": "1.0.10",
   "publisher": "dzhukovsky",
   "public": false,
   "author": "Dmitry Zhukovsky",
@@ -58,10 +58,6 @@
   "repository": {
     "type": "git",
     "uri": "https://github.com/dzhukovsky/azdo-advanced-library"
-  },
-  "branding": {
-    "color": "#232323",
-    "theme": "dark"
   },
   "screenshots": [
     {
